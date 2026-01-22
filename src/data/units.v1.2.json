@@ -1,0 +1,629 @@
+{
+  "meta": {
+    "game": "G_no_Heya_TCG",
+    "version": "units_v1.2_final",
+    "board": { "rows": 7, "cols": 7 },
+    "lanes": { "gates": { "north": ["B1", "D1", "F1"], "south": ["B7", "D7", "F7"] } },
+    "evolution": {
+      "evolveLineRow_1based": 4,
+      "timing": "turnEnd",
+      "statBonus": { "atk": 1, "hp": 1 },
+      "unlockSkill2ByDefault": true,
+      "exceptions": ["YABUKO_NORMAL", "YABUKO_FM"]
+    },
+    "summon": {
+      "startUnitsPlaced": 3,
+      "myoMustBeInStart": true,
+      "reserveDeckSize": 8,
+      "reserveDeckShuffle": "fullRandom",
+      "summonPerTurn": 1,
+      "summonZones": {
+        "north": { "backRows_1based": [1, 2], "evolveRow_1based": 4 },
+        "south": { "backRows_1based": [6, 7], "evolveRow_1based": 4 }
+      },
+      "centerSummonRestriction": { "cannotMoveThisTurn": true, "canAttackAndSkill": true }
+    },
+    "skills": { "oncePerMatchPerUnit": true, "sharedBetweenSkill1AndSkill2": true },
+    "facingRule": { "mode": "sideFixed", "southFront": "up", "northFront": "down", "rotateAllowed": false }
+  },
+
+  "statusEffects": {
+    "PARALYZE": { "type": "debuff", "durationTurns": 1, "effect": "cannotAct" },
+    "POISON": { "type": "debuff", "ticks": 3, "tickTiming": "ownerTurnEnd", "damagePerTick": 1 },
+    "BURN": { "type": "debuff", "ticks": 3, "tickTiming": "ownerTurnEnd", "damagePerTick": 1 },
+    "CANNOT_LEAVE_ZONE": { "type": "debuff", "durationTurns": 1, "effect": "cannotMoveOutOfMarkedZone" },
+    "GUARD_BARRIER": { "type": "buff", "durationTurns": 1, "effect": "absorbDamage", "params": { "absorbTotal": 3 } }
+  },
+
+  "sharedRules": {
+    "kingLoss": {
+      "id": "KING_LOSS",
+      "trigger": "when_MYO_is_defeated",
+      "effect": "all_allies_ATK_minus_1_min_0_permanent",
+      "isDebuff": true,
+      "cannotBeNegated": true
+    },
+    "debuffNegation": {
+      "sources": ["MAO_AURA", "DELI_SEARCH"],
+      "behavior": "negateNewDebuffsAndCleanseExisting",
+      "exceptions": ["KING_LOSS"]
+    }
+  },
+
+  "units": [
+    {
+      "id": "MYOUOU",
+      "name": "明王",
+      "base": {
+        "atk": 2,
+        "hp": 7,
+        "movePattern": { "type": "orthogonal", "range": 1, "diagonal": false, "canPassThroughUnits": false }
+      },
+      "passives": [
+        {
+          "id": "MAO_AURA",
+          "name": "明王の加護",
+          "range": { "shape": "chebyshev", "distance": 1, "includeSelf": false },
+          "effect": "alliesInRangeIgnoreDebuffs"
+        }
+      ],
+      "skills": {
+        "skill1": {
+          "id": "MYO_BURN",
+          "name": "焼き払う",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": {
+            "mode": "cells",
+            "cellsRelative": [
+              { "dx": -1, "dy": -1 },
+              { "dx": 0, "dy": -1 },
+              { "dx": 1, "dy": -1 }
+            ],
+            "facingRequired": true
+          },
+          "effect": { "damage": 2 }
+        },
+        "skill2": {
+          "id": "MYO_G_KARYURA",
+          "name": "迦楼羅の炎羽",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": {
+            "mode": "cells",
+            "cellsRelative": [
+              { "dx": -1, "dy": -1 },
+              { "dx": 0, "dy": -1 },
+              { "dx": 1, "dy": -1 }
+            ],
+            "facingRequired": true
+          },
+          "effect": {
+            "perCellIfEnemyPresent": {
+              "damage": 2,
+              "applyDebuffs": [
+                { "id": "BURN", "ticks": 3 },
+                { "id": "PARALYZE", "durationTurns": 1 }
+              ]
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "id": "HIBIKI",
+      "name": "hibiki",
+      "base": {
+        "atk": 1,
+        "hp": 6,
+        "movePattern": {
+          "type": "custom",
+          "movesRelative": [
+            { "dx": 0, "dy": -1 },
+            { "dx": -1, "dy": 0 },
+            { "dx": 1, "dy": 0 }
+          ],
+          "canPassThroughUnits": false
+        }
+      },
+      "passives": [
+        {
+          "id": "HIBIKI_STANCE",
+          "name": "盾構え",
+          "range": { "shape": "chebyshev", "distance": 1, "includeSelf": true },
+          "effect": "damageTakenMinus",
+          "params": { "amount": 1, "min": 0 },
+          "extras": ["knockbackImmune"]
+        }
+      ],
+      "skills": {
+        "skill1": {
+          "id": "HIBIKI_SHIELDALL",
+          "name": "ぜったいに守る！",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": {
+            "mode": "aura",
+            "range": { "shape": "chebyshev", "distance": 2, "includeSelf": true }
+          },
+          "effect": { "applyBuffs": [{ "id": "GUARD_BARRIER", "durationTurns": 1 }] }
+        },
+        "skill2": {
+          "id": "HIBIKI_G_FIELDWALL",
+          "name": "守護結界（全面）",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": { "mode": "globalAllies" },
+          "effect": { "applyBuffs": [{ "id": "GUARD_BARRIER", "durationTurns": 1 }] }
+        }
+      }
+    },
+
+    {
+      "id": "TSUTSU",
+      "name": "つつ",
+      "base": {
+        "atk": 3,
+        "hp": 4,
+        "movePattern": {
+          "type": "custom",
+          "movesRelative": [{ "dx": -2, "dy": 0 }, { "dx": 2, "dy": 0 }],
+          "canPassThroughUnits": true
+        }
+      },
+      "passives": [
+        {
+          "id": "TSUTSU_COMMAND",
+          "name": "司令塔の采配",
+          "range": { "shape": "chebyshev", "distance": 2, "includeSelf": false },
+          "effect": "alliesInRangeMovePlus",
+          "params": { "amount": 1, "appliesToFixedPatternMoves": false }
+        }
+      ],
+      "attacks": { "normalAttack": { "type": "rangedLine", "range": 3, "lineOfSightBlockedByUnits": true } },
+      "skills": {
+        "skill1": {
+          "id": "TSUTSU_SEEN",
+          "name": "視えてんだよ！",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": { "mode": "enemyLine", "range": 3, "lineOfSightBlockedByUnits": true },
+          "effect": {
+            "damage": 3,
+            "hitRule": "guaranteed",
+            "applyDebuffs": [{ "id": "PARALYZE", "durationTurns": 1 }]
+          }
+        },
+        "skill2": {
+          "id": "TSUTSU_G_NO_NEAR",
+          "name": "近寄らせねえよ",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": {
+            "mode": "enemiesInRange",
+            "range": { "shape": "chebyshev", "distance": 2, "includeSelf": false }
+          },
+          "effect": {
+            "damage": 2,
+            "applyDebuffs": [{ "id": "PARALYZE", "durationTurns": 1 }],
+            "knockback": { "distance": 1, "direction": "towardOwnSideOfTarget", "ifBlocked": "failOnlyKnockback" }
+          }
+        }
+      }
+    },
+
+    {
+      "id": "ROKUDO",
+      "name": "ROKUDO",
+      "base": {
+        "atk": 4,
+        "hp": 2,
+        "movePattern": {
+          "type": "teleportFixed",
+          "destinationsRelative": [
+            { "dx": 2, "dy": 0 },
+            { "dx": -2, "dy": 0 },
+            { "dx": 0, "dy": 2 },
+            { "dx": 0, "dy": -2 },
+            { "dx": 2, "dy": 2 },
+            { "dx": 2, "dy": -2 },
+            { "dx": -2, "dy": 2 },
+            { "dx": -2, "dy": -2 }
+          ],
+          "canPassThroughUnits": true
+        }
+      },
+      "passives": [{ "id": "ROKUDO_STEALTH", "name": "隠密", "effect": "cannotBeTargetedByRanged" }],
+      "skills": {
+        "skill1": {
+          "id": "ROKUDO_ASSASSIN",
+          "name": "闇討ち",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": {
+            "mode": "enemyInRange",
+            "range": { "shape": "chebyshev", "distance": 2, "includeSelf": false }
+          },
+          "restrictions": [{ "type": "requiresAdjacentEmptyToTarget" }],
+          "effect": {
+            "teleportTo": { "mode": "chooseAdjacentEmptyToTarget", "canPassThroughUnits": true },
+            "damage": 4,
+            "bonus": { "condition": "fromBehindTarget", "extraDamage": 2 }
+          }
+        },
+        "skill2": {
+          "id": "ROKUDO_G_SMOKE",
+          "name": "毒煙玉",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": {
+            "mode": "enemiesInRange",
+            "range": { "shape": "chebyshev", "distance": 2, "includeSelf": false }
+          },
+          "effect": { "applyDebuffs": [{ "id": "PARALYZE", "durationTurns": 1 }, { "id": "POISON", "ticks": 3 }] }
+        }
+      }
+    },
+
+    {
+      "id": "7171",
+      "name": "7171",
+      "base": {
+        "atk": 2,
+        "hp": 5,
+        "movePattern": {
+          "type": "custom",
+          "movesRelative": [
+            { "dx": -1, "dy": -1 },
+            { "dx": 0, "dy": -1 },
+            { "dx": 1, "dy": -1 }
+          ],
+          "canPassThroughUnits": false
+        }
+      },
+      "passives": [
+        { "id": "7171_PARRY", "name": "受け流す", "effect": "chanceNegateDamage", "params": { "chance": 0.5, "negateTo": 0 } }
+      ],
+      "skills": {
+        "skill1": {
+          "id": "7171_GAZE",
+          "name": "凝視",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": {
+            "mode": "markCells",
+            "cellsRelative": [
+              { "dx": -1, "dy": -1 },
+              { "dx": 0, "dy": -1 },
+              { "dx": 1, "dy": -1 }
+            ],
+            "facingRequired": true
+          },
+          "effect": {
+            "onCast": { "applyDebuffToEnemiesInMarkedCells": [{ "id": "PARALYZE", "durationTurns": 1 }] },
+            "untilOpponentTurnEnd": { "onEnemyEnterMarkedCells": [{ "id": "PARALYZE", "durationTurns": 1 }] }
+          }
+        },
+        "skill2": {
+          "id": "7171_G_CAGE",
+          "name": "視線の檻",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": {
+            "mode": "markCells",
+            "cellsRelative": [
+              { "dx": -1, "dy": -1 },
+              { "dx": 0, "dy": -1 },
+              { "dx": 1, "dy": -1 },
+              { "dx": -2, "dy": -2 },
+              { "dx": 0, "dy": -2 },
+              { "dx": 2, "dy": -2 }
+            ],
+            "facingRequired": true
+          },
+          "effect": {
+            "onCast": { "applyDebuffToEnemiesInMarkedCells": [{ "id": "PARALYZE", "durationTurns": 1 }] },
+            "untilOpponentTurnEnd": {
+              "rule": "enemiesInMarkedCellsCannotMoveOut",
+              "debuffId": "CANNOT_LEAVE_ZONE",
+              "onEnemyEnterMarkedCells": [
+                { "id": "PARALYZE", "durationTurns": 1 },
+                { "id": "CANNOT_LEAVE_ZONE", "durationTurns": 1 }
+              ]
+            }
+          }
+        }
+      }
+    },
+
+    {
+      "id": "PLAYER",
+      "name": "Player",
+      "base": {
+        "atk": 1,
+        "hp": 5,
+        "movePattern": { "type": "orthogonal", "range": 2, "diagonal": false, "canPassThroughUnits": false }
+      },
+      "passives": [{ "id": "PLAYER_REFLECT", "name": "反射", "effect": "onDamagedDealDamageBack", "params": { "damage": 1 } }],
+      "skills": {
+        "skill1": {
+          "id": "PLAYER_SUPPORT",
+          "name": "援護射撃",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": { "mode": "triggered", "range": { "shape": "chebyshev", "distance": 3, "includeSelf": true } },
+          "effect": { "trigger": "whenAllyDealsDamageToEnemyWithinRange", "bonusDamage": 1 }
+        },
+        "skill2": {
+          "id": "PLAYER_G_FULLBURST",
+          "name": "フルバースト",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": { "mode": "global" },
+          "effect": { "untilTurnEnd": { "modifySkill": { "skillId": "PLAYER_SUPPORT", "bonusDamageOverride": 2 } } }
+        }
+      }
+    },
+
+    {
+      "id": "ROCKEL",
+      "name": "ROCKEL",
+      "base": {
+        "atk": 4,
+        "hp": 5,
+        "movePattern": { "type": "custom", "movesRelative": [{ "dx": 0, "dy": -1 }, { "dx": 0, "dy": -2 }], "canPassThroughUnits": false }
+      },
+      "passives": [{ "id": "ROCKEL_RAMPAGE", "name": "暴走", "effect": "afterAttackSelfDamage", "params": { "damage": 1 } }],
+      "skills": {
+        "skill1": {
+          "id": "ROCKEL_SLASH",
+          "name": "ぶった斬る",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": {
+            "mode": "cells",
+            "cellsRelative": [
+              { "dx": 0, "dy": -1 },
+              { "dx": 0, "dy": -2 },
+              { "dx": -1, "dy": -1 },
+              { "dx": 1, "dy": -1 }
+            ],
+            "facingRequired": true
+          },
+          "effect": { "damage": 4, "pierce": true }
+        },
+        "skill2": {
+          "id": "ROCKEL_G_WHIRL",
+          "name": "旋風斬り",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": { "mode": "enemiesInRange", "range": { "shape": "chebyshev", "distance": 1, "includeSelf": false } },
+          "effect": { "damage": 3, "knockback": { "distance": 1, "direction": "awayFromSource", "ifBlocked": "failOnlyKnockback" } }
+        }
+      }
+    },
+
+    {
+      "id": "SOCHO",
+      "name": "総長",
+      "base": { "atk": 3, "hp": 6, "movePattern": { "type": "orthogonal", "range": 2, "diagonal": false, "canPassThroughUnits": false } },
+      "passives": [
+        {
+          "id": "SOCHO_COMMAND",
+          "name": "指揮統制",
+          "range": { "shape": "orthogonal", "distance": 1, "includeSelf": false },
+          "effect": "alliesInRangeAtkPlus",
+          "params": { "amount": 1 }
+        }
+      ],
+      "skills": {
+        "skill1": {
+          "id": "SOCHO_IAI",
+          "name": "居合【一閃】",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": { "mode": "enemyInRange", "range": { "shape": "chebyshev", "distance": 2, "includeSelf": false } },
+          "effect": { "damage": 4 }
+        },
+        "skill2": {
+          "id": "SOCHO_G_RENSEN",
+          "name": "抜刀【連閃】",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": { "mode": "enemiesInRange", "range": { "shape": "chebyshev", "distance": 2, "includeSelf": false } },
+          "effect": { "damage": 3 }
+        }
+      }
+    },
+
+    {
+      "id": "USHIMARU",
+      "name": "うしまる",
+      "base": {
+        "atk": 3,
+        "hp": 6,
+        "movePattern": {
+          "type": "custom",
+          "movesRelative": [
+            { "dx": 0, "dy": -1 },
+            { "dx": -1, "dy": -1 },
+            { "dx": -2, "dy": -2 },
+            { "dx": 1, "dy": -1 },
+            { "dx": 2, "dy": -2 }
+          ],
+          "canPassThroughUnits": false
+        }
+      },
+      "passives": [
+        {
+          "id": "USHI_MAXHP_AURA",
+          "name": "大丈夫ですよ！",
+          "range": { "shape": "chebyshev", "distance": 1, "includeSelf": false },
+          "effect": "alliesInRangeMaxHpPlus",
+          "params": { "amount": 1 }
+        }
+      ],
+      "skills": {
+        "skill1": {
+          "id": "USHI_PIERCE",
+          "name": "貫く",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": {
+            "mode": "chooseOriginWithinRangeThenLine",
+            "originRange": { "shape": "chebyshev", "distance": 2, "includeSelf": true },
+            "lineDirections": "8"
+          },
+          "effect": { "damage": 3, "pierce": true }
+        },
+        "skill2": {
+          "id": "USHI_G_LINEPUSH",
+          "name": "貫徹の槍",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": { "mode": "lineFromSelf", "lineDirections": "8" },
+          "effect": {
+            "damage": 3,
+            "pierce": true,
+            "knockback": { "distance": 1, "direction": "alongLineForward", "ifBlocked": "failOnlyKnockback" }
+          }
+        }
+      }
+    },
+
+    {
+      "id": "DELI",
+      "name": "Deli",
+      "base": {
+        "atk": 2,
+        "hp": 5,
+        "movePattern": {
+          "type": "custom",
+          "movesRelative": [{ "dx": -1, "dy": 0 }, { "dx": 1, "dy": 0 }, { "dx": 0, "dy": 1 }],
+          "canPassThroughUnits": false
+        }
+      },
+      "passives": [
+        {
+          "id": "DELI_SEARCH",
+          "name": "索敵（サーチ）",
+          "range": { "shape": "chebyshev", "distance": 3, "includeSelf": true },
+          "effect": "negateDebuffsAndRevealStealth"
+        }
+      ],
+      "skills": {
+        "skill1": {
+          "id": "DELI_THROW",
+          "name": "ぶん投げる",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": { "mode": "enemyInRange", "range": { "shape": "chebyshev", "distance": 3, "includeSelf": false } },
+          "effect": {
+            "dashToTargetAdjacent": true,
+            "throw": { "distance": 2, "direction": "chosen", "requiresEmptyLanding": true },
+            "onSuccess": { "landingDamage": 2, "deliMovesTo": "targetOriginalCell" },
+            "onFail": { "damage": 0, "noPositionChange": true }
+          }
+        },
+        "skill2": {
+          "id": "DELI_G_BOOM",
+          "name": "制御不能！？",
+          "type": "active",
+          "oncePerMatch": true,
+          "requiresEvolved": true,
+          "targeting": { "mode": "enemyInRange", "range": { "shape": "chebyshev", "distance": 3, "includeSelf": false } },
+          "restrictions": [{ "type": "requiresAdjacentEmptyToTarget" }],
+          "effect": {
+            "dashToTargetAdjacent": true,
+            "explode": {
+              "center": "dashDestination",
+              "range": { "shape": "chebyshev", "distance": 2, "includeSelf": true },
+              "affects": "enemiesOnly",
+              "damage": 3,
+              "knockback": { "distance": 1, "direction": "awayFromCenter", "ifBlocked": "failOnlyKnockback" }
+            },
+            "selfDamage": 2
+          }
+        }
+      }
+    },
+
+    {
+      "id": "YABUKO_NORMAL",
+      "name": "やぶこ（通常）",
+      "evolve": { "grantsSkill2": false },
+      "base": {
+        "atk": 1,
+        "hp": 6,
+        "movePattern": { "type": "orthogonal", "range": 1, "diagonal": false, "canPassThroughUnits": false }
+      },
+      "passives": [
+        {
+          "id": "YABUKO_HEAL_AURA",
+          "name": "癒しの祈り",
+          "range": { "shape": "chebyshev", "distance": 1, "includeSelf": false },
+          "effect": "healAlliesEachTurnStart",
+          "params": { "amount": 1 }
+        }
+      ],
+      "skills": {
+        "skill1": {
+          "id": "YABUKO_DELIVER",
+          "name": "届けこの想い",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": { "mode": "allyInRange", "range": { "shape": "chebyshev", "distance": 3, "includeSelf": false } },
+          "effect": { "heal": 2 }
+        }
+      },
+      "transform": { "toUnitId": "YABUKO_FM", "trigger": { "type": "hpThreshold", "value": 3, "comparison": "<=" } }
+    },
+
+    {
+      "id": "YABUKO_FM",
+      "name": "やぶこ（FM）",
+      "evolve": { "grantsSkill2": false },
+      "base": {
+        "atk": 4,
+        "hp": 3,
+        "movePattern": {
+          "type": "custom",
+          "movesRelative": [{ "dx": 0, "dy": -1 }, { "dx": 0, "dy": -2 }, { "dx": -1, "dy": 0 }, { "dx": 1, "dy": 0 }],
+          "canPassThroughUnits": false
+        }
+      },
+      "passives": [
+        {
+          "id": "YABUKO_FM_CHARGE",
+          "name": "いくしかないでしょ！",
+          "effect": "reduceDamageAndAdvanceTowardAttacker",
+          "params": { "damageMinus": 2, "min": 0, "advance": 1 }
+        }
+      ],
+      "skills": {
+        "skill1": {
+          "id": "YABUKO_FM_SMASH",
+          "name": "叩き潰す！",
+          "type": "active",
+          "oncePerMatch": true,
+          "targeting": { "mode": "enemyInRange", "range": { "shape": "chebyshev", "distance": 3, "includeSelf": false } },
+          "effect": {
+            "chargeTurns": 2,
+            "duringCharge": "cannotAct",
+            "onResolve": { "dashToTarget": true, "attack": { "type": "execute", "rule": "instantKill" } }
+          }
+        }
+      }
+    }
+  ]
+}
