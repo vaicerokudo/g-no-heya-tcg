@@ -14,6 +14,7 @@ import checkVictory from "./game/victory";
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { tickStartOfSide } from "./game/skills";
+import boardBg from "./assets/boards/board_bg.png";
 
 
 
@@ -1154,16 +1155,33 @@ return (
     userSelect: "none",
     WebkitUserSelect: "none",
     paddingBottom: bottomBarH + 12,
+
   }}
 >
-  <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+
+ <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+  <div
+    style={{
+      width: cols * cell,
+      height: rows * cell,
+      borderRadius: 12,
+      overflow: "hidden",
+
+      // ★盤面ぴったり背景
+      backgroundImage: `url(${boardBg})`,
+      backgroundSize: "100% 100%", // ← 盤面サイズに固定で一致
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+    }}
+  >
     <div
       style={{
         display: "grid",
         gridTemplateColumns: `repeat(${cols}, ${cell}px)`,
-        gap: 0,
         width: cols * cell,
+        height: rows * cell,
       }}
+   
     >
       {Array.from({ length: rows * cols }).map((_, idx) => {
         const r = Math.floor(idx / cols);
@@ -1183,12 +1201,18 @@ return (
         const isGateNorth = r === 0 && (c === 1 || c === 3 || c === 5);
         const isGateSouth = r === 6 && (c === 1 || c === 3 || c === 5);
 
-        const baseBg = inst
-          ? inst.side === "south"
-            ? "#1f2a44"
-            : "#44201f"
-          : "#111";
-        const gateTint = isGateNorth ? "#1a2a1a" : isGateSouth ? "#2a1a1a" : "";
+      const baseBg = inst
+  ? inst.side === "south"
+    ? "rgba(31,42,68,0.78)"   // #1f2a44 を半透明に
+    : "rgba(68,32,31,0.78)"   // #44201f を半透明に
+  : "transparent";            // ★空マスは透明（背景が見える）
+
+const gateTint = isGateNorth
+  ? "rgba(26,42,26,0.55)"
+  : isGateSouth
+    ? "rgba(42,26,26,0.55)"
+    : "";
+
 
         const inSkill = !!skillMode;
         const showMove = !inSkill && isLegalMove;
@@ -1196,15 +1220,16 @@ return (
 
         const isSkillTarget = inSkill && skillTargetSet.has(k);
 
-        const bg =
-          isSelected ? "#333"
-          : isSkillTarget ? "#5a4a00"
-          : isAttackableEnemy ? "#552222"
-          : showRng ? "#8a7a00"
-          : isAttackBlocker ? "#555555"
-          : showMove ? "#224422"
-          : gateTint ? gateTint
-          : baseBg;
+       const bg =
+  isSelected ? "rgba(255,255,255,0.12)"
+  : isSkillTarget ? "rgba(90,74,0,0.70)"
+  : isAttackableEnemy ? "rgba(85,34,34,0.80)"
+  : showRng ? "rgba(138,122,0,0.55)"
+  : isAttackBlocker ? "rgba(255,255,255,0.12)"
+  : showMove ? "rgba(34,68,34,0.65)"
+  : gateTint ? gateTint
+  : baseBg;
+
 
         const cursor =
           inSkill
@@ -1263,7 +1288,8 @@ return (
               position: "relative",
               width: cell,
               height: cell,
-              border: "1px solid #444",
+              boxSizing: "border-box", // ★これ
+              border: "1px solid rgba(255,255,255,0.14)", // ←ついでに線も透けさせると背景が見える
               background: bg,
               color: "#fff",
               display: "flex",
@@ -1360,8 +1386,8 @@ return (
       })}
     </div>
   </div>
+ </div>
 </div>
-
 
 {/* --- Bottom Action Bar (mobile) --- */}
 <div
