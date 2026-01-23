@@ -1007,7 +1007,7 @@ return (
 
 
 
-      <h2>Gの部屋 TCG（オフライン試作）</h2>
+      <h2>Gの部屋 TCG（体験版）</h2>
 
 <div
   style={{
