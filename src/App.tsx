@@ -7,16 +7,16 @@ import { otherSide } from "./game/turn";
 import type { Side } from "./game/types";
 import { getAttackableTargets, applyNormalAttack, getAttackMarks } from "./game/attack";
 import { tryKnockback } from "./game/knockback";
-import { getEffectiveAtk, getEffectiveMaxHp } from "./game/stats";
+
 import { SKILLS, getAvailableSkillsForUnit, type SkillId } from "./game/skills/registry";
 
 import checkVictory from "./game/victory";
-import { createPortal } from "react-dom";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { tickStartOfSide } from "./game/skills";
-import boardBg from "./assets/boards/board_bg.png";
+
 import type * as React from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+
 import { Board } from "./components/Board/Board";
 import { UnitPopup } from "./components/Popup/UnitPopup";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
@@ -84,8 +84,7 @@ const pressStartRef = useRef<{ x: number; y: number } | null>(null);
 const LONG_PRESS_MS = 420;   
 const MOVE_CANCEL_PX = 10;   
 
-const [pressCellKey, setPressCellKey] = useState<string | null>(null);
-const [pressPct, setPressPct] = useState(0);
+
 const pressRafRef = useRef<number | null>(null);
 const pressStartTimeRef = useRef<number>(0);
 
@@ -146,50 +145,6 @@ function startPressFx(cellKey: string) {
   pressRafRef.current = requestAnimationFrame(tick);
 }
 
-function endLongPress() {
-  isPressingRef.current = false;
-  clearLongPress();
-  stopPressFx();
-}
-
-function startLongPress(inst: any, e: React.PointerEvent) {
-  if (!inst || gameOver) return;
-
-  longPressFiredRef.current = false;
-  isPressingRef.current = true;
-  pressStartRef.current = { x: e.clientX, y: e.clientY };
-
-  e.currentTarget.setPointerCapture?.(e.pointerId);
-
-  clearLongPress();
-
-
-  startPressFx(posKey(inst.pos.r, inst.pos.c));
-
-  longPressTimerRef.current = window.setTimeout(() => {
-    if (!isPressingRef.current) return;
-
-    longPressFiredRef.current = true;
-    setSelectedId(inst.instanceId);
-    setSwapUnitId("");
-    setPopupId(inst.instanceId);
-    setSkillMode(null);
-
-   
-    stopPressFx();
-  }, LONG_PRESS_MS);
-}
-
-function moveLongPress(e: React.PointerEvent) {
-  const s = pressStartRef.current;
-  if (!s) return;
-  if (Math.hypot(e.clientX - s.x, e.clientY - s.y) > MOVE_CANCEL_PX) {
-    isPressingRef.current = false;
-    clearLongPress();
-    stopPressFx();
-
-  }
-}
 
 
 
