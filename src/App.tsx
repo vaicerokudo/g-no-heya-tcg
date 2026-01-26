@@ -15,7 +15,7 @@ import checkVictory from "./game/victory";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { tickStartOfSide } from "./game/skills";
 
-import type * as React from "react";
+
 
 import { Board } from "./components/Board/Board";
 import { UnitPopup } from "./components/Popup/UnitPopup";
@@ -77,25 +77,18 @@ const popupUnit = instances.find(x => x.instanceId === popupId) ?? null;
 
 const longPressTimerRef = useRef<number | null>(null);
 const isPressingRef = useRef(false);
-const longPressFiredRef = useRef(false);
+
 const pressStartRef = useRef<{ x: number; y: number } | null>(null);
 
 
 const LONG_PRESS_MS = 420;   
-const MOVE_CANCEL_PX = 10;   
 
 
 const pressRafRef = useRef<number | null>(null);
 const pressStartTimeRef = useRef<number>(0);
 
-function stopPressFx() {
-  if (pressRafRef.current != null) {
-    cancelAnimationFrame(pressRafRef.current);
-    pressRafRef.current = null;
-  }
-  setPressCellKey(null);
-  setPressPct(0);
-}
+
+ 
 
 
 const gameOver = !!victory;
@@ -119,31 +112,7 @@ useEffect(() => {
   return () => ro.disconnect();
 }, []);
 
-function clearLongPress() {
-  if (longPressTimerRef.current != null) {
-    window.clearTimeout(longPressTimerRef.current);
-    longPressTimerRef.current = null;
-  }
-  pressStartRef.current = null;
-}
 
-function startPressFx(cellKey: string) {
-  setPressCellKey(cellKey);
-  setPressPct(0);
-  pressStartTimeRef.current = performance.now();
-
-  if (pressRafRef.current != null) cancelAnimationFrame(pressRafRef.current);
-
-  const tick = () => {
-    if (!isPressingRef.current) return;
-    const t = performance.now() - pressStartTimeRef.current;
-    const pct = Math.max(0, Math.min(1, t / LONG_PRESS_MS));
-    setPressPct(Math.floor(pct * 100));
-    if (pct < 1) pressRafRef.current = requestAnimationFrame(tick);
-  };
-
-  pressRafRef.current = requestAnimationFrame(tick);
-}
 
 
 

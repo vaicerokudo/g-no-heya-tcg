@@ -1,5 +1,4 @@
 
-import type * as React from "react";
 
 import boardBg from "../../assets/boards/board_bg.png";
 import { Cell } from "./Cell";

@@ -1,11 +1,18 @@
 type Props = {
   open: boolean;
-  disabledConfirm: boolean;
-  onClose: () => void;
+  disabled?: boolean;
+  disabledTitle?: string;
+  onCancel: () => void;
   onConfirm: () => void;
 };
 
-export function TurnEndConfirm({ open, disabledConfirm, onClose, onConfirm }: Props) {
+export function TurnEndConfirm({
+  open,
+  disabled = false,
+  disabledTitle = "",
+  onCancel,
+  onConfirm,
+}: Props) {
   if (!open) return null;
 
   return (
@@ -19,7 +26,7 @@ export function TurnEndConfirm({ open, disabledConfirm, onClose, onConfirm }: Pr
         justifyContent: "center",
         zIndex: 9999,
       }}
-      onClick={onClose}
+      onClick={onCancel}
     >
       <div
         style={{
@@ -33,22 +40,28 @@ export function TurnEndConfirm({ open, disabledConfirm, onClose, onConfirm }: Pr
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>ターン終了しますか？</div>
+        <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
+          ターン終了しますか？
+        </div>
 
         <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 12 }}>
           自軍ユニットの行動がすべて完了しました。
         </div>
 
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ padding: "6px 10px" }}>
+          <button onClick={onCancel} style={{ padding: "6px 10px" }}>
             いいえ
           </button>
 
           <button
-            disabled={disabledConfirm}
+            disabled={disabled}
             onClick={onConfirm}
-            style={{ padding: "6px 10px", fontWeight: 800, opacity: disabledConfirm ? 0.6 : 1 }}
-            title={disabledConfirm ? "スキル選択中はターン終了できません（ESCで解除）" : ""}
+            style={{
+              padding: "6px 10px",
+              fontWeight: 800,
+              opacity: disabled ? 0.6 : 1,
+            }}
+            title={disabled ? disabledTitle : ""}
           >
             はい（ターン終了）
           </button>
