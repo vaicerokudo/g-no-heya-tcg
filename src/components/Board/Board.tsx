@@ -11,7 +11,6 @@ type BoardProps = {
   cols: number;
   cellSize: number;
 
-
   letters: string[];
   occ: Map<string, any>;
 
@@ -37,34 +36,37 @@ type BoardProps = {
   onCellClick: (r: number, c: number, inst: any | null) => void;
   onLongPressUnit: (inst: any) => void;
   onShiftEnemyPick: (enemyInstanceId: string) => void;
+
+  dmgByInstanceId: Map<string, { id: string; amount: number }>;
 };
 
 export function Board(props: BoardProps) {
-  const {
-    rows,
-    cols,
-    cellSize,
+ const {
+  rows,
+  cols,
+  cellSize,
+  letters,
+  occ,
+  selectedId,
+  turn,
+  gameOver,
+  legalMoveSet,
+  attackRangeSet,
+  attackBlockerSet,
+  attackSet,
+  skillMode,
+  skillTargetSet,
+  debugTargetId,
+  unitsById,
+  getPortrait,
+  posKey,
+  canSelect,
+  onCellClick,
+  onLongPressUnit,
+  onShiftEnemyPick,
+  dmgByInstanceId,
+} = props;
 
-    letters,
-    occ,
-    selectedId,
-    turn,
-    gameOver,
-    legalMoveSet,
-    attackRangeSet,
-    attackBlockerSet,
-    attackSet,
-    skillMode,
-    skillTargetSet,
-    debugTargetId,
-    unitsById,
-    getPortrait,
-    posKey,
-    canSelect,
-    onCellClick,
-    onLongPressUnit,
-    onShiftEnemyPick,
-  } = props;
 
   return (
     <div
@@ -110,6 +112,7 @@ const maxHp =
   inst && unitsById?.[inst.unitId]
     ? getEffectiveMaxHp(unitsById[inst.unitId].base.hp, form)
     : undefined;
+
 
 
               const isSelected = !!inst && inst.instanceId === selectedId;
@@ -192,7 +195,8 @@ maxHp={maxHp}
                   cursor={cursor}
                   showRng={showRng}
                   isAttackBlocker={isAttackBlocker}
-     
+     dmgFx={inst ? dmgByInstanceId.get(inst.instanceId) ?? null : null}
+
                   isDebugTarget={!!inst && inst.instanceId === debugTargetId}
                   disableInput={gameOver}
                   onClickCell={() => onCellClick(r, c, inst)}

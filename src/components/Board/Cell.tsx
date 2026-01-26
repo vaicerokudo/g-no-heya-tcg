@@ -6,6 +6,7 @@ import { useLongPress } from "../../hooks/useLongPress";
 
 type CellProps = {
   cellSize: number;
+dmgFx?: { id: string; amount: number } | null;
 
   getPortrait: (unitId: string, side: "south" | "north") => string;
 maxHp?: number;
@@ -35,7 +36,7 @@ maxHp?: number;
 export function Cell(props: CellProps) {
   const {
     cellSize,
-
+dmgFx, 
 maxHp,
     label,
     inst,
@@ -65,14 +66,11 @@ useEffect(() => {
 
   const prev = prevHpRef.current;
   const cur = Number(inst.hp ?? 0);
-
-  // 初回は記録だけ
   if (prev === null) {
     prevHpRef.current = cur;
     return;
   }
 
-  // 減った時だけ赤フラッシュ
   if (cur < prev) {
     setHpFlash(true);
     if (flashTimerRef.current) window.clearTimeout(flashTimerRef.current);
@@ -228,14 +226,35 @@ zIndex: 5,
   />
 )}
 
+{inst && dmgFx && (
+  <div
+    key={dmgFx.id}
+    style={{
+      position: "absolute",
+      left: "50%",
+      bottom: 18, // HPバーとかぶるので少し上
+      transform: "translateX(-50%)",
+      fontWeight: 900,
+      fontSize: 18,
+      textShadow: "0 2px 6px rgba(0,0,0,0.85)",
+      pointerEvents: "none",
+      zIndex: 6,
+      animation: "dmgPop 650ms ease-out forwards",
+    }}
+  >
+    -{dmgFx.amount}
+  </div>
+)}
+
+
 {inst && (
   <div
     style={{
       position: "absolute",
       left: 6,
       right: 6,
-      bottom: 6,                 // ★足元
-      height: 9,                 // ★少し太くして“台座感”
+      bottom: 6,              
+      height: 9,                
       borderRadius: 999,
       background: "rgba(0,0,0,0.60)",
       border: hpFlash
@@ -247,7 +266,7 @@ zIndex: 5,
       overflow: "hidden",
       zIndex: 4,
       pointerEvents: "none",
-      backdropFilter: "blur(2px)", // ★ガラスっぽい台座（不要なら消してOK）
+      backdropFilter: "blur(2px)", 
     }}
   >
     {/* ゲージ本体 */}

@@ -63,6 +63,9 @@ const [lastMove, setLastMove] = useState<null | {
 const [showDebug, setShowDebug] = useState(false);
 const [bottomBarH, setBottomBarH] = useState(0);
 const bottomBarRef = useRef<HTMLDivElement | null>(null);
+type DmgFx = { id: string; instanceId: string; amount: number };
+
+const [dmgFx, setDmgFx] = useState<DmgFx[]>([]);
 
 
 const [turn, setTurn] = useState<Side>("south");
@@ -162,6 +165,29 @@ useEffect(() => {
   const cols = initial.cols;
 
 function applyNextInstances(next: typeof instances) {
+
+  const prevById = new Map(instances.map((u) => [u.instanceId, u]));
+  const born: DmgFx[] = [];
+
+  for (const n of next) {
+    const p = prevById.get(n.instanceId);
+    if (!p) continue;
+    const dh = (n.hp ?? 0) - (p.hp ?? 0);
+    if (dh < 0) {
+      born.push({
+        id: `${Date.now()}-${n.instanceId}-${Math.random().toString(16).slice(2)}`,
+        instanceId: n.instanceId,
+        amount: -dh,
+      });
+    }
+  }
+
+  if (born.length) {
+    setDmgFx((prev) => [...prev, ...born]);
+    window.setTimeout(() => {
+      setDmgFx((prev) => prev.filter((x) => !born.some((b) => b.id === x.id)));
+    }, 700);
+  }
   setInstances(next);
   const v = checkVictory(rows, cols, next as any);
   if (v) setVictory(v);
@@ -797,6 +823,11 @@ const doKnock = (dr: number, dc: number) => {
   if (res.ok) setInstances(res.instances);
 };
 
+const dmgByInstanceId = useMemo(() => {
+  const m = new Map<string, { id: string; amount: number }>();
+  for (const fx of dmgFx) m.set(fx.instanceId, { id: fx.id, amount: fx.amount });
+  return m;
+}, [dmgFx]);
 
 
 const canSelect = (inst: any) =>
@@ -1053,6 +1084,9 @@ return (
     paddingBottom: bottomBarH + 12,
   }}
 >
+
+
+
   <Board
     rows={rows}
     cols={cols}
@@ -1104,12 +1138,13 @@ return (
 
       moveTo(r, c);
     }}
+dmgByInstanceId={dmgByInstanceId}
   />
 </div>
 
 
-
 {/* --- Bottom Action Bar (mobile) --- */}
+
 <div
   ref={bottomBarRef as any}
   style={{
@@ -1230,6 +1265,7 @@ return (
           );
         })}
     </div>
+
 
     {/* --- action row --- */}
     <div style={{ display: "flex", gap: 8 }}>
