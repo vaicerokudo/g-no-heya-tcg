@@ -6,7 +6,7 @@ import { useLongPress } from "../../hooks/useLongPress";
 
 type CellProps = {
   cellSize: number;
-  portraitSize: number;
+
   getPortrait: (unitId: string, side: "south" | "north") => string;
 maxHp?: number;
 
@@ -20,7 +20,7 @@ maxHp?: number;
 
   showRng: boolean;
   isAttackBlocker: boolean;
-  isAttackableEnemy: boolean;
+
   isDebugTarget: boolean;
 
   onClickCell: () => void;
@@ -35,7 +35,7 @@ maxHp?: number;
 export function Cell(props: CellProps) {
   const {
     cellSize,
-    portraitSize,
+
 maxHp,
     label,
     inst,
@@ -43,7 +43,7 @@ maxHp,
     cursor,
     showRng,
     isAttackBlocker,
-    isAttackableEnemy,
+
     isDebugTarget,
     getPortrait,
     onClickCell,

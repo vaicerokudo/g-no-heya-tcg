@@ -14,6 +14,7 @@ import checkVictory from "./game/victory";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { tickStartOfSide } from "./game/skills";
+import { getEffectiveMaxHp } from "./game/stats";
 
 
 
@@ -72,24 +73,6 @@ const [popupId, setPopupId] = useState<string | null>(null);
 const popupOpen = popupId !== null;
 
 const popupUnit = instances.find(x => x.instanceId === popupId) ?? null;
-
-
-
-const longPressTimerRef = useRef<number | null>(null);
-const isPressingRef = useRef(false);
-
-const pressStartRef = useRef<{ x: number; y: number } | null>(null);
-
-
-const LONG_PRESS_MS = 420;   
-
-
-const pressRafRef = useRef<number | null>(null);
-const pressStartTimeRef = useRef<number>(0);
-
-
- 
-
 
 const gameOver = !!victory;
 
@@ -208,11 +191,6 @@ const cell = useMemo(() => {
   const size = Math.floor((winW - pad) / cols);
   return Math.max(min, Math.min(max, size));
 }, [winW, cols]);
-
-const portraitSize = useMemo(
-  () => Math.max(18, Math.floor(cell * 0.34)),
-  [cell]
-);
 
 
   const letters = ["A", "B", "C", "D", "E", "F", "G"];
@@ -1079,7 +1057,7 @@ return (
     rows={rows}
     cols={cols}
     cellSize={cell}
-    portraitSize={portraitSize}
+
     letters={letters}
     occ={occ}
     selectedId={selectedId}

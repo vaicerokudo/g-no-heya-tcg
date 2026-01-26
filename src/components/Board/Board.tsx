@@ -10,7 +10,7 @@ type BoardProps = {
   rows: number;
   cols: number;
   cellSize: number;
-  portraitSize: number;
+
 
   letters: string[];
   occ: Map<string, any>;
@@ -44,7 +44,7 @@ export function Board(props: BoardProps) {
     rows,
     cols,
     cellSize,
-    portraitSize,
+
     letters,
     occ,
     selectedId,
@@ -180,7 +180,7 @@ const maxHp =
                 <Cell
                   key={k}
                   cellSize={cellSize}
-                  portraitSize={portraitSize}
+     
 getPortrait={getPortrait}
 maxHp={maxHp}
 
@@ -192,7 +192,7 @@ maxHp={maxHp}
                   cursor={cursor}
                   showRng={showRng}
                   isAttackBlocker={isAttackBlocker}
-                  isAttackableEnemy={isAttackableEnemy}
+     
                   isDebugTarget={!!inst && inst.instanceId === debugTargetId}
                   disableInput={gameOver}
                   onClickCell={() => onCellClick(r, c, inst)}
