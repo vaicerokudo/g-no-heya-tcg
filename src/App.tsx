@@ -15,50 +15,20 @@ import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { tickStartOfSide } from "./game/skills";
 import boardBg from "./assets/boards/board_bg.png";
+import type * as React from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
+import { Board } from "./components/Board/Board";
+import { UnitPopup } from "./components/Popup/UnitPopup";
+import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
+import { VictoryModal } from "./components/UI/VictoryModal";
 
 
-
-
-// --- portraits (auto) ---
-// Vite: import.meta.glob はビルド時にファイルを列挙できる
-const SOUTH_PORTRAITS = import.meta.glob<{ default: string }>(
-  "./assets/portraits/south/*.{png,jpg,jpeg,webp}",
-  { eager: true }
-);
-
-const NORTH_PORTRAITS = import.meta.glob<{ default: string }>(
-  "./assets/portraits/north/*.{png,jpg,jpeg,webp}",
-  { eager: true }
-);
-
-// path から "ファイル名(拡張子なし)" を抜く
-function baseName(path: string) {
-  const file = path.split("/").pop() ?? "";
-  return file.replace(/\.[^.]+$/, ""); // 拡張子除去
-}
-
-// ファイル名 -> unitId に寄せる（必要に応じて調整）
-function normalizeToUnitId(name: string) {
-  // 例: "chibi_tsutsu" -> "TSUTSU"
-  // 例: "TSUTSU" -> "TSUTSU"
-  return name
-    .replace(/^chibi[_-]?/i, "")
-    .toUpperCase();
-}
 
 function getPortrait(unitId: string, side: "south" | "north") {
-  const table = side === "south" ? SOUTH_PORTRAITS : NORTH_PORTRAITS;
+  const dir = side === "south" ? "portraits/south" : "portraits/north";
 
-  // 1) unitIdそのまま（方式①）
-  for (const [path, mod] of Object.entries(table)) {
-    if (normalizeToUnitId(baseName(path)) === unitId) return mod.default;
-  }
-
-  // 2) 見つからない場合は undefined
-  return undefined;
+  return `/${dir}/${unitId}.png`;
 }
-
-
 
 function posKey(r: number, c: number) {
   return `${r},${c}`;
@@ -73,6 +43,8 @@ type PerUnitTurn = Record<string, { moved: boolean; attacked: boolean; done: boo
 
 
 export default function App() {
+console.count("App render");
+
   const initial = useMemo(() => createDemoState(unitsData as any), []);
 
  const [instances, setInstances] = useState(initial.instances);
@@ -95,6 +67,38 @@ const bottomBarRef = useRef<HTMLDivElement | null>(null);
 const [turn, setTurn] = useState<Side>("south");
 const [victory, setVictory] = useState<null | { winner: Side; detail: string }>(null);
 
+
+const [popupId, setPopupId] = useState<string | null>(null);
+const popupOpen = popupId !== null;
+
+const popupUnit = instances.find(x => x.instanceId === popupId) ?? null;
+
+
+
+const longPressTimerRef = useRef<number | null>(null);
+const isPressingRef = useRef(false);
+const longPressFiredRef = useRef(false);
+const pressStartRef = useRef<{ x: number; y: number } | null>(null);
+
+
+const LONG_PRESS_MS = 420;   
+const MOVE_CANCEL_PX = 10;   
+
+const [pressCellKey, setPressCellKey] = useState<string | null>(null);
+const [pressPct, setPressPct] = useState(0);
+const pressRafRef = useRef<number | null>(null);
+const pressStartTimeRef = useRef<number>(0);
+
+function stopPressFx() {
+  if (pressRafRef.current != null) {
+    cancelAnimationFrame(pressRafRef.current);
+    pressRafRef.current = null;
+  }
+  setPressCellKey(null);
+  setPressPct(0);
+}
+
+
 const gameOver = !!victory;
 
   const [perUnitTurn, setPerUnitTurn] = useState<PerUnitTurn>({});
@@ -116,6 +120,77 @@ useEffect(() => {
   return () => ro.disconnect();
 }, []);
 
+function clearLongPress() {
+  if (longPressTimerRef.current != null) {
+    window.clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+  }
+  pressStartRef.current = null;
+}
+
+function startPressFx(cellKey: string) {
+  setPressCellKey(cellKey);
+  setPressPct(0);
+  pressStartTimeRef.current = performance.now();
+
+  if (pressRafRef.current != null) cancelAnimationFrame(pressRafRef.current);
+
+  const tick = () => {
+    if (!isPressingRef.current) return;
+    const t = performance.now() - pressStartTimeRef.current;
+    const pct = Math.max(0, Math.min(1, t / LONG_PRESS_MS));
+    setPressPct(Math.floor(pct * 100));
+    if (pct < 1) pressRafRef.current = requestAnimationFrame(tick);
+  };
+
+  pressRafRef.current = requestAnimationFrame(tick);
+}
+
+function endLongPress() {
+  isPressingRef.current = false;
+  clearLongPress();
+  stopPressFx();
+}
+
+function startLongPress(inst: any, e: React.PointerEvent) {
+  if (!inst || gameOver) return;
+
+  longPressFiredRef.current = false;
+  isPressingRef.current = true;
+  pressStartRef.current = { x: e.clientX, y: e.clientY };
+
+  e.currentTarget.setPointerCapture?.(e.pointerId);
+
+  clearLongPress();
+
+
+  startPressFx(posKey(inst.pos.r, inst.pos.c));
+
+  longPressTimerRef.current = window.setTimeout(() => {
+    if (!isPressingRef.current) return;
+
+    longPressFiredRef.current = true;
+    setSelectedId(inst.instanceId);
+    setSwapUnitId("");
+    setPopupId(inst.instanceId);
+    setSkillMode(null);
+
+   
+    stopPressFx();
+  }, LONG_PRESS_MS);
+}
+
+function moveLongPress(e: React.PointerEvent) {
+  const s = pressStartRef.current;
+  if (!s) return;
+  if (Math.hypot(e.clientX - s.x, e.clientY - s.y) > MOVE_CANCEL_PX) {
+    isPressingRef.current = false;
+    clearLongPress();
+    stopPressFx();
+
+  }
+}
+
 
 
 function resetGame() {
@@ -126,6 +201,8 @@ function resetGame() {
   setTurn("south");
 
   setSelectedId(null);
+
+
   setSwapUnitId("");
   setDebugTargetId(null);
 
@@ -135,7 +212,7 @@ function resetGame() {
   setShowEndTurnConfirm(false);
 }
 
-// ESCでスキル解除（1回だけ登録）
+
 useEffect(() => {
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape") setSkillMode(null);
@@ -149,13 +226,12 @@ useEffect(() => {
 }, [turn]);
 
 
-// 手番が変わった時の初期化（turn切替のタイミングで初期化）
+
 useEffect(() => {
   if (victory) return;
 
 
 
-  // ★手番側ユニットの「行動表」を作る（スタン中は最初からdone）
   setPerUnitTurn(() => {
     const m: PerUnitTurn = {};
     for (const u of instances) {
@@ -166,12 +242,13 @@ useEffect(() => {
     return m;
   });
 
-  // 手番が変わったら選択解除
+
   setSelectedId(null);
 
-  // 確認ポップアップも閉じる保険
+
+
   setShowEndTurnConfirm(false);
-}, [turn, victory]); // ★instances は入れない（無限初期化の原因になりやすい）
+}, [turn, victory]); 
 
 
    const rows = initial.rows;
@@ -183,7 +260,8 @@ function applyNextInstances(next: typeof instances) {
   if (v) setVictory(v);
 }
 
-// --- responsive cell size (mobile friendly) ---
+
+
 function useWindowWidth() {
   const [w, setW] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 1024
@@ -199,10 +277,10 @@ function useWindowWidth() {
 const winW = useWindowWidth();
 
 const cell = useMemo(() => {
-  // 画面幅から余白ぶん引いて 7列で割る
-  const pad = 24;         // 外側余白
-  const max = 64;         // PC時の最大
-  const min = 44;         // スマホで押せる最低ライン（目安）
+
+  const pad = 24;         
+  const max = 64;         
+  const min = 44;         
   const size = Math.floor((winW - pad) / cols);
   return Math.max(min, Math.min(max, size));
 }, [winW, cols]);
@@ -231,8 +309,6 @@ const portraitSize = useMemo(
   
 
 
-
-// 進化エリア判定：中央ライン（0-based r===3）＝ A4〜G4
 const isEvolveCell = (r: number, _c: number) => r === 3;
 
  
@@ -242,8 +318,6 @@ const isEvolveCell = (r: number, _c: number) => r === 3;
     return m;
   }, [instances]);
 
-  
-  // --- 移動可能マス ---
 const legalMoves = useMemo(() => {
   if (!selected) return [];
   if (gameOver) return [];
@@ -264,7 +338,7 @@ const legalMoveSet = useMemo(() => {
 }, [legalMoves]);
 
  
- // --- 攻撃射程（空マス含む表示用） ---
+
 const attackMarks = useMemo(() => {
   if (!selected) return [];
   if (gameOver) return [];
@@ -303,18 +377,18 @@ const skillTargetSet = useMemo(() => {
   if (!def) return s;
   if (def.requiresForm && selected.form !== def.requiresForm) return s;
 
-  // 盤面占有（ここは instances から作る）
+
   const occLocal = new Map<string, any>();
   for (const u of instances) occLocal.set(posKey(u.pos.r, u.pos.c), u);
 
-  // 8方向
+
   const dirs8 = [
     [-1, 0],[1, 0],[0, -1],[0, 1],
     [-1, -1],[-1, 1],[1, -1],[1, 1],
   ] as const;
 
   if (def.targetMode === "chooseEnemyAdjacent") {
-    // ★敵がいる隣接マスだけターゲットにする
+
     for (const [dr, dc] of dirs8) {
       const rr = selected.pos.r + dr;
       const cc = selected.pos.c + dc;
@@ -325,7 +399,7 @@ const skillTargetSet = useMemo(() => {
   }
 
   if (def.targetMode === "chooseLineDirection") {
-    // ★各方向、range まで。途中でユニットに当たったらそこで止める（遮蔽一致）
+ 
     for (const [dr, dc] of dirs8) {
       for (let i = 1; i <= def.range; i++) {
         const rr = selected.pos.r + dr * i;
@@ -335,7 +409,7 @@ const skillTargetSet = useMemo(() => {
         const k = posKey(rr, cc);
         s.add(k);
 
-        // 何か居たらその先は押せない（必要なら “敵だけ止める” に変更可）
+
         if (occLocal.get(k)) break;
       }
     }
@@ -365,7 +439,7 @@ const skillTargetSet = useMemo(() => {
 }, [skillMode, selected, gameOver, rows, cols, instances]);
  
 
-  // --- 攻撃可能ターゲット ---
+
 const attackables = useMemo(() => {
   if (!selected) return [];
   if (gameOver) return [];
@@ -410,7 +484,7 @@ const moveTo = (r: number, c: number) => {
   if (gameOver) return;
   if (selected.side !== turn) return;
 
-// ★ここで移動前スナップショットを保存
+
 setLastMove({
   turn,
   instanceId: selected.instanceId,
@@ -427,13 +501,13 @@ setLastMove({
   const k = posKey(r, c);
   if (!legalMoveSet.has(k)) return;
 
-  // まず移動
+
 
   let next = instances.map((u) =>
     u.instanceId === selected.instanceId ? { ...u, pos: { r, c } } : u
   );
 
-  // 進化（base→g）適用：HP+1、上限は新MaxHP
+
   if (isEvolveCell(r, c)) {
     next = next.map((u) => {
       if (u.instanceId !== selected.instanceId) return u;
@@ -449,10 +523,9 @@ setLastMove({
     });
   }
 
-  // ここで移動確定
   applyNextInstances(next);
 
-  // moved だけ立てる（done は絶対いじらない）
+
   setPerUnitTurn((m) => ({
     ...m,
     [selected.instanceId]: {
@@ -465,7 +538,7 @@ setLastMove({
 
 
 function tryExecuteSkillOnCell(opts: { r: number; c: number; inst: any | null }) {
-  if (!skillMode) return false; // スキル中じゃない → 通常処理へ
+  if (!skillMode) return false;
   if (!selected) { setSkillMode(null); return true; }
   
   const me = perUnitTurn[selected.instanceId];
@@ -477,20 +550,20 @@ function tryExecuteSkillOnCell(opts: { r: number; c: number; inst: any | null })
   const def = SKILLS[skillMode];
   if (!def) { setSkillMode(null); return true; }
 
-  // ★クリックしたマスがターゲット外ならキャンセル（または無視）
+
   if (!skillTargetSet.has(posKey(opts.r, opts.c))) {
     setSkillMode(null);
     return true;
   }
 
 
-  // 進化条件
+
   if (def.requiresForm && selected.form !== def.requiresForm) {
     setSkillMode(null);
     return true;
   }
 
-  // 1試合1回（プレイヤー×キャラ×スキル）
+
 
 const key = skillUseKey(turn, selected.instanceId, def.id);
 
@@ -500,11 +573,11 @@ if (def.oncePerMatch && usedSkills[key]) {
 }
 
 
-  // targetMode別処理
+
   switch (def.targetMode) {
 
 case "chooseFront3Cells": {
-  // クリック地点が「前3マス」のどれかじゃないとダメ（ハイライトと一致）
+
   const fr = selected.side === "south" ? -1 : 1;
   const rr = selected.pos.r + fr;
 
@@ -519,7 +592,7 @@ case "chooseFront3Cells": {
     return true;
   }
 
-  // 実行（skills.ts側は前3マスを内部で処理するので、ここは方向指定いらない）
+
   const stateLike = { rows, cols, instances };
   const next = def.execute({
     stateLike,
@@ -547,24 +620,26 @@ case "chooseFront3Cells": {
 
 
   setSkillMode(null);
-  setSelectedId(null); // テンポ優先。残したいならこの行消してOK
-  return true;
+  setSelectedId(null); 
+ 
+  
+return true;
 }
 
 
 
 
 case "chooseEnemyAdjacent": {
-  // クリックしたマスにユニットがいないとダメ
+
   if (!opts.inst) { setSkillMode(null); return true; }
 
-  // 敵じゃないとダメ
+
   if (opts.inst.side === selected.side) { setSkillMode(null); return true; }
 
   const dr = Math.abs(opts.r - selected.pos.r);
 const dc = Math.abs(opts.c - selected.pos.c);
 
-// 8方向隣接（縦横斜め）
+
 if (Math.max(dr, dc) !== 1) {
   setSkillMode(null);
   return true;
@@ -584,7 +659,7 @@ setPerUnitTurn((m) => ({
   [selected.instanceId]: {
     ...(m[selected.instanceId] ?? { moved: false, attacked: false, done: false }),
     attacked: true,
-    done: true, // ★攻撃したらそのユニットは完了（テンポ優先）
+    done: true, 
   },
 }));
 
@@ -604,7 +679,7 @@ setPerUnitTurn((m) => ({
       const absR = Math.abs(dr);
       const absC = Math.abs(dc);
 
-      // 直線（縦/横/斜め）
+
       const isLine =
         (absR === 0 && absC > 0) ||
         (absC === 0 && absR > 0) ||
@@ -612,7 +687,7 @@ setPerUnitTurn((m) => ({
 
       const dist = Math.max(absR, absC);
       if (!isLine || dist > def.range) {
-        // 変な場所を押したらキャンセル（ここは好みで「維持」にもできる）
+
         setSkillMode(null);
         return true;
       }
@@ -684,6 +759,8 @@ setPerUnitTurn((m) => ({
 
   
     setSelectedId(null);
+
+
     
   };
 
@@ -691,54 +768,52 @@ const endTurn = () => {
   setShowEndTurnConfirm(false);
   if (gameOver) return;
 
-  // 次のinstancesを先に作る（副作用なし）
-  const next = instances
-    .map((u: any) => {
-      if (u.side !== turn) return u;
+  const nextSide: Side = otherSide(turn);
 
-      // ---- STUN 減衰 ----
-      const s = u.stun ?? 0;
-      const nextStun = s > 0 ? Math.max(0, s - 1) : 0;
-
-      // ---- BURN（1ターンにつき1ダメ、1減衰）----
-      const b = u.burn ?? 0;
-      const burnDamage = b > 0 ? 1 : 0;
-      const nextBurn = b > 0 ? Math.max(0, b - 1) : 0;
-
-      // 反映
-      let v: any = { ...u, hp: u.hp - burnDamage };
-
-      // stun 0なら消す
-      if (nextStun > 0) v.stun = nextStun;
-      else {
-        const { stun, ...rest } = v;
-        v = rest;
-      }
-
-      // burn 0なら消す
-      if (nextBurn > 0) v.burn = nextBurn;
-      else {
-        const { burn, ...rest } = v;
-        v = rest;
-      }
-
-      return v;
-    })
-    .filter((u: any) => u.hp > 0);
-
-  applyNextInstances(next);
-  setSelectedId(null);
-
-  // ターン終了でも勝利判定
+  setInstances((prev) => {
   
-// 次のsideを先に計算
-const nextSide: Side = otherSide(turn);
+    const afterEnd = prev
+      .map((u: any) => {
+        if (u.side !== turn) return u;
 
-// ★状態異常tick（次sideの開始時に1回）
-setInstances((prev) => tickStartOfSide({ instances: prev }, nextSide));
+        const s = u.stun ?? 0;
+        const nextStun = s > 0 ? Math.max(0, s - 1) : 0;
 
-// ★ターン交代
-setTurn(nextSide);
+        const b = u.burn ?? 0;
+        const burnDamage = b > 0 ? 1 : 0;
+        const nextBurn = b > 0 ? Math.max(0, b - 1) : 0;
+
+        let v: any = { ...u, hp: u.hp - burnDamage };
+
+        if (nextStun > 0) v.stun = nextStun;
+        else {
+          const { stun, ...rest } = v;
+          v = rest;
+        }
+
+        if (nextBurn > 0) v.burn = nextBurn;
+        else {
+          const { burn, ...rest } = v;
+          v = rest;
+        }
+
+        return v;
+      })
+      .filter((u: any) => u.hp > 0);
+
+
+    const afterStart = tickStartOfSide({ instances: afterEnd }, nextSide);
+
+
+    const v = checkVictory(rows, cols, afterStart as any);
+    if (v) setVictory(v);
+
+    return afterStart as any;
+  });
+
+  setSelectedId(null);
+ 
+  setTurn(nextSide);
 };
 
 useEffect(() => {
@@ -763,15 +838,14 @@ function replaceSelectedUnit(newUnitId: string) {
     prev.map((u) => {
       if (u.instanceId !== selected.instanceId) return u;
 
-      // 入替後は「そのユニットの初期状態」に寄せる
+   
       const nextForm = "base";
       const baseMaxHp = getEffectiveMaxHp(def.base.hp, nextForm);
 
-      // ★ここが肝：HPを入替先の初期HPにする
-      // （とりあえず “満タン” がテスト向き）
+
       const nextHp = baseMaxHp;
 
-      // スタン等の状態異常もクリア（テストしやすく）
+
       const { stun, ...rest } = u;
 
       return {
@@ -783,7 +857,7 @@ function replaceSelectedUnit(newUnitId: string) {
     })
   );
 
-  // 入替したら行動表も「未行動」に戻す（混乱防止）
+
   setPerUnitTurn((m) => {
     const cur = m[selected.instanceId] ?? { moved: false, attacked: false, done: false };
     return {
@@ -792,7 +866,7 @@ function replaceSelectedUnit(newUnitId: string) {
     };
   });
 
-  // 入替したらスキル選択も解除（事故防止）
+
   setSkillMode(null);
 }
 
@@ -800,6 +874,8 @@ function replaceSelectedUnit(newUnitId: string) {
 const reset = () => {
   setInstances(initial.instances);
   setSelectedId(null);
+
+
   setDebugTargetId(null);
   setSkillMode(null);
 
@@ -834,128 +910,46 @@ const canUndoMove = useMemo(() => {
   const me = perUnitTurn[lastMove.instanceId];
   if (!me) return false;
 
-  // 「移動後 / 攻撃前 / 未完了」だけ許可
+
   if (!me.moved) return false;
   if (me.attacked) return false;
   if (me.done) return false;
 
-  // 選択中ユニットと一致してる時だけ（好み）
+
   if (selectedId && selectedId !== lastMove.instanceId) return false;
 
   return true;
 }, [gameOver, lastMove, turn, perUnitTurn, selectedId]);
 
-
-
-
 return (
-  <div style={{ padding: 16 }}>
+  <>
+<UnitPopup
+  open={popupOpen}
+  unit={popupUnit}
+  unitsById={unitsById}
+  usedSkills={usedSkills}
+  onClose={() => setPopupId(null)}
+  getPortrait={getPortrait}
+/>
 
-
-{showEndTurnConfirm && !gameOver && (
-  <div
-    style={{
-      position: "fixed",
-      inset: 0,
-      background: "rgba(0,0,0,0.55)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 9999,
-    }}
-    onClick={() => setShowEndTurnConfirm(false)}
-  >
-    <div
-      style={{
-        width: 360,
-        maxWidth: "90vw",
-        background: "#111",
-        border: "1px solid #444",
-        borderRadius: 12,
-        padding: 14,
-        boxShadow: "0 12px 30px rgba(0,0,0,0.6)",
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
-        ターン終了しますか？
-      </div>
-
-      <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 12 }}>
-        自軍ユニットの行動がすべて完了しました。
-      </div>
-
-      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-        <button
-          onClick={() => setShowEndTurnConfirm(false)}
-          style={{ padding: "6px 10px" }}
-        >
-          いいえ
-        </button>
-
-       <button
+<TurnEndConfirm
+  open={showEndTurnConfirm && !gameOver}
   disabled={!!skillMode}
-  onClick={() => {
-    if (skillMode) return; // 保険
+  onCancel={() => setShowEndTurnConfirm(false)}
+  onConfirm={() => {
     setShowEndTurnConfirm(false);
     endTurn();
   }}
-  style={{ padding: "6px 10px", fontWeight: 800, opacity: skillMode ? 0.6 : 1 }}
-  title={skillMode ? "スキル選択中はターン終了できません（ESCで解除）" : ""}
->
-  はい（ターン終了）
-</button>
+  disabledTitle={skillMode ? "スキル選択中はターン終了できません（ESCで解除）" : ""}
+/>
 
-      </div>
-    </div>
-  </div>
-)}
+<VictoryModal
+  victory={victory}
+  onRestart={resetGame}
+/>
 
-{victory &&
-  typeof document !== "undefined" &&
-  createPortal(
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.65)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 10000,
-      }}
-    >
-      <div
-        style={{
-          width: 420,
-          maxWidth: "92vw",
-          background: "#111",
-          border: "1px solid #444",
-          borderRadius: 14,
-          padding: 16,
-          boxShadow: "0 16px 40px rgba(0,0,0,0.65)",
-        }}
-      >
-        <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 8 }}>
-  
-        </div>
+ 
 
-        <div style={{ fontSize: 13, opacity: 0.9, marginBottom: 14 }}>
-          {victory.detail}
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <button
-            onClick={resetGame}
-            style={{ padding: "8px 12px", fontWeight: 900 }}
-          >
-            RESTART
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
-  )}
 
 {/* --- Skill Mode Banner --- */}
 {!gameOver && skillMode && selected && (() => {
@@ -1155,239 +1149,63 @@ return (
     userSelect: "none",
     WebkitUserSelect: "none",
     paddingBottom: bottomBarH + 12,
-
   }}
 >
-
- <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-  <div
-    style={{
-      width: cols * cell,
-      height: rows * cell,
-      borderRadius: 12,
-      overflow: "hidden",
-
-      // ★盤面ぴったり背景
-      backgroundImage: `url(${boardBg})`,
-      backgroundSize: "100% 100%", // ← 盤面サイズに固定で一致
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
+  <Board
+    rows={rows}
+    cols={cols}
+    cellSize={cell}
+    portraitSize={portraitSize}
+    letters={letters}
+    occ={occ}
+    selectedId={selectedId}
+    turn={turn}
+    gameOver={gameOver}
+    legalMoveSet={legalMoveSet}
+    attackRangeSet={attackRangeSet}
+    attackBlockerSet={attackBlockerSet}
+    attackSet={attackSet}
+    skillMode={skillMode}
+    skillTargetSet={skillTargetSet}
+    debugTargetId={debugTargetId}
+    unitsById={unitsById}
+    getPortrait={getPortrait}
+    posKey={posKey}
+    canSelect={canSelect}
+    onShiftEnemyPick={(enemyId) => setDebugTargetId(enemyId)}
+    onLongPressUnit={(inst) => {
+      if (gameOver) return;
+      setSelectedId(inst.instanceId);
+      setSwapUnitId("");
+      setPopupId(inst.instanceId);
+      setSkillMode(null);
     }}
-  >
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${cols}, ${cell}px)`,
-        width: cols * cell,
-        height: rows * cell,
-      }}
-   
-    >
-      {Array.from({ length: rows * cols }).map((_, idx) => {
-        const r = Math.floor(idx / cols);
-        const c = idx % cols;
-        const label = `${letters[c]}${r + 1}`;
+    onCellClick={(r, c, inst) => {
+      if (gameOver) return;
 
-        const k = posKey(r, c);
-        const inst = occ.get(k);
+      setPopupId(null);
 
-        const isSelected = inst && inst.instanceId === selectedId;
-        const isLegalMove = legalMoveSet.has(k);
-        const isAttackRange = attackRangeSet.has(k);
-        const isAttackBlocker = attackBlockerSet.has(k);
-        const isAttackableEnemy =
-          inst && inst.side !== turn && attackSet.has(inst.instanceId);
+      const handled = tryExecuteSkillOnCell({ r, c, inst: inst ?? null });
+      if (handled) return;
 
-        const isGateNorth = r === 0 && (c === 1 || c === 3 || c === 5);
-        const isGateSouth = r === 6 && (c === 1 || c === 3 || c === 5);
+      if (inst) {
+        if (inst.side !== turn) {
+          if (attackSet.has(inst.instanceId)) attack(inst.instanceId);
+          return;
+        }
+        if (canSelect(inst)) {
+          setSelectedId(inst.instanceId);
+          setSwapUnitId("");
+        }
+        return;
+      }
 
-      const baseBg = inst
-  ? inst.side === "south"
-    ? "rgba(31,42,68,0.78)"   // #1f2a44 を半透明に
-    : "rgba(68,32,31,0.78)"   // #44201f を半透明に
-  : "transparent";            // ★空マスは透明（背景が見える）
-
-const gateTint = isGateNorth
-  ? "rgba(26,42,26,0.55)"
-  : isGateSouth
-    ? "rgba(42,26,26,0.55)"
-    : "";
-
-
-        const inSkill = !!skillMode;
-        const showMove = !inSkill && isLegalMove;
-        const showRng = !inSkill && isAttackRange;
-
-        const isSkillTarget = inSkill && skillTargetSet.has(k);
-
-       const bg =
-  isSelected ? "rgba(255,255,255,0.12)"
-  : isSkillTarget ? "rgba(90,74,0,0.70)"
-  : isAttackableEnemy ? "rgba(85,34,34,0.80)"
-  : showRng ? "rgba(138,122,0,0.55)"
-  : isAttackBlocker ? "rgba(255,255,255,0.12)"
-  : showMove ? "rgba(34,68,34,0.65)"
-  : gateTint ? gateTint
-  : baseBg;
-
-
-        const cursor =
-          inSkill
-            ? isSkillTarget
-              ? "pointer"
-              : "not-allowed"
-            : inst
-              ? canSelect(inst)
-                ? inst.side === turn
-                  ? "pointer"
-                  : isAttackableEnemy
-                    ? "pointer"
-                    : "default"
-                : isAttackableEnemy
-                  ? "pointer"
-                  : "not-allowed"
-              : isLegalMove && !gameOver
-                ? "pointer"
-                : "default";
-
-        return (
-          <div
-            key={label}
-            onPointerDown={(e) => {
-              if (gameOver) return;
-              if (!inst) return;
-
-              if (e.shiftKey && inst.side !== turn) {
-                e.preventDefault();
-                e.stopPropagation();
-                setDebugTargetId(inst.instanceId);
-              }
-            }}
-            onClick={() => {
-              if (gameOver) return;
-
-              const handled = tryExecuteSkillOnCell({ r, c, inst: inst ?? null });
-              if (handled) return;
-
-              if (inst) {
-                if (inst.side !== turn) {
-                  if (isAttackableEnemy) attack(inst.instanceId);
-                  return;
-                }
-
-                if (canSelect(inst)) {
-                  setSelectedId(inst.instanceId);
-                  setSwapUnitId("");
-                }
-                return;
-              }
-
-              moveTo(r, c);
-            }}
-            style={{
-              position: "relative",
-              width: cell,
-              height: cell,
-              boxSizing: "border-box", // ★これ
-              border: "1px solid rgba(255,255,255,0.14)", // ←ついでに線も透けさせると背景が見える
-              background: bg,
-              color: "#fff",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 11,
-              cursor,
-              userSelect: "none",
-              WebkitUserSelect: "none",
-              outline:
-                inst && inst.instanceId === debugTargetId
-                  ? "2px solid #00e5ff"
-                  : "none",
-              outlineOffset: -2,
-            }}
-            title={label}
-          >
-            {showRng && !inst && (
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 6,
-                  border: "2px dashed rgba(255,255,255,0.35)",
-                  borderRadius: 8,
-                  pointerEvents: "none",
-                }}
-              />
-            )}
-
-            {isAttackBlocker && (
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 26,
-                  opacity: 0.7,
-                  pointerEvents: "none",
-                }}
-              >
-                ×
-              </div>
-            )}
-
-            <div style={{ opacity: 0.8 }}>{label}</div>
-
-            {inst && (() => {
-              const src = getPortrait(inst.unitId, inst.side);
-              if (!src) return null;
-              return (
-                <img
-                  src={src}
-                  alt={inst.unitId}
-                  style={{
-                    position: "absolute",
-                    top: 4,
-                    left: 4,
-                    width: portraitSize,
-                    height: portraitSize,
-                    borderRadius: 999,
-                    objectFit: "cover",
-                    border: "1px solid rgba(255,255,255,0.35)",
-                    background: "rgba(0,0,0,0.35)",
-                    pointerEvents: "none",
-                  }}
-                />
-              );
-            })()}
-
-            {inst ? (
-              <>
-                <div style={{ fontWeight: 700 }}>{unitsById[inst.unitId].name}</div>
-
-                <div style={{ opacity: 0.9 }}>
-                  HP {inst.hp}/
-                  {getEffectiveMaxHp(unitsById[inst.unitId].base.hp, inst.form)} / ATK{" "}
-                  {getEffectiveAtk(unitsById[inst.unitId].base.atk, inst.form)}
-                </div>
-
-                {isAttackableEnemy && (
-                  <div style={{ opacity: 0.95, fontWeight: 700 }}>HIT</div>
-                )}
-              </>
-            ) : (
-              <div style={{ opacity: showMove || showRng ? 0.9 : 0.25 }}>
-                {showMove ? "MOVE" : showRng ? "RNG" : "."}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  </div>
- </div>
+      moveTo(r, c);
+    }}
+  />
 </div>
+
+
 
 {/* --- Bottom Action Bar (mobile) --- */}
 <div
@@ -1455,7 +1273,7 @@ const gateTint = isGateNorth
                 if (gameOver) return;
                 if (!selected) return;
 
-                // instantは即時実行
+                
                 if (s.targetMode === "instant") {
                   const stateLike = { rows, cols, instances };
                   const next = s.execute({
@@ -1491,7 +1309,7 @@ const gateTint = isGateNorth
                   return;
                 }
 
-                // クリック型はモードへ
+               
                 setSkillMode(s.id);
               }}
               style={{
@@ -1533,6 +1351,8 @@ const gateTint = isGateNorth
     });
 
     setSelectedId(null);
+
+
   }}
   style={{
     flex: 1,
@@ -1586,6 +1406,6 @@ const gateTint = isGateNorth
     </div>
   </div>
 </div>
-  </div>
+</> 
 );
 }

@@ -3,10 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    host: true,
-    port: 5173,
-    strictPort: true,
-    allowedHosts: true, // ← これが本体（トンネルの host も許可）
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-dom/client"],
   },
 });
