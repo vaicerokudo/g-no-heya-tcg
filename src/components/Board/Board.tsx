@@ -28,7 +28,7 @@ type BoardProps = {
   debugTargetId: string | null;
 
   unitsById: any;
-  getPortrait: (unitId: string, side: "south" | "north") => string;
+getPortrait: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
   posKey: (r: number, c: number) => string;
 
   canSelect: (inst: any) => boolean;

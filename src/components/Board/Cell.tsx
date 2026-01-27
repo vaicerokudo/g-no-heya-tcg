@@ -8,7 +8,7 @@ type CellProps = {
   cellSize: number;
 dmgFx?: { id: string; amount: number } | null;
 
-  getPortrait: (unitId: string, side: "south" | "north") => string;
+ getPortrait: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
 maxHp?: number;
 
   label: string;
@@ -103,11 +103,6 @@ const pressPct = enableLongPress ? lp.pressPct : 0;
 const bind = enableLongPress ? lp.bind : null;
 const denom = (maxHp ?? inst?.hp ?? 1);
 const pct = inst ? Math.max(0, Math.min(1, (inst.hp ?? 0) / denom)) * 100 : 0;
-const [evolveTick, setEvolveTick] = useState(0);
-const prevFormRef = useRef<string | null>(null);
-
-
-
 
 
 return (

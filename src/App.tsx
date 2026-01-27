@@ -32,7 +32,6 @@ function skillUseKey(side: Side, instanceId: string, skillId: SkillId) {
   return `${side}:${instanceId}:${skillId}`;
 }
 
-type Form = "base" | "g";
 
 function getCardImage(
   unitId: string,
@@ -463,21 +462,13 @@ setLastMove({
       const newMaxHp = getEffectiveMaxHp(def.base.hp, "g");
       const newHp = Math.min(u.hp + 1, newMaxHp);
 
- return { ...u, form: "g", hp: newHp, justEvolved: true };
+ return { ...u, form: "g", hp: newHp };
 
     });
   }
 
  applyNextInstances(next);
 
-
-window.setTimeout(() => {
-  setInstances(prev =>
-    prev.map(u =>
-      u.justEvolved ? { ...u, justEvolved: false } : u
-    )
-  );
-}, 200);
 
 
 

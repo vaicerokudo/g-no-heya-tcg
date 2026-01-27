@@ -17,15 +17,8 @@ type Props = {
   getCardImage: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
 };
 
-export function UnitPopup({
-  open,
-  unit,
-  unitsById,
-  usedSkills,
-  onClose,
-  getPortrait,
-  getCardImage,
-}: Props) {
+export function UnitPopup({ open, unit, unitsById, usedSkills, onClose, getCardImage }: Props) {
+
 
   const [w, setW] = useState<number>(typeof window !== "undefined" ? window.innerWidth : 1024);
   useEffect(() => {
@@ -44,7 +37,7 @@ export function UnitPopup({
   const maxHp = getEffectiveMaxHp(def.base.hp, form);
   const atk = getEffectiveAtk(def.base.atk, form);
 
-  const cardSrc = getCardImage(unit.unitId, unit.side, form);
+
 
   return (
     <div
