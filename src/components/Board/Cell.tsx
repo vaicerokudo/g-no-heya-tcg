@@ -103,13 +103,18 @@ const pressPct = enableLongPress ? lp.pressPct : 0;
 const bind = enableLongPress ? lp.bind : null;
 const denom = (maxHp ?? inst?.hp ?? 1);
 const pct = inst ? Math.max(0, Math.min(1, (inst.hp ?? 0) / denom)) * 100 : 0;
+const [evolveTick, setEvolveTick] = useState(0);
+const prevFormRef = useRef<string | null>(null);
+
+
+
 
 
 return (
   <div
     onClick={() => {
       if (disableInput) return;
-      if (!enableLongPress) onClickCell(); // ←空マスはこれで移動が復活
+      if (!enableLongPress) onClickCell(); 
     }}
     onPointerDown={(e) => {
       if (disableInput) return;
@@ -204,10 +209,13 @@ zIndex: 5,
         </div>
       )}
 
+
+
+
       {/* ★ユニット画像 */}
     {inst && (
   <img
-    src={getPortrait(inst.unitId, inst.side)}
+    src={getPortrait(inst.unitId, inst.side,inst.form ?? "base")}
     alt={inst.unitId}
     draggable={false}
     style={{
@@ -222,7 +230,13 @@ zIndex: 5,
       opacity: 0.98,
       filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.55))",
     }}
-    onError={() => console.log("IMG NG", inst.unitId, getPortrait(inst.unitId, inst.side))}
+  onError={() =>
+  console.log("IMG NG", inst.unitId, getPortrait(inst.unitId, inst.side, inst.form ?? "base"))
+}
+onLoad={() =>
+  console.log("IMG OK", inst.unitId, getPortrait(inst.unitId, inst.side, inst.form ?? "base"))
+}
+
   />
 )}
 
@@ -298,6 +312,47 @@ zIndex: 5,
     />
   </div>
 )}
+
+{inst?.justEvolved && (
+  <div
+    key={inst.justEvolvedId ?? inst.instanceId}
+    style={{
+      position: "absolute",
+      inset: 2,
+      borderRadius: 10,
+      pointerEvents: "none",
+      zIndex: 6,
+    }}
+  >
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        borderRadius: 10,
+        background:
+          "radial-gradient(circle at 50% 60%, rgba(255,255,255,0.95), rgba(255,215,0,0.55) 40%, rgba(255,215,0,0) 72%)",
+        mixBlendMode: "screen",
+        animation: "evolveFlash 520ms ease-out forwards",
+      }}
+    />
+    <div
+      style={{
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        width: "135%",
+        height: "135%",
+        borderRadius: 999,
+        border: "2px solid rgba(255,215,0,0.9)",
+        boxShadow: "0 0 26px rgba(255,215,0,0.65)",
+        transform: "translate(-50%,-50%)",
+        animation: "evolveRing 520ms ease-out forwards",
+      }}
+    />
+  </div>
+)}
+
+
 
 
 {!inst && (

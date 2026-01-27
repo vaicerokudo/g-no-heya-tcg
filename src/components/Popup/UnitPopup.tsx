@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { getAvailableSkillsForUnit, type SkillId, SKILLS } from "../../game/skills/registry";
 import type { Side } from "../../game/types";
 import { getEffectiveAtk, getEffectiveMaxHp } from "../../game/stats";
@@ -12,23 +13,45 @@ type Props = {
   unitsById: any;
   usedSkills: Record<string, boolean>;
   onClose: () => void;
-  getPortrait: (unitId: string, side: "south" | "north") => string;
+  getPortrait: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
+  getCardImage: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
 };
 
-export function UnitPopup({ open, unit, unitsById, usedSkills, onClose, getPortrait }: Props) {
+export function UnitPopup({
+  open,
+  unit,
+  unitsById,
+  usedSkills,
+  onClose,
+  getPortrait,
+  getCardImage,
+}: Props) {
+
+  const [w, setW] = useState<number>(typeof window !== "undefined" ? window.innerWidth : 1024);
+  useEffect(() => {
+    const onResize = () => setW(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const isNarrow = w < 720;
+
   if (!open || !unit) return null;
 
-  const def = unitsById[unit.unitId];
-  const form = unit.form ?? "base";
+  const def = unitsById?.[unit.unitId];
+  if (!def) return null;
+
+  const form = (unit.form ?? "base") as "base" | "g";
   const maxHp = getEffectiveMaxHp(def.base.hp, form);
   const atk = getEffectiveAtk(def.base.atk, form);
+
+  const cardSrc = getCardImage(unit.unitId, unit.side, form);
 
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.65)",
+        background: "rgba(0,0,0,0.70)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -40,9 +63,10 @@ export function UnitPopup({ open, unit, unitsById, usedSkills, onClose, getPortr
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: 420,
-          maxWidth: "92vw",
-          background: "rgba(10,10,12,0.92)",
+          width: "min(980px, 96vw)",
+          maxHeight: "92vh",
+          overflow: "auto",
+          background: "rgba(10,10,12,0.94)",
           border: "1px solid rgba(255,255,255,0.16)",
           borderRadius: 16,
           padding: 14,
@@ -50,8 +74,12 @@ export function UnitPopup({ open, unit, unitsById, usedSkills, onClose, getPortr
           color: "rgba(255,255,255,0.92)",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-          <div style={{ fontWeight: 900 }}>{def.name}</div>
+        {/* ヘッダー */}
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+          <div style={{ fontWeight: 900, fontSize: 16 }}>
+            {def.name} <span style={{ opacity: 0.7, fontSize: 12 }}>({String(unit.unitId)})</span>
+          </div>
+
           <button
             onClick={onClose}
             style={{
@@ -68,120 +96,154 @@ export function UnitPopup({ open, unit, unitsById, usedSkills, onClose, getPortr
           </button>
         </div>
 
-        <img
-          src={getPortrait(unit.unitId, unit.side)}
-          alt={unit.unitId}
+        {/* C：左カード / 右情報 */}
+        <div
           style={{
-            width: "100%",
-            marginTop: 10,
-            borderRadius: 12,
-            objectFit: "contain",
-            background: "rgba(0,0,0,0.22)",
-            border: "1px solid rgba(255,255,255,0.14)",
-            maxHeight: "48vh",
+            display: "flex",
+            flexDirection: isNarrow ? "column" : "row",
+            gap: 12,
+            marginTop: 12,
+            alignItems: isNarrow ? "stretch" : "flex-start",
           }}
-        />
+        >
+          {/* 左：カード */}
+          <div
+            style={{
+              flex: isNarrow ? "0 0 auto" : "0 0 52%",
+              background: "rgba(0,0,0,0.22)",
+              border: "1px solid rgba(255,255,255,0.14)",
+              borderRadius: 14,
+              padding: 10,
+            }}
+          >
+           {/* カード画像（ポップアップのメイン） */}
+<img
+  src={getCardImage(unit.unitId, unit.side, form)}
+  alt={`${unit.unitId}-${form}`}
+  style={{
+    width: "100%",
+    marginTop: 10,
+    borderRadius: 12,
+    objectFit: "contain",
+    background: "rgba(0,0,0,0.22)",
+    border: "1px solid rgba(255,255,255,0.14)",
+    maxHeight: "72vh",
+    display: "block",
+  }}
+  onError={() =>
+    console.log("CARD IMG NG", unit.unitId, getCardImage(unit.unitId, unit.side, form))
+  }
+  onLoad={() =>
+    console.log("CARD IMG OK", unit.unitId, getCardImage(unit.unitId, unit.side, form))
+  }
+/>
 
-        <div style={{ marginTop: 10, fontSize: 13, opacity: 0.92 }}>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <span>
-              side: <b>{String(unit.side).toUpperCase()}</b>
-            </span>
-            <span>
-              form: <b>{form}</b>
-            </span>
-            <span>
-              HP:{" "}
-              <b>
-                {unit.hp}/{maxHp}
-              </b>
-            </span>
-            <span>
-              ATK: <b>{atk}</b>
-            </span>
           </div>
-        </div>
 
-        <div style={{ marginTop: 12, fontSize: 13, fontWeight: 900, marginBottom: 6 }}>スキル</div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {getAvailableSkillsForUnit(unit.unitId).map((s) => {
-            const formOk = !s.requiresForm || form === s.requiresForm;
-            const usedKey = skillUseKey(unit.side as Side, unit.instanceId, s.id);
-            const used = !!usedSkills[usedKey];
-
-            const disabledReason = !formOk
-              ? "進化(G)が必要"
-              : s.oncePerMatch && used
-                ? "この試合で使用済み"
-                : "";
-
-            return (
-              <div
-                key={s.id}
-                style={{
-                  padding: "8px 10px",
-                  borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.14)",
-                  background: "rgba(0,0,0,0.25)",
-                }}
-                title={disabledReason}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <div style={{ fontWeight: 900 }}>{s.label}</div>
-
-                  {s.requiresForm && (
-                    <span
-                      style={{
-                        fontSize: 11,
-                        padding: "2px 8px",
-                        borderRadius: 999,
-                        border: "1px solid rgba(255,255,255,0.18)",
-                        opacity: formOk ? 0.9 : 0.6,
-                      }}
-                    >
-                      要{String(s.requiresForm).toUpperCase()}
-                    </span>
-                  )}
-
-                  {s.oncePerMatch && (
-                    <span
-                      style={{
-                        fontSize: 11,
-                        padding: "2px 8px",
-                        borderRadius: 999,
-                        border: "1px solid rgba(255,255,255,0.18)",
-                        opacity: 0.9,
-                      }}
-                    >
-                      1回
-                    </span>
-                  )}
-
-                  {s.oncePerMatch && used && (
-                    <span
-                      style={{
-                        fontSize: 11,
-                        padding: "2px 8px",
-                        borderRadius: 999,
-                        border: "1px solid rgba(255,255,255,0.18)",
-                        background: "rgba(255,255,255,0.08)",
-                        opacity: 0.9,
-                      }}
-                    >
-                      使用済
-                    </span>
-                  )}
-
-                  {!formOk && <span style={{ fontSize: 12, opacity: 0.75 }}>（進化してね）</span>}
-                </div>
-
-                <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
-                  mode: {SKILLS[s.id]?.targetMode ?? s.targetMode}
-                </div>
+          {/* 右：情報 */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                padding: "10px 10px",
+                borderRadius: 14,
+                border: "1px solid rgba(255,255,255,0.14)",
+                background: "rgba(0,0,0,0.22)",
+              }}
+            >
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", fontSize: 13, alignItems: "center" }}>
+                <span>side: <b>{String(unit.side).toUpperCase()}</b></span>
+                <span>form: <b>{form}</b></span>
+                <span>HP: <b>{unit.hp}/{maxHp}</b></span>
+                <span>ATK: <b>{atk}</b></span>
               </div>
-            );
-          })}
+            </div>
+
+            <div style={{ marginTop: 12, fontSize: 13, fontWeight: 900, marginBottom: 6 }}>スキル</div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {getAvailableSkillsForUnit(unit.unitId).map((s) => {
+                const formOk = !s.requiresForm || form === s.requiresForm;
+                const usedKey = skillUseKey(unit.side as Side, unit.instanceId, s.id);
+                const used = !!usedSkills[usedKey];
+
+                const disabledReason = !formOk
+                  ? "進化(G)が必要"
+                  : s.oncePerMatch && used
+                    ? "この試合で使用済み"
+                    : "";
+
+                return (
+                  <div
+                    key={s.id}
+                    style={{
+                      padding: "8px 10px",
+                      borderRadius: 12,
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      background: "rgba(0,0,0,0.22)",
+                    }}
+                    title={disabledReason}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <div style={{ fontWeight: 900 }}>{s.label}</div>
+
+                      {s.requiresForm && (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            padding: "2px 8px",
+                            borderRadius: 999,
+                            border: "1px solid rgba(255,255,255,0.18)",
+                            opacity: formOk ? 0.9 : 0.6,
+                          }}
+                        >
+                          要{String(s.requiresForm).toUpperCase()}
+                        </span>
+                      )}
+
+                      {s.oncePerMatch && (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            padding: "2px 8px",
+                            borderRadius: 999,
+                            border: "1px solid rgba(255,255,255,0.18)",
+                            opacity: 0.9,
+                          }}
+                        >
+                          1回
+                        </span>
+                      )}
+
+                      {s.oncePerMatch && used && (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            padding: "2px 8px",
+                            borderRadius: 999,
+                            border: "1px solid rgba(255,255,255,0.18)",
+                            background: "rgba(255,255,255,0.08)",
+                            opacity: 0.9,
+                          }}
+                        >
+                          使用済
+                        </span>
+                      )}
+
+                      {!formOk && <span style={{ fontSize: 12, opacity: 0.75 }}>（進化してね）</span>}
+                    </div>
+
+                    <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
+                      mode: {SKILLS[s.id]?.targetMode ?? s.targetMode}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ marginTop: 12, fontSize: 12, opacity: 0.75 }}>
+              ※カード画像が無い場合はコンソールに CARD IMG NG が出るよ
+            </div>
+          </div>
         </div>
       </div>
     </div>

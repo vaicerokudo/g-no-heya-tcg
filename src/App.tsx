@@ -24,19 +24,35 @@ import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
 
 
-
-function getPortrait(unitId: string, side: "south" | "north") {
-  const dir = side === "south" ? "portraits/south" : "portraits/north";
-
-  return `/${dir}/${unitId}.png`;
-}
-
 function posKey(r: number, c: number) {
   return `${r},${c}`;
 }
 
 function skillUseKey(side: Side, instanceId: string, skillId: SkillId) {
   return `${side}:${instanceId}:${skillId}`;
+}
+
+type Form = "base" | "g";
+
+function getCardImage(
+  unitId: string,
+  side: "south" | "north",
+  form: "base" | "g" = "base"
+) {
+  const dir = side === "south" ? "cards/south" : "cards/north";
+  // 例：G用ファイル名ルール（好きな形にしてOK）
+  const suffix = form === "g" ? "_G" : "";
+  return `/${dir}/${unitId}${suffix}.png`;
+}
+
+function getPortrait(
+  unitId: string,
+  side: "south" | "north",
+  form: "base" | "g" = "base"
+) {
+  const dir = side === "south" ? "portraits/south" : "portraits/north";
+  const suffix = form === "g" ? "_G" : "";
+  return `/${dir}/${unitId}${suffix}.png`;
 }
 
 
@@ -447,11 +463,22 @@ setLastMove({
       const newMaxHp = getEffectiveMaxHp(def.base.hp, "g");
       const newHp = Math.min(u.hp + 1, newMaxHp);
 
-      return { ...u, form: "g", hp: newHp };
+ return { ...u, form: "g", hp: newHp, justEvolved: true };
+
     });
   }
 
-  applyNextInstances(next);
+ applyNextInstances(next);
+
+
+window.setTimeout(() => {
+  setInstances(prev =>
+    prev.map(u =>
+      u.justEvolved ? { ...u, justEvolved: false } : u
+    )
+  );
+}, 200);
+
 
 
   setPerUnitTurn((m) => ({
@@ -854,8 +881,13 @@ const canUndoMove = useMemo(() => {
   return true;
 }, [gameOver, lastMove, turn, perUnitTurn, selectedId]);
 
+
+
+
 return (
   <>
+
+
 <UnitPopup
   open={popupOpen}
   unit={popupUnit}
@@ -863,7 +895,10 @@ return (
   usedSkills={usedSkills}
   onClose={() => setPopupId(null)}
   getPortrait={getPortrait}
+  getCardImage={getCardImage}
 />
+
+
 
 <TurnEndConfirm
   open={showEndTurnConfirm && !gameOver}
@@ -883,53 +918,52 @@ return (
 
  
 
-
 {/* --- Skill Mode Banner --- */}
-{!gameOver && skillMode && selected && (() => {
-  const def = SKILLS[skillMode];
-  const label = def?.label ?? skillMode;
+{!gameOver && skillMode && selected ? (
+  (() => {
+    const def = SKILLS[skillMode];
+    const label = def?.label ?? skillMode;
 
-  return (
-    <div
-      style={{
-        marginBottom: 10,
-        padding: "8px 10px",
-        borderRadius: 10,
-        border: "1px solid #6a5a00",
-        background: "rgba(90,74,0,0.25)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 10,
-      }}
-    >
-      <div style={{ fontSize: 13, lineHeight: 1.25 }}>
-        <div style={{ fontWeight: 900 }}>
-          スキル選択中：{label}
-        </div>
-        <div style={{ opacity: 0.9, marginTop: 2 }}>
-          盤面の<span style={{ fontWeight: 800 }}>黄色</span>マスをクリックして発動／
-          <span style={{ fontWeight: 800 }}>ESC</span>で解除
-        </div>
-      </div>
-
-      <button
-        onClick={() => setSkillMode(null)}
+    return (
+      <div
         style={{
-          padding: "6px 10px",
+          marginBottom: 10,
+          padding: "8px 10px",
           borderRadius: 10,
           border: "1px solid #6a5a00",
-          background: "rgba(0,0,0,0.35)",
-          color: "#fff",
-          fontWeight: 900,
-          cursor: "pointer",
+          background: "rgba(90,74,0,0.25)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
         }}
       >
-        解除
-      </button>
-    </div>
-  );
-})()}
+        <div style={{ fontSize: 13, lineHeight: 1.25 }}>
+          <div style={{ fontWeight: 900 }}>スキル選択中：{label}</div>
+          <div style={{ opacity: 0.9, marginTop: 2 }}>
+            盤面の<span style={{ fontWeight: 800 }}>黄色</span>マスをクリックして発動／
+            <span style={{ fontWeight: 800 }}>ESC</span>で解除
+          </div>
+        </div>
+
+        <button
+          onClick={() => setSkillMode(null)}
+          style={{
+            padding: "6px 10px",
+            borderRadius: 10,
+            border: "1px solid #6a5a00",
+            background: "rgba(0,0,0,0.35)",
+            color: "#fff",
+            fontWeight: 900,
+            cursor: "pointer",
+          }}
+        >
+          解除
+        </button>
+      </div>
+    );
+  })()
+) : null}
 
 
 
