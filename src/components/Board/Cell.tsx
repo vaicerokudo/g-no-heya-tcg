@@ -1,6 +1,8 @@
 
 import { useEffect, useRef, useState } from "react";
+
 import { useLongPress } from "../../hooks/useLongPress";
+import { useImgFallback } from "../imgFallback";
 
 
 
@@ -10,6 +12,13 @@ dmgFx?: { id: string; amount: number } | null;
 
  getPortrait: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
 maxHp?: number;
+
+getPortraitCandidates?: (
+  unitId: string,
+  side: "south" | "north",
+  form?: "base" | "g"
+) => string[];
+
 
   label: string;
   r: number;
@@ -34,25 +43,36 @@ maxHp?: number;
 };
 
 export function Cell(props: CellProps) {
-  const {
-    cellSize,
-dmgFx, 
-maxHp,
-    label,
-    inst,
-    bg,
-    cursor,
-    showRng,
-    isAttackBlocker,
+const {
+  cellSize,
+  dmgFx,
+  maxHp,
+  label,
+  inst,
+  bg,
+  cursor,
+  showRng,
+  isAttackBlocker,
+  isDebugTarget,
+  getPortrait,
+  getPortraitCandidates,
+  onClickCell,
+  enableLongPress,
+  onLongPressUnit,
+  onShiftEnemyPick,
+  disableInput = false,
+} = props;
 
-    isDebugTarget,
-    getPortrait,
-    onClickCell,
-    enableLongPress,
-    onLongPressUnit,
-    onShiftEnemyPick,
-    disableInput = false,
-  } = props;
+const form = (inst?.form ?? "base") as "base" | "g";
+
+const cands = inst
+  ? (getPortraitCandidates
+      ? getPortraitCandidates(inst.unitId, inst.side, form)
+      : [getPortrait(inst.unitId, inst.side, form)])
+  : [];
+
+const fb = useImgFallback(cands, { placeholder: "" });
+
 
 const [hpFlash, setHpFlash] = useState(false);
 const prevHpRef = useRef<number | null>(null);
@@ -103,6 +123,69 @@ const pressPct = enableLongPress ? lp.pressPct : 0;
 const bind = enableLongPress ? lp.bind : null;
 const denom = (maxHp ?? inst?.hp ?? 1);
 const pct = inst ? Math.max(0, Math.min(1, (inst.hp ?? 0) / denom)) * 100 : 0;
+const ringSize = Math.round(cellSize * 1.40);
+const burstSize = Math.round(cellSize * 1.65);
+
+
+type Form = "base" | "g";
+
+const prevInstIdRef = useRef<string | null>(null);
+const prevFormRef = useRef<Form | null>(null);
+
+const [evolveTick, setEvolveTick] = useState(0); // 既存流用OK
+const [evolveBoost, setEvolveBoost] = useState(false);
+const evolveBoostTimerRef = useRef<number | null>(null);
+
+useEffect(() => {
+  // inst が消えたら全部リセット
+  if (!inst) {
+    prevInstIdRef.current = null;
+    prevFormRef.current = null;
+    setEvolveBoost(false);
+    if (evolveBoostTimerRef.current) {
+      window.clearTimeout(evolveBoostTimerRef.current);
+      evolveBoostTimerRef.current = null;
+    }
+    return;
+  }
+
+  const instId = String(inst.instanceId ?? "");
+  const cur = (inst.form ?? "base") as Form;
+
+  // ユニット入れ替え時は比較せず初期化（誤検知防止）
+  if (prevInstIdRef.current !== instId) {
+    prevInstIdRef.current = instId;
+    prevFormRef.current = cur;
+    return;
+  }
+
+  const prev = prevFormRef.current;
+
+  if (prev === "base" && cur === "g") {
+    // 進化を確実にトリガ
+    setEvolveTick((x) => x + 1);
+
+    // ブーストON（一定時間でOFFにする）
+    setEvolveBoost(true);
+    if (evolveBoostTimerRef.current) window.clearTimeout(evolveBoostTimerRef.current);
+    evolveBoostTimerRef.current = window.setTimeout(() => {
+      setEvolveBoost(false);
+      evolveBoostTimerRef.current = null;
+    }, 650);
+
+    console.log("[EVOLVE DETECTED]", instId, inst.unitId);
+  }
+
+  prevFormRef.current = cur;
+
+  return () => {
+    // 念のため（アンマウント時）
+    if (evolveBoostTimerRef.current) {
+      window.clearTimeout(evolveBoostTimerRef.current);
+      evolveBoostTimerRef.current = null;
+    }
+  };
+}, [inst?.instanceId, inst?.form]);
 
 
 return (
@@ -205,35 +288,119 @@ zIndex: 5,
       )}
 
 
+{inst && (inst.form ?? "base") === "g" && (
+ <div
+  key={evolveTick}
+  style={{
+    position: "absolute",
+    inset: -6,
+    borderRadius: 14,
+    pointerEvents: "none",
+    zIndex: 6,
+    mixBlendMode: "screen",
+    opacity: evolveBoost ? 1 : 0.14,
+
+    display: "grid",
+    placeItems: "center",
+  }}
+>
+
+    {/* ① 白フラッシュ */}
+    <div
+      style={{
+        position: "absolute",
+        inset: -10,
+        borderRadius: 16,
+        background: "rgba(255,255,255,0.92)",
+        filter: "blur(2px)",
+        animation: "evolveFlash 260ms ease-out forwards",
+      }}
+    />
+
+{/* ② リング（px固定＋中心固定） */}
+<div
+  style={{
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    width: ringSize,
+    height: ringSize,
+    transform: "translate(-50%,-50%)",
+    pointerEvents: "none",
+  }}
+>
+  <div
+    style={{
+      position: "absolute",
+      inset: 0,
+      borderRadius: 999,
+      border: "3px solid rgba(255,215,0,0.85)",
+      boxShadow: "0 0 30px rgba(255,215,0,0.55)",
+
+      filter: "blur(0.4px)",
+      transformOrigin: "50% 50%",
+      animation: "evolveRingCore 520ms cubic-bezier(.2,.9,.2,1) forwards",
+    }}
+  />
+</div>
+
+
+{/* ③ バースト（px固定＋中心固定） */}
+<div
+  style={{
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    width: burstSize,
+    height: burstSize,
+    transform: "translate(-50%,-50%)",
+    pointerEvents: "none",
+  }}
+>
+  <div
+    style={{
+      position: "absolute",
+      inset: 0,
+      borderRadius: 999,
+      background:
+        "radial-gradient(circle at 50% 60%, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.0) 35%, rgba(255,255,255,0.70) 55%, rgba(255,255,255,0.0) 75%)",
+      filter: "blur(1px)",
+      transformOrigin: "50% 50%",
+      animation: "evolveBurstCore 650ms ease-out forwards",
+    }}
+  />
+</div>
+
+  </div>
+)}
+
+
+
+
 
 
       {/* ★ユニット画像 */}
-    {inst && (
+ {inst && (
   <img
-    src={getPortrait(inst.unitId, inst.side,inst.form ?? "base")}
+    src={fb.src}
+    onError={fb.onError}
     alt={inst.unitId}
     draggable={false}
     style={{
       position: "absolute",
-      inset: 0,              
+      inset: 0,
       width: "calc(100% - 4px)",
       height: "calc(100% - 4px)",
       borderRadius: 10,
-      objectFit: "contain", 
+      objectFit: "contain",
       pointerEvents: "none",
       zIndex: 3,
       opacity: 0.98,
       filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.55))",
     }}
-  onError={() =>
-  console.log("IMG NG", inst.unitId, getPortrait(inst.unitId, inst.side, inst.form ?? "base"))
-}
-onLoad={() =>
-  console.log("IMG OK", inst.unitId, getPortrait(inst.unitId, inst.side, inst.form ?? "base"))
-}
-
   />
 )}
+
 
 {inst && dmgFx && (
   <div

@@ -55,7 +55,7 @@
       "id": "MYOUOU",
       "name": "明王",
       "base": {
-        "atk": 2,
+        "atk": 3,
         "hp": 7,
         "movePattern": { "type": "orthogonal", "range": 1, "diagonal": false, "canPassThroughUnits": false }
       },
@@ -116,7 +116,7 @@
       "id": "HIBIKI",
       "name": "hibiki",
       "base": {
-        "atk": 1,
+        "atk": 2,
         "hp": 6,
         "movePattern": {
           "type": "custom",
@@ -166,7 +166,7 @@
       "id": "TSUTSU",
       "name": "つつ",
       "base": {
-        "atk": 3,
+        "atk": 2,
         "hp": 4,
         "movePattern": {
           "type": "custom",
@@ -414,7 +414,7 @@
     {
       "id": "SOCHO",
       "name": "総長",
-      "base": { "atk": 3, "hp": 6, "movePattern": { "type": "orthogonal", "range": 2, "diagonal": false, "canPassThroughUnits": false } },
+      "base": { "atk": 3, "hp": 4, "movePattern": { "type": "orthogonal", "range": 2, "diagonal": false, "canPassThroughUnits": false } },
       "passives": [
         {
           "id": "SOCHO_COMMAND",

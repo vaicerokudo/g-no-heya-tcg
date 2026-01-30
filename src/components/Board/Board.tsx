@@ -29,6 +29,13 @@ type BoardProps = {
 
   unitsById: any;
 getPortrait: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
+
+  getPortraitCandidates?: (
+    unitId: string,
+    side: "south" | "north",
+    form?: "base" | "g"
+  ) => string[];
+
   posKey: (r: number, c: number) => string;
 
   canSelect: (inst: any) => boolean;
@@ -59,6 +66,7 @@ export function Board(props: BoardProps) {
   debugTargetId,
   unitsById,
   getPortrait,
+getPortraitCandidates,
   posKey,
   canSelect,
   onCellClick,
@@ -107,7 +115,8 @@ export function Board(props: BoardProps) {
 
               const k = posKey(r, c);
               const inst = occ.get(k) ?? null;
-const form = inst?.form ?? "base";
+const form = (inst?.form ?? "base") as "base" | "g";
+
 const maxHp =
   inst && unitsById?.[inst.unitId]
     ? getEffectiveMaxHp(unitsById[inst.unitId].base.hp, form)
@@ -184,7 +193,8 @@ const maxHp =
                   key={k}
                   cellSize={cellSize}
      
-getPortrait={getPortrait}
+  getPortrait={getPortrait}
+  getPortraitCandidates={getPortraitCandidates}
 maxHp={maxHp}
 
                   label={label}

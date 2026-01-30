@@ -16,12 +16,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { tickStartOfSide } from "./game/skills";
 import { getEffectiveMaxHp } from "./game/stats";
 
-
-
 import { Board } from "./components/Board/Board";
 import { UnitPopup } from "./components/Popup/UnitPopup";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
+
+import {
+
+  getPortrait as getPortraitPath,
+  cardCandidates,
+  portraitCandidates,
+  type Skin,
+} from "./assets/imagePaths";
 
 
 function posKey(r: number, c: number) {
@@ -33,33 +39,18 @@ function skillUseKey(side: Side, instanceId: string, skillId: SkillId) {
 }
 
 
-function getCardImage(
-  unitId: string,
-  side: "south" | "north",
-  form: "base" | "g" = "base"
-) {
-  const dir = side === "south" ? "cards/south" : "cards/north";
-  // 例：G用ファイル名ルール（好きな形にしてOK）
-  const suffix = form === "g" ? "_G" : "";
-  return `/${dir}/${unitId}${suffix}.png`;
-}
-
-function getPortrait(
-  unitId: string,
-  side: "south" | "north",
-  form: "base" | "g" = "base"
-) {
-  const dir = side === "south" ? "portraits/south" : "portraits/north";
-  const suffix = form === "g" ? "_G" : "";
-  return `/${dir}/${unitId}${suffix}.png`;
-}
-
-
 type PerUnitTurn = Record<string, { moved: boolean; attacked: boolean; done: boolean }>;
 
 
+
+
+
 export default function App() {
+
+
+
 console.count("App render");
+const [skin, setSkin] = useState<Skin>("default"); 
 
   const initial = useMemo(() => createDemoState(unitsData as any), []);
 
@@ -885,8 +876,11 @@ return (
   unitsById={unitsById}
   usedSkills={usedSkills}
   onClose={() => setPopupId(null)}
-  getPortrait={getPortrait}
-  getCardImage={getCardImage}
+  getCardCandidates={(
+    unitId: string,
+    side: "south" | "north",
+    form?: "base" | "g"
+  ) => cardCandidates(unitId, side, form ?? "base", skin)}
 />
 
 
@@ -960,6 +954,33 @@ return (
 
 
       <h2>Gの部屋 TCG（体験版）</h2>
+
+<div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
+  <div style={{ fontSize: 12, opacity: 0.85 }}>スキン:</div>
+
+  <select
+    value={skin}
+    onChange={(e) => setSkin(e.target.value as Skin)}
+    style={{
+      padding: "6px 8px",
+      background: "#111",
+      color: "#fff",
+      border: "1px solid #444",
+      borderRadius: 8,
+      fontWeight: 800,
+    }}
+  >
+    <option value="default">default</option>
+    <option value="dark">dark</option>
+    <option value="travel">travel</option>
+  </select>
+
+  <div style={{ fontSize: 12, opacity: 0.7 }}>
+    ※未作成の画像は default にフォールバック推奨
+  </div>
+</div>
+
+
 
 <div
   style={{
@@ -1112,59 +1133,64 @@ return (
 
 
 
-  <Board
-    rows={rows}
-    cols={cols}
-    cellSize={cell}
+<Board
+  rows={rows}
+  cols={cols}
+  cellSize={cell}
+  letters={letters}
+  occ={occ}
+  selectedId={selectedId}
+  turn={turn}
+  gameOver={gameOver}
+  legalMoveSet={legalMoveSet}
+  attackRangeSet={attackRangeSet}
+  attackBlockerSet={attackBlockerSet}
+  attackSet={attackSet}
+  skillMode={skillMode}
+  skillTargetSet={skillTargetSet}
+  debugTargetId={debugTargetId}
+  unitsById={unitsById}
+  getPortrait={(unitId, side, form) =>
+    getPortraitPath(unitId, side, (form ?? "base"), skin)
+  }
+  getPortraitCandidates={(unitId, side, form) =>
+    portraitCandidates(unitId, side, (form ?? "base"), skin)
+  }
+  posKey={posKey}
+  canSelect={canSelect}
+  onShiftEnemyPick={(enemyId) => setDebugTargetId(enemyId)}
+  onLongPressUnit={(inst) => {
+    if (gameOver) return;
+    setSelectedId(inst.instanceId);
+    setSwapUnitId("");
+    setPopupId(inst.instanceId);
+    setSkillMode(null);
+  }}
+  onCellClick={(r, c, inst) => {
+    if (gameOver) return;
+    setPopupId(null);
 
-    letters={letters}
-    occ={occ}
-    selectedId={selectedId}
-    turn={turn}
-    gameOver={gameOver}
-    legalMoveSet={legalMoveSet}
-    attackRangeSet={attackRangeSet}
-    attackBlockerSet={attackBlockerSet}
-    attackSet={attackSet}
-    skillMode={skillMode}
-    skillTargetSet={skillTargetSet}
-    debugTargetId={debugTargetId}
-    unitsById={unitsById}
-    getPortrait={getPortrait}
-    posKey={posKey}
-    canSelect={canSelect}
-    onShiftEnemyPick={(enemyId) => setDebugTargetId(enemyId)}
-    onLongPressUnit={(inst) => {
-      if (gameOver) return;
-      setSelectedId(inst.instanceId);
-      setSwapUnitId("");
-      setPopupId(inst.instanceId);
-      setSkillMode(null);
-    }}
-    onCellClick={(r, c, inst) => {
-      if (gameOver) return;
+    const handled = tryExecuteSkillOnCell({ r, c, inst: inst ?? null });
+    if (handled) return;
 
-      setPopupId(null);
-
-      const handled = tryExecuteSkillOnCell({ r, c, inst: inst ?? null });
-      if (handled) return;
-
-      if (inst) {
-        if (inst.side !== turn) {
-          if (attackSet.has(inst.instanceId)) attack(inst.instanceId);
-          return;
-        }
-        if (canSelect(inst)) {
-          setSelectedId(inst.instanceId);
-          setSwapUnitId("");
-        }
+    if (inst) {
+      if (inst.side !== turn) {
+        if (attackSet.has(inst.instanceId)) attack(inst.instanceId);
         return;
       }
+      if (canSelect(inst)) {
+        setSelectedId(inst.instanceId);
+        setSwapUnitId("");
+      }
+      return;
+    }
 
-      moveTo(r, c);
-    }}
-dmgByInstanceId={dmgByInstanceId}
-  />
+    moveTo(r, c);
+  }}
+  dmgByInstanceId={dmgByInstanceId}
+/>
+
+
 </div>
 
 

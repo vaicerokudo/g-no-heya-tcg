@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getAvailableSkillsForUnit, type SkillId, SKILLS } from "../../game/skills/registry";
 import type { Side } from "../../game/types";
 import { getEffectiveAtk, getEffectiveMaxHp } from "../../game/stats";
+import { useImgFallback } from "../imgFallback";
 
 function skillUseKey(side: Side, instanceId: string, skillId: SkillId) {
   return `${side}:${instanceId}:${skillId}`;
@@ -13,29 +14,43 @@ type Props = {
   unitsById: any;
   usedSkills: Record<string, boolean>;
   onClose: () => void;
-  getPortrait: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
-  getCardImage: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
+
+  // フォールバック候補（Appから渡す）
+  getCardCandidates: (unitId: string, side: "south" | "north", form?: "base" | "g") => string[];
 };
 
-export function UnitPopup({ open, unit, unitsById, usedSkills, onClose, getCardImage }: Props) {
-
-
+export function UnitPopup({
+  open,
+  unit,
+  unitsById,
+  usedSkills,
+  onClose,
+  getCardCandidates,
+}: Props) {
   const [w, setW] = useState<number>(typeof window !== "undefined" ? window.innerWidth : 1024);
+
   useEffect(() => {
     const onResize = () => setW(window.innerWidth);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
   const isNarrow = w < 720;
+
+ const form = (unit?.form ?? "base") as "base" | "g";
+  const cardCands = unit ? getCardCandidates(unit.unitId, unit.side, form) : [];
+  const fb = useImgFallback(cardCands, { placeholder: "" }); // ← optsはオブジェクトね
+
 
   if (!open || !unit) return null;
 
   const def = unitsById?.[unit.unitId];
   if (!def) return null;
 
-  const form = (unit.form ?? "base") as "base" | "g";
   const maxHp = getEffectiveMaxHp(def.base.hp, form);
   const atk = getEffectiveAtk(def.base.atk, form);
+
+
 
 
 
@@ -44,197 +59,288 @@ export function UnitPopup({ open, unit, unitsById, usedSkills, onClose, getCardI
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.70)",
+        background: "rgba(0,0,0,0.72)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 13000,
         padding: 12,
+        backdropFilter: "blur(6px)",
       }}
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "min(980px, 96vw)",
+          width: "min(1020px, 96vw)",
           maxHeight: "92vh",
           overflow: "auto",
-          background: "rgba(10,10,12,0.94)",
+          background: "rgba(10,10,12,0.96)",
           border: "1px solid rgba(255,255,255,0.16)",
-          borderRadius: 16,
-          padding: 14,
-          boxShadow: "0 16px 40px rgba(0,0,0,0.65)",
+          borderRadius: 18,
+          boxShadow: "0 18px 60px rgba(0,0,0,0.72)",
           color: "rgba(255,255,255,0.92)",
         }}
       >
-        {/* ヘッダー */}
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>
-            {def.name} <span style={{ opacity: 0.7, fontSize: 12 }}>({String(unit.unitId)})</span>
+        {/* --- Sticky Header --- */}
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 2,
+            padding: "12px 14px",
+            borderBottom: "1px solid rgba(255,255,255,0.10)",
+            background: "rgba(10,10,12,0.92)",
+            backdropFilter: "blur(10px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 950, fontSize: 16, lineHeight: 1.15 }}>
+              {def.name}{" "}
+              <span style={{ opacity: 0.7, fontSize: 12, fontWeight: 800 }}>
+                ({String(unit.unitId)})
+              </span>
+            </div>
+
+            <div style={{ marginTop: 6, display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <span
+                style={{
+                  fontSize: 11,
+                  padding: "3px 10px",
+                  borderRadius: 999,
+                  border: "1px solid rgba(255,255,255,0.16)",
+                  background: "rgba(0,0,0,0.22)",
+                  fontWeight: 900,
+                  letterSpacing: 0.2,
+                }}
+              >
+                SIDE: {String(unit.side).toUpperCase()}
+              </span>
+
+              <span
+                style={{
+                  fontSize: 11,
+                  padding: "3px 10px",
+                  borderRadius: 999,
+                  border: "1px solid rgba(255,255,255,0.16)",
+                  background: form === "g" ? "rgba(255,215,0,0.12)" : "rgba(0,0,0,0.22)",
+                  fontWeight: 900,
+                  letterSpacing: 0.2,
+                }}
+              >
+                FORM: {form.toUpperCase()}
+              </span>
+
+              <span
+                style={{
+                  fontSize: 11,
+                  padding: "3px 10px",
+                  borderRadius: 999,
+                  border: "1px solid rgba(255,255,255,0.16)",
+                  background: "rgba(0,0,0,0.22)",
+                  fontWeight: 900,
+                }}
+              >
+                ID: {String(unit.instanceId)}
+              </span>
+            </div>
           </div>
 
           <button
             onClick={onClose}
             style={{
-              padding: "6px 10px",
-              borderRadius: 10,
-              border: "1px solid #444",
-              background: "rgba(0,0,0,0.25)",
+              padding: "8px 12px",
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,0.18)",
+              background: "rgba(0,0,0,0.30)",
               color: "#fff",
-              fontWeight: 900,
+              fontWeight: 950,
               cursor: "pointer",
+              flex: "0 0 auto",
             }}
           >
             閉じる
           </button>
         </div>
 
-        {/* C：左カード / 右情報 */}
+        {/* --- Body --- */}
         <div
           style={{
-            display: "flex",
-            flexDirection: isNarrow ? "column" : "row",
-            gap: 12,
-            marginTop: 12,
-            alignItems: isNarrow ? "stretch" : "flex-start",
+            padding: 14,
+            display: "grid",
+            gridTemplateColumns: isNarrow ? "1fr" : "minmax(340px, 420px) 1fr",
+            gap: 14,
+            alignItems: "start",
           }}
         >
-          {/* 左：カード */}
+          {/* --- Left: Card --- */}
           <div
             style={{
-              flex: isNarrow ? "0 0 auto" : "0 0 52%",
-              background: "rgba(0,0,0,0.22)",
+              position: isNarrow ? "relative" : "sticky",
+              top: isNarrow ? "auto" : 64,
+              borderRadius: 16,
               border: "1px solid rgba(255,255,255,0.14)",
-              borderRadius: 14,
+              background: "rgba(0,0,0,0.22)",
               padding: 10,
             }}
           >
-           {/* カード画像（ポップアップのメイン） */}
-<img
-  src={getCardImage(unit.unitId, unit.side, form)}
-  alt={`${unit.unitId}-${form}`}
-  style={{
-    width: "100%",
-    marginTop: 10,
-    borderRadius: 12,
-    objectFit: "contain",
-    background: "rgba(0,0,0,0.22)",
-    border: "1px solid rgba(255,255,255,0.14)",
-    maxHeight: "72vh",
-    display: "block",
-  }}
-  onError={() =>
-    console.log("CARD IMG NG", unit.unitId, getCardImage(unit.unitId, unit.side, form))
-  }
-  onLoad={() =>
-    console.log("CARD IMG OK", unit.unitId, getCardImage(unit.unitId, unit.side, form))
-  }
-/>
+            <div style={{ fontSize: 12, fontWeight: 950, opacity: 0.9 }}>カード</div>
 
-          </div>
-
-          {/* 右：情報 */}
-          <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                padding: "10px 10px",
+                marginTop: 10,
                 borderRadius: 14,
-                border: "1px solid rgba(255,255,255,0.14)",
-                background: "rgba(0,0,0,0.22)",
+                overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(0,0,0,0.24)",
               }}
             >
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", fontSize: 13, alignItems: "center" }}>
-                <span>side: <b>{String(unit.side).toUpperCase()}</b></span>
-                <span>form: <b>{form}</b></span>
-                <span>HP: <b>{unit.hp}/{maxHp}</b></span>
-                <span>ATK: <b>{atk}</b></span>
+
+   <img
+        src={fb.src}
+        onError={fb.onError}
+        alt={`${unit.unitId}-${form}`}
+        style={{
+          width: "100%",
+          display: "block",
+          objectFit: "contain",
+          maxHeight: isNarrow ? "56vh" : "72vh",
+        }}
+        draggable={false}
+/>
+
+            </div>
+
+            <div style={{ marginTop: 10, fontSize: 12, opacity: 0.72 }}>
+              ※画像が無い場合は候補へフォールバック
+            </div>
+          </div>
+
+          {/* --- Right: Info --- */}
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                borderRadius: 16,
+                border: "1px solid rgba(255,255,255,0.14)",
+                background: "rgba(0,0,0,0.22)",
+                padding: 12,
+              }}
+            >
+              <div style={{ fontWeight: 950, fontSize: 14 }}>ステータス</div>
+
+              <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div
+                  style={{
+                    padding: "10px 10px",
+                    borderRadius: 14,
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    background: "rgba(0,0,0,0.18)",
+                  }}
+                >
+                  <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 900 }}>HP</div>
+                  <div style={{ marginTop: 4, fontSize: 18, fontWeight: 950 }}>
+                    {unit.hp}/{maxHp}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    padding: "10px 10px",
+                    borderRadius: 14,
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    background: "rgba(0,0,0,0.18)",
+                  }}
+                >
+                  <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 900 }}>ATK</div>
+                  <div style={{ marginTop: 4, fontSize: 18, fontWeight: 950 }}>{atk}</div>
+                </div>
               </div>
             </div>
 
-            <div style={{ marginTop: 12, fontSize: 13, fontWeight: 900, marginBottom: 6 }}>スキル</div>
+            <div style={{ marginTop: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 950 }}>スキル</div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {getAvailableSkillsForUnit(unit.unitId).map((s) => {
-                const formOk = !s.requiresForm || form === s.requiresForm;
-                const usedKey = skillUseKey(unit.side as Side, unit.instanceId, s.id);
-                const used = !!usedSkills[usedKey];
+              <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+                {getAvailableSkillsForUnit(unit.unitId).map((s) => {
+                  const formOk = !s.requiresForm || form === s.requiresForm;
+                  const usedKey = skillUseKey(unit.side as Side, unit.instanceId, s.id);
+                  const used = !!usedSkills[usedKey];
+                  const mode = SKILLS?.[s.id]?.targetMode ?? s.targetMode;
 
-                const disabledReason = !formOk
-                  ? "進化(G)が必要"
-                  : s.oncePerMatch && used
-                    ? "この試合で使用済み"
-                    : "";
+                  return (
+                    <div
+                      key={s.id}
+                      style={{
+                        padding: "10px 10px",
+                        borderRadius: 16,
+                        border: "1px solid rgba(255,255,255,0.14)",
+                        background: "rgba(0,0,0,0.22)",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                        <div style={{ fontWeight: 950, fontSize: 14 }}>{s.label}</div>
 
-                return (
-                  <div
-                    key={s.id}
-                    style={{
-                      padding: "8px 10px",
-                      borderRadius: 12,
-                      border: "1px solid rgba(255,255,255,0.14)",
-                      background: "rgba(0,0,0,0.22)",
-                    }}
-                    title={disabledReason}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      <div style={{ fontWeight: 900 }}>{s.label}</div>
+                        {s.requiresForm && (
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: "3px 10px",
+                              borderRadius: 999,
+                              border: "1px solid rgba(255,255,255,0.16)",
+                              opacity: formOk ? 0.9 : 0.6,
+                            }}
+                          >
+                            要{String(s.requiresForm).toUpperCase()}
+                          </span>
+                        )}
 
-                      {s.requiresForm && (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            padding: "2px 8px",
-                            borderRadius: 999,
-                            border: "1px solid rgba(255,255,255,0.18)",
-                            opacity: formOk ? 0.9 : 0.6,
-                          }}
-                        >
-                          要{String(s.requiresForm).toUpperCase()}
-                        </span>
-                      )}
+                        {s.oncePerMatch && (
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: "3px 10px",
+                              borderRadius: 999,
+                              border: "1px solid rgba(255,255,255,0.16)",
+                              opacity: 0.9,
+                            }}
+                          >
+                            1回
+                          </span>
+                        )}
 
-                      {s.oncePerMatch && (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            padding: "2px 8px",
-                            borderRadius: 999,
-                            border: "1px solid rgba(255,255,255,0.18)",
-                            opacity: 0.9,
-                          }}
-                        >
-                          1回
-                        </span>
-                      )}
+                        {s.oncePerMatch && used && (
+                          <span
+                            style={{
+                              fontSize: 11,
+                              padding: "3px 10px",
+                              borderRadius: 999,
+                              border: "1px solid rgba(255,255,255,0.16)",
+                              background: "rgba(255,255,255,0.08)",
+                              opacity: 0.9,
+                            }}
+                          >
+                            使用済
+                          </span>
+                        )}
+                      </div>
 
-                      {s.oncePerMatch && used && (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            padding: "2px 8px",
-                            borderRadius: 999,
-                            border: "1px solid rgba(255,255,255,0.18)",
-                            background: "rgba(255,255,255,0.08)",
-                            opacity: 0.9,
-                          }}
-                        >
-                          使用済
-                        </span>
-                      )}
-
-                      {!formOk && <span style={{ fontSize: 12, opacity: 0.75 }}>（進化してね）</span>}
+                      <div style={{ marginTop: 8, fontSize: 12, opacity: 0.82 }}>
+                        <span style={{ fontWeight: 900, opacity: 0.9 }}>mode:</span> {String(mode)}
+                        {s.damage != null ? (
+                          <>
+                            {" "}
+                            / <span style={{ fontWeight: 900, opacity: 0.9 }}>dmg:</span> {String(s.damage)}
+                          </>
+                        ) : null}
+                      </div>
                     </div>
-
-                    <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
-                      mode: {SKILLS[s.id]?.targetMode ?? s.targetMode}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div style={{ marginTop: 12, fontSize: 12, opacity: 0.75 }}>
-              ※カード画像が無い場合はコンソールに CARD IMG NG が出るよ
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

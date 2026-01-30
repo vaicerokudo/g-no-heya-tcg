@@ -60,63 +60,45 @@ export type InstantArgs = {
 };
 
 // --- defs (unionで安全に) ---
-export type SkillDef =
-  | {
-      id: SkillId;
-      label: string;
-      unitId: string;
-      requiresForm?: "g";
-      oncePerMatch: boolean;
-      targetMode: "chooseLineDirection";
-      range: number;
-      damage: number;
-      knockback: number;
-      execute: (args: ChooseLineDirectionArgs) => any[];
-    }
-  | {
-      id: SkillId;
-      label: string;
-      unitId: string;
-      requiresForm?: "g";
-      oncePerMatch: boolean;
-      targetMode: "chooseEnemyAdjacent";
-      damage: number;
-      execute: (args: ChooseEnemyAdjacentArgs) => any[];
-    }
-  | {
-      id: SkillId;
-      label: string;
-      unitId: string;
-      requiresForm?: "g";
-      oncePerMatch: boolean;
-      targetMode: "instant";
-      aoeRadius: number;
-      damage: number;
-      knockback: number;
-      stunTurns?: number;
-      execute: (args: InstantArgs) => any[];
-    }
-  | {
-      id: SkillId;
-      label: string;
-      unitId: string;
-      requiresForm?: "g";
-      oncePerMatch: boolean;
-      targetMode: "chooseFront3Cells";
-      damage: number;
-      burnTicks?: number;
-      stunTurns?: number;
-      execute: (args: ChooseFront3CellsArgs) => any[];
-    };
-
-// ========= 事故らないファクトリ =========
-type DefBase = {
+type Common = {
   id: SkillId;
   label: string;
   unitId: string;
   requiresForm?: "g";
   oncePerMatch: boolean;
+  desc?: string;
+  stunTurns?: number; // 表示したいので共通に
 };
+
+export type SkillDef =
+  | (Common & {
+      targetMode: "chooseLineDirection";
+      range: number;
+      damage: number;
+      knockback: number;
+      execute: (args: ChooseLineDirectionArgs) => any[];
+    })
+  | (Common & {
+      targetMode: "chooseEnemyAdjacent";
+      damage: number;
+      execute: (args: ChooseEnemyAdjacentArgs) => any[];
+    })
+  | (Common & {
+      targetMode: "instant";
+      aoeRadius: number;
+      damage: number;
+      knockback: number;
+      execute: (args: InstantArgs) => any[];
+    })
+  | (Common & {
+      targetMode: "chooseFront3Cells";
+      damage: number;
+      burnTicks?: number;
+      execute: (args: ChooseFront3CellsArgs) => any[];
+    });
+
+// ========= 事故らないファクトリ =========
+type DefBase = Common; // ★ targetMode を持たない
 
 export function defineChooseLineDirection(
   def: DefBase & {
@@ -143,13 +125,24 @@ export function defineInstant(
     aoeRadius: number;
     damage: number;
     knockback: number;
-    stunTurns?: number;
     execute: (args: InstantArgs) => any[];
   }
 ): SkillDef {
   return { ...def, targetMode: "instant" };
 }
+
+export function defineChooseFront3Cells(
+  def: DefBase & {
+    damage: number;
+    burnTicks?: number;
+    execute: (args: ChooseFront3CellsArgs) => any[];
+  }
+): SkillDef {
+  return { ...def, targetMode: "chooseFront3Cells" };
+}
 // ========= ここまで =========
+
+
 
 export const SKILLS: Record<SkillId, SkillDef> = {
   ushimaru_kantetsu_g: defineChooseLineDirection({
@@ -176,7 +169,8 @@ export const SKILLS: Record<SkillId, SkillDef> = {
 
   socho_iaijutsu: defineChooseEnemyAdjacent({
     id: "socho_iaijutsu",
-    label: "総長 居合い斬り",
+    label: "居合い斬り 【一閃】",
+　　desc: "指定した敵一体に4ダメージ",
     unitId: "SOCHO",
     oncePerMatch: true,
     damage: 4,
@@ -187,7 +181,8 @@ export const SKILLS: Record<SkillId, SkillDef> = {
 
   myouou_yaki_harau: defineChooseEnemyAdjacent({
     id: "myouou_yaki_harau",
-    label: "明王 焼き払う",
+    label: "焼き払う",
+    desc: "前面3マスの敵にそれぞれ2ダメージ",
     unitId: "MYOUOU",
     oncePerMatch: true,
     damage: 2,
@@ -196,26 +191,27 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     },
   }),
 
-  myouou_karyura_g: {
-    id: "myouou_karyura_g",
-    label: "明王(G) 迦楼羅",
-    unitId: "MYOUOU",
-    requiresForm: "g",
-    oncePerMatch: true,
-    targetMode: "chooseFront3Cells",
-    damage: 2,
-    burnTicks: 3, // 今のskills.tsのデフォ(3)に合わせる
-    stunTurns: 1,
-    execute: ({ stateLike, casterId, damage, burnTicks, stunTurns }) => {
-      return applyMyououGKaryuraFront3(
-        stateLike as any,
-        casterId,
-        damage,
-        burnTicks ?? 3,
-        stunTurns ?? 1
-      );
-    },
+ myouou_karyura_g: defineChooseFront3Cells({
+  id: "myouou_karyura_g",
+  label: "(G) 迦楼羅",
+  desc: "前面3マスの敵に2ダメ+炎上(1ダメ3ターン)+スタン",
+  unitId: "MYOUOU",
+  requiresForm: "g",
+  oncePerMatch: true,
+  damage: 2,
+  burnTicks: 3,
+  stunTurns: 1,
+  execute: ({ stateLike, casterId, damage, burnTicks, stunTurns }) => {
+    return applyMyououGKaryuraFront3(
+      stateLike as any,
+      casterId,
+      damage,
+      burnTicks ?? 3,
+      stunTurns ?? 1
+    );
   },
+}),
+
 
   tsutsu_chikayorasenee_g: defineInstant({
     id: "tsutsu_chikayorasenee_g",
