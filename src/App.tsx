@@ -54,6 +54,24 @@ function parseHandKey(key: string | null): { uid: string; idx: number } | null {
   return { uid: m[1], idx: Number(m[2]) };
 }
 
+function getHandThumbSrc(unitId: string, side: Side, skin: Skin) {
+  return `/cards/hand/${skin}/${side}/${unitId}.webp`;
+}
+
+function getHandFallbackSrc(unitId: string, side: Side, skin: Skin) {
+  const cands = cardCandidates(unitId, side, "base", skin);
+  if (cands && cands.length > 0) return cands[0];
+  return getPortraitPath(unitId, side, "base", skin);
+}
+
+// ★これが無いから落ちてる：今の呼び出しに合わせて用意
+function getHandCardSrc(unitId: string, side: Side, skin: Skin) {
+  // まずサムネ（軽い）
+  return getHandThumbSrc(unitId, side, skin);
+}
+
+
+
 type PerUnitTurn = Record<string, { moved: boolean; attacked: boolean; done: boolean }>;
 type Phase = "setup_draw" | "setup_deploy" | "battle";
 
@@ -214,14 +232,6 @@ function getDeckBackPath(skin: Skin) {
   return "/cards/back_default.png";
 }
 
-function getHandCardSrc(unitId: string, side: Side, skin: Skin) {
-  // まず “カード画像”候補（スキン込み）を探す
-  const cands = cardCandidates(unitId, side, "base", skin);
-  if (cands && cands.length > 0) return cands[0];
-
-  // 無ければ “ポートレート”にフォールバック
-  return getPortraitPath(unitId, side, "base", skin);
-}
 
 
   const selectedHandPick = useMemo(
@@ -1670,8 +1680,9 @@ function drawAtStartOfTurn(side: Side, turnKey: string) {
     const k = `${uid}-${i}`;
     const isSel = selectedHandKey === k;
     const name = unitsById[uid]?.name ?? uid;
+const src = getHandCardSrc(uid, "south", skin);
 
-    const src = getHandCardSrc(uid, "south", skin);
+    
 
     return (
       <button
@@ -1702,22 +1713,23 @@ function drawAtStartOfTurn(side: Side, turnKey: string) {
     background: "rgba(0,0,0,0.25)",
   }}
 >
+        <img
+  src={src}
+  alt={name}
+  loading="lazy"
+  decoding="async"
+  style={{
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
+    display: "block",
+  }}
+  onError={(e) => {
+    // thumbが無い/読めない場合は従来画像へ
+    (e.currentTarget as HTMLImageElement).src = getHandFallbackSrc(uid, "south", skin);
+  }}
+/>
 
-          <img
-            src={src}
-            alt={name}
-            loading="lazy"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "contain", // ★全部見せる（切らない）
-              display: "block",
-            }}
-            onError={(e) => {
-              // 最終保険：default skin の base portrait
-              (e.currentTarget as HTMLImageElement).src = getPortraitPath(uid, "south", "base", "default");
-            }}
-          />
 
           {/* 名前ラベル（邪魔なら消してOK） */}
           <div
