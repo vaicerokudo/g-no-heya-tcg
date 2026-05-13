@@ -1,98 +1,235 @@
+// src/game/attack.ts
+import { computeFinalDamage } from "./combat/damage";
 
+type Pos = { r: number; c: number };
 
-import type { GameState, UnitInstance } from "./state";
+export type StateLike = {
+  rows: number;
+  cols: number;
+  unitsById: Record<string, any>;
+  instances: any[];
+  selectedInstanceId?: string | null;
+};
 
-function inBounds(r: number, c: number, rows: number, cols: number) {
-  return r >= 0 && r < rows && c >= 0 && c < cols;
+function chebDist(a: Pos, b: Pos) {
+  return Math.max(Math.abs(a.r - b.r), Math.abs(a.c - b.c));
 }
-function key(r: number, c: number) {
-  return `${r},${c}`;
+
+function getByInstanceId(instances: any[], id: string) {
+  return instances.find((u) => u.instanceId === id) ?? null;
 }
 
-export type AttackMarkKind = "range" | "target" | "blocker";
-export type AttackMark = { r: number; c: number; kind: AttackMarkKind };
-
-export function buildOcc(instances: UnitInstance[]) {
-  const m = new Map<string, UnitInstance>();
-  for (const inst of instances) m.set(key(inst.pos.r, inst.pos.c), inst);
+function occMap(instances: any[]) {
+  const m = new Map<string, any>();
+  for (const u of instances) m.set(`${u.pos.r},${u.pos.c}`, u);
   return m;
 }
 
-const DIRS_4 = [
-  { dr: -1, dc: 0 },
-  { dr: 1, dc: 0 },
-  { dr: 0, dc: -1 },
-  { dr: 0, dc: 1 }
-];
+function damageOne(instances: any[], targetId: string, amount: number) {
+  const dmg = Math.max(0, amount ?? 0);
+  return instances
+    .map((u) =>
+      u.instanceId === targetId ? { ...u, hp: (u.hp ?? 0) - dmg } : u
+    )
+    .filter((u) => (u.hp ?? 0) > 0);
+}
 
-const DIRS_8 = [
-  ...DIRS_4,
-  { dr: -1, dc: -1 },
-  { dr: -1, dc: 1 },
-  { dr: 1, dc: -1 },
-  { dr: 1, dc: 1 }
-];
+function sign(n: number) {
+  if (n > 0) return 1;
+  if (n < 0) return -1;
+  return 0;
+}
 
-export function getAttackMarks(state: GameState, attacker: UnitInstance): AttackMark[] {
-  const def = state.unitsById[attacker.unitId] as any;
-  const occ = buildOcc(state.instances);
+function isLine8(a: Pos, b: Pos) {
+  const dr = b.r - a.r;
+  const dc = b.c - a.c;
+  if (dr === 0 && dc === 0) return false;
+  // orthogonal or diagonal
+  return dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc);
+}
 
-  // 近接デフォ（上下左右1）
-  const marks: AttackMark[] = [];
-  for (const d of DIRS_4) {
-    const r = attacker.pos.r + d.dr;
-    const c = attacker.pos.c + d.dc;
-    if (!inBounds(r, c, state.rows, state.cols)) continue;
-    const t = occ.get(key(r, c));
-    if (!t) marks.push({ r, c, kind: "range" });
-    else if (t.side !== attacker.side) marks.push({ r, c, kind: "target" });
-    else marks.push({ r, c, kind: "blocker" });
+function stepDir8(a: Pos, b: Pos) {
+  return { dr: sign(b.r - a.r), dc: sign(b.c - a.c) };
+}
+
+function isLineOfSightClear(instances: any[], from: Pos, to: Pos) {
+  if (!isLine8(from, to)) return false;
+  const { dr, dc } = stepDir8(from, to);
+  const occ = occMap(instances);
+
+  let r = from.r + dr;
+  let c = from.c + dc;
+
+  while (!(r === to.r && c === to.c)) {
+    if (occ.has(`${r},${c}`)) return false;
+    r += dr;
+    c += dc;
+  }
+  return true;
+}
+
+// ATKは「必ず unitsById から」引く（instance.atk は見ない）
+function getBaseAtk(stateLike: StateLike, attacker: any): number {
+  const def = stateLike.unitsById?.[attacker.unitId];
+  const baseAtk = def?.base?.atk ?? 1;
+  const form = attacker.form ?? "base";
+  const formAtk = form === "g" ? baseAtk + 1 : baseAtk;
+  return formAtk + Math.max(0, attacker.dmgBonus ?? 0);
+}
+
+function isMeleeAttackable(_stateLike: StateLike, attacker: any, target: any) {
+  // 隣接（チェビ1）
+  return chebDist(attacker.pos, target.pos) <= 1;
+}
+
+function isRangedLineAttackable(
+  stateLike: StateLike,
+  attacker: any,
+  target: any,
+  range: number,
+  losBlocked: boolean
+) {
+  if (!isLine8(attacker.pos, target.pos)) return false;
+
+  const dist = chebDist(attacker.pos, target.pos);
+  if (dist > range) return false;
+
+  if (losBlocked) {
+    return isLineOfSightClear(stateLike.instances, attacker.pos, target.pos);
+  }
+  return true;
+}
+
+function getNormalAttackSpec(stateLike: StateLike, attacker: any) {
+  const def = stateLike.unitsById?.[attacker.unitId];
+  const spec = def?.attacks?.normalAttack ?? null;
+  return spec;
+}
+
+/**
+ * 攻撃可能な敵一覧（UI/CPU共通）
+ */
+export function getAttackableTargets(stateLike: StateLike, attacker: any): any[] {
+  const instances = stateLike.instances;
+  const spec = getNormalAttackSpec(stateLike, attacker);
+
+  const enemies = instances.filter((u) => u.side !== attacker.side);
+
+  // rangedLine
+  if (spec?.type === "rangedLine") {
+    const range = spec.range ?? 3;
+    const blocked = spec.lineOfSightBlockedByUnits ?? true;
+
+    return enemies.filter((t) =>
+      isRangedLineAttackable(stateLike, attacker, t, range, blocked)
+    );
   }
 
-  const na = def?.attacks?.normalAttack;
-  if (!na || na.type !== "rangedLine") return marks;
+  // default melee
+  return enemies.filter((t) => isMeleeAttackable(stateLike, attacker, t));
+}
 
-  // rangedLine（つつ用）
-  marks.length = 0;
-  const range: number = na.range ?? 3;
-  const blockByUnits: boolean = !!na.lineOfSightBlockedByUnits;
+/**
+ * 通常攻撃を適用して instances を返す
+ */
+export function applyNormalAttack(
+  stateLike: StateLike,
+  attacker: any,
+  targetId: string
+): any[] {
+  const instances = stateLike.instances;
 
-  for (const d of DIRS_8) {
-    for (let step = 1; step <= range; step++) {
-      const r = attacker.pos.r + d.dr * step;
-      const c = attacker.pos.c + d.dc * step;
-      if (!inBounds(r, c, state.rows, state.cols)) break;
+  const target = getByInstanceId(instances, targetId);
+  if (!target) return instances;
 
-      const t = occ.get(key(r, c));
-      if (!t) {
-        marks.push({ r, c, kind: "range" });
-        continue;
+  // そもそも攻撃可能かチェック（UI/CPUのズレ防止）
+  const legalTargets = getAttackableTargets(stateLike, attacker);
+  const ok = legalTargets.some((t) => t.instanceId === targetId);
+  if (!ok) return instances;
+
+  // raw damage = ATK（Gなら+1込み）
+  const raw = getBaseAtk(stateLike, attacker);
+
+  // B案：共通最終ダメ（hibiki aura / dmgReduction / aegis line / rockel無視 などを damage.ts 側で処理）
+  const finalDmg = computeFinalDamage(stateLike as any, attacker, target, raw);
+
+  // ターゲットにダメージ（イミュータブル更新）
+  let next = damageOne(instances, targetId, finalDmg);
+
+  // Player 反射（被弾したら1ダメ返す）※finalDmg>0 のときだけ
+  if (target.unitId === "PLAYER" && finalDmg > 0) {
+    next = damageOne(next, attacker.instanceId, 1);
+  }
+
+  return next;
+}
+
+export function buildNormalAttackInstances({
+  rows,
+  cols,
+  unitsById,
+  instances,
+  selectedInstanceId,
+  attacker,
+  targetId,
+}: StateLike & {
+  attacker: any;
+  targetId: string;
+}) {
+  return applyNormalAttack(
+    { rows, cols, unitsById, instances, selectedInstanceId },
+    attacker,
+    targetId
+  );
+}
+
+// --- danger / UI 用：攻撃可能マスのマーキング ---
+export function getAttackMarks(stateLike: StateLike, attacker: any): Set<string> {
+  const marks = new Set<string>();
+  const spec = stateLike.unitsById?.[attacker.unitId]?.attacks?.normalAttack ?? null;
+
+  // rangedLine の場合：8方向直線上（射程内）をマーク
+  if (spec?.type === "rangedLine") {
+    const range = spec.range ?? 3;
+    const blocked = spec.lineOfSightBlockedByUnits ?? true;
+
+    const dirs = [
+      { dr: -1, dc: 0 },
+      { dr: 1, dc: 0 },
+      { dr: 0, dc: -1 },
+      { dr: 0, dc: 1 },
+      { dr: -1, dc: -1 },
+      { dr: -1, dc: 1 },
+      { dr: 1, dc: -1 },
+      { dr: 1, dc: 1 },
+    ];
+
+    for (const d of dirs) {
+      for (let step = 1; step <= range; step++) {
+        const r = attacker.pos.r + d.dr * step;
+        const c = attacker.pos.c + d.dc * step;
+        if (r < 0 || r >= stateLike.rows || c < 0 || c >= stateLike.cols) break;
+
+        if (blocked) {
+          const from = attacker.pos;
+          const to = { r, c };
+          const ok = isLineOfSightClear(stateLike.instances, from, to);
+          if (!ok) break;
+        }
+
+        marks.add(`${r},${c}`);
       }
+    }
+    return marks;
+  }
 
-      if (t.side !== attacker.side) marks.push({ r, c, kind: "target" });
-      else marks.push({ r, c, kind: "blocker" });
-
-      if (blockByUnits) break;
+  // default melee（隣接：チェビ1）
+  for (let r = attacker.pos.r - 1; r <= attacker.pos.r + 1; r++) {
+    for (let c = attacker.pos.c - 1; c <= attacker.pos.c + 1; c++) {
+      if (r < 0 || r >= stateLike.rows || c < 0 || c >= stateLike.cols) continue;
+      if (r === attacker.pos.r && c === attacker.pos.c) continue;
+      marks.add(`${r},${c}`);
     }
   }
-
   return marks;
-}
-
-export function getAttackableTargets(state: GameState, attacker: UnitInstance): UnitInstance[] {
-  const marks = getAttackMarks(state, attacker);
-  const occ = buildOcc(state.instances);
-  const targets: UnitInstance[] = [];
-  for (const m of marks) {
-    if (m.kind !== "target") continue;
-    const t = occ.get(key(m.r, m.c));
-    if (t) targets.push(t);
-  }
-  return targets;
-}
-
-export function applyNormalAttack(state: GameState, attacker: UnitInstance, targetId: string) {
-  const atk = state.unitsById[attacker.unitId].base.atk;
-  const next = state.instances.map((u) => (u.instanceId === targetId ? { ...u, hp: u.hp - atk } : u));
-  return next.filter((u) => u.hp > 0);
 }

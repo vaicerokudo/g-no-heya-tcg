@@ -1,0 +1,187 @@
+import type { Dispatch, SetStateAction } from "react";
+import type { Skin } from "../assets/imagePaths";
+import type { Side, UnitDef } from "../game/types";
+
+type Phase = "setup_draw" | "setup_deploy" | "battle";
+
+type SouthDeckProps = {
+  deckSouth: string[];
+  skin: Skin;
+  getDeckBackPath: (skin: Skin) => string;
+};
+
+type SouthHandProps = {
+  phase: Phase;
+  handSouth: string[];
+  selectedHandKey: string | null;
+  setSelectedHandKey: Dispatch<SetStateAction<string | null>>;
+  selectedHandUnitId: string | null;
+  deployPlaced: number;
+  battleDeployUsed: boolean;
+  unitsById: Record<string, UnitDef>;
+  skin: Skin;
+  getHandCardSrc: (unitId: string, side: Side, skin: Skin) => string;
+  getHandFallbackSrc: (unitId: string, side: Side, skin: Skin) => string;
+};
+
+export function SouthDeck({ deckSouth, skin, getDeckBackPath }: SouthDeckProps) {
+  return (
+    <div style={{ width: 180, flex: "0 0 auto" }}>
+      <div style={{ padding: 10, border: "1px solid #444", borderRadius: 12 }}>
+        <div style={{ fontWeight: 900, marginBottom: 6 }}>山札（South）</div>
+
+        <button
+          disabled
+          style={{
+            width: "100%",
+            aspectRatio: "63 / 88",
+            borderRadius: 12,
+            border: "1px solid #6a5a00",
+            background: "rgba(0,0,0,0.35)",
+            padding: 6,
+            cursor: "default",
+          }}
+          title="蛻晏屓縺ｯ閾ｪ蜍輔〒5譫壹ラ繝ｭ繝ｼ貂医∩"
+        >
+          <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", position: "relative" }}>
+            <img
+              src={getDeckBackPath(skin)}
+              alt="deck back"
+              style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+            />
+
+            <div
+              style={{
+                position: "absolute",
+                right: 8,
+                bottom: 8,
+                padding: "4px 8px",
+                borderRadius: 999,
+                background: "rgba(0,0,0,0.55)",
+                border: "1px solid rgba(255,215,0,0.6)",
+                color: "#fff",
+                fontWeight: 900,
+                fontSize: 12,
+                lineHeight: 1,
+              }}
+            >
+              {deckSouth.length}
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function SouthHand({
+  phase,
+  handSouth,
+  selectedHandKey,
+  setSelectedHandKey,
+  selectedHandUnitId,
+  deployPlaced,
+  battleDeployUsed,
+  unitsById,
+  skin,
+  getHandCardSrc,
+  getHandFallbackSrc,
+}: SouthHandProps) {
+  return (
+    <div style={{ width: 260, flex: "0 0 auto" }}>
+      <div style={{ padding: 10, border: "1px solid #444", borderRadius: 12 }}>
+        <div style={{ fontWeight: 900, marginBottom: 6 }}>手札（South） {handSouth.length}枚</div>
+
+        {phase === "setup_deploy" ? (
+          <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 8 }}>出撃：{deployPlaced}/3（最下段クリックで配置）</div>
+        ) : (
+          <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 8 }}>
+            増援：{battleDeployUsed ? "済（このターンは終了）" : "未"}（手札を選んで下段をクリック / 1ターン1回）
+          </div>
+        )}
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            maxHeight: "calc(100vh - 220px)",
+            overflowY: "auto",
+            paddingRight: 6,
+          }}
+        >
+          {handSouth.map((uid, i) => {
+            const key = `${uid}-${i}`;
+            const isSelected = selectedHandKey === key;
+            const name = unitsById[uid]?.name ?? uid;
+            const src = getHandCardSrc(uid, "south", skin);
+
+            return (
+              <button
+                key={key}
+                onClick={() => setSelectedHandKey(key)}
+                style={{
+                  textAlign: "left",
+                  padding: 8,
+                  borderRadius: 12,
+                  border: isSelected ? "2px solid gold" : "1px solid #444",
+                  background: "rgba(0,0,0,0.20)",
+                  color: "#fff",
+                  fontWeight: 900,
+                  cursor: "pointer",
+                }}
+              >
+                <div
+                  style={{
+                    width: "100%",
+                    maxWidth: 180,
+                    margin: "0 auto",
+                    aspectRatio: "63 / 88",
+                    borderRadius: 10,
+                    overflow: "hidden",
+                    position: "relative",
+                    border: "1px solid rgba(255,215,0,0.35)",
+                    background: "rgba(0,0,0,0.25)",
+                  }}
+                >
+                  <img
+                    src={src}
+                    alt={name}
+                    loading="lazy"
+                    decoding="async"
+                    style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+                    onError={(e) => {
+                      e.currentTarget.src = getHandFallbackSrc(uid, "south", skin);
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 8,
+                      right: 8,
+                      bottom: 8,
+                      padding: "5px 8px",
+                      borderRadius: 10,
+                      background: "rgba(0,0,0,0.55)",
+                      border: "1px solid rgba(255,215,0,0.35)",
+                      fontSize: 12,
+                      lineHeight: 1.2,
+                      textShadow: "0 1px 0 rgba(0,0,0,0.6)",
+                    }}
+                  >
+                    {name}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {!selectedHandUnitId && (
+          <div style={{ marginTop: 10, fontSize: 12, opacity: 0.75 }}>縺ｾ縺壽焔譛ｭ縺九ｉ1譫夐∈繧薙〒縺ｭ</div>
+        )}
+      </div>
+    </div>
+  );
+}

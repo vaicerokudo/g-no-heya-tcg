@@ -2,9 +2,6 @@
 import type { Side } from "../types";
 import { getAttackMarks } from "../attack";
 
-function posKey(r: number, c: number) {
-  return `${r},${c}`;
-}
 
 /**
  * 「opts.side が次に動く側」として、
@@ -36,11 +33,9 @@ export function buildDangerCells(opts: {
 
     const marks = getAttackMarks(stateLike as any, enemy as any);
 
-    for (const m of marks as any[]) {
-      // UIで “range/blocker” を使ってる前提
-      if (m.kind === "range") {
-        danger.add(posKey(m.r, m.c));
-      }
+    // marks は Set<string>（"r,c"）を想定
+    for (const key of marks) {
+      danger.add(key);
     }
   }
 

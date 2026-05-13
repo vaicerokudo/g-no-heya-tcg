@@ -2,13 +2,18 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useLongPress } from "../../hooks/useLongPress";
-import { useImgFallback } from "../imgFallback";
+import { UnitSprite } from "../UnitSprite";
 
 
 
 type CellProps = {
   cellSize: number;
 dmgFx?: { id: string; amount: number } | null;
+skillEventId?: string | null;
+attackMotion?: { id: string; dr: number; dc: number } | null;
+moveEventId?: string | null;
+impactFx?: { id: string; targetId: string } | null;
+skillImpactFx?: { id: string; skillId: string; variant: string; casterId: string; targetId: string } | null;
 
  getPortrait: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
 maxHp?: number;
@@ -30,6 +35,7 @@ getPortraitCandidates?: (
 
   showRng: boolean;
   isAttackBlocker: boolean;
+  isSelected: boolean;
 
   isDebugTarget: boolean;
 
@@ -46,6 +52,11 @@ export function Cell(props: CellProps) {
 const {
   cellSize,
   dmgFx,
+  skillEventId,
+  attackMotion,
+  moveEventId,
+  impactFx,
+  skillImpactFx,
   maxHp,
   label,
   inst,
@@ -53,6 +64,7 @@ const {
   cursor,
   showRng,
   isAttackBlocker,
+  isSelected,
   isDebugTarget,
   getPortrait,
   getPortraitCandidates,
@@ -70,9 +82,6 @@ const cands = inst
       ? getPortraitCandidates(inst.unitId, inst.side, form)
       : [getPortrait(inst.unitId, inst.side, form)])
   : [];
-
-const fb = useImgFallback(cands, { placeholder: "" });
-
 
 const [hpFlash, setHpFlash] = useState(false);
 const prevHpRef = useRef<number | null>(null);
@@ -381,24 +390,35 @@ zIndex: 5,
 
       {/* ★ユニット画像 */}
  {inst && (
-  <img
-    src={fb.src}
-    onError={fb.onError}
-    alt={inst.unitId}
-    draggable={false}
-    style={{
-      position: "absolute",
-      inset: 0,
-      width: "calc(100% - 4px)",
-      height: "calc(100% - 4px)",
-      borderRadius: 10,
-      objectFit: "contain",
-      pointerEvents: "none",
-      zIndex: 3,
-      opacity: 0.98,
-      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.55))",
-    }}
+  <UnitSprite
+    candidates={cands}
+    unitId={inst.unitId}
+    instanceId={inst.instanceId}
+    isSelected={isSelected}
+    damageEventId={dmgFx?.id ?? null}
+    skillEventId={skillEventId ?? null}
+    attackMotion={attackMotion ?? null}
+    moveEventId={moveEventId ?? null}
+    isBurning={!!inst?.burn && inst.burn > 0}
+    isStunned={!!inst?.stun && inst.stun > 0}
   />
+)}
+
+{impactFx && (
+  <div key={impactFx.id} className="impactFxBurst">
+    <div className="impactFxBurstCore" />
+    <div className="impactFxBurstRing" />
+  </div>
+)}
+
+{skillImpactFx && (
+  <div
+    key={skillImpactFx.id}
+    className={`skillImpactFxBurst skillImpactFxBurst--${skillImpactFx.variant}`}
+  >
+    <div className="skillImpactFxBurstCore" />
+    <div className="skillImpactFxBurstRing" />
+  </div>
 )}
 
 

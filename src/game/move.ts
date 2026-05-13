@@ -1,5 +1,6 @@
 import type { GameState, Pos, UnitInstance } from "./state";
 import type { Side } from "./types";
+import { getEffectiveMaxHp } from "./stats";
 
 function inBounds(r: number, c: number, rows: number, cols: number) {
   return r >= 0 && r < rows && c >= 0 && c < cols;
@@ -26,7 +27,7 @@ if (inst.stun && inst.stun > 0) return [];
   
 
   const def = state.unitsById[inst.unitId];
-  const mp: any = def.base.movePattern;
+  const mp = def.base.movePattern;
   const occ = buildOccupancy(state.instances);
 
   const addIf = (r: number, c: number, out: Pos[]) => {
@@ -61,7 +62,7 @@ if (inst.stun && inst.stun > 0) return [];
   }
 
   if (mp.type === "custom") {
-    for (const m of mp.movesRelative as Array<{ dx: number; dy: number }>) {
+    for (const m of mp.movesRelative) {
       // JSONは dx/dy で、dyは「前=-」前提の相対系なのでsideで反転
       const dr = applyFacing(m.dy, inst.side);
       const dc = m.dx;
@@ -71,7 +72,7 @@ if (inst.stun && inst.stun > 0) return [];
   }
 
   if (mp.type === "teleportFixed") {
-    for (const m of mp.destinationsRelative as Array<{ dx: number; dy: number }>) {
+    for (const m of mp.destinationsRelative) {
       const dr = applyFacing(m.dy, inst.side);
       const dc = m.dx;
       addIf(inst.pos.r + dr, inst.pos.c + dc, out);
@@ -80,4 +81,39 @@ if (inst.stun && inst.stun > 0) return [];
   }
 
   return out;
+}
+
+export function buildMoveInstances({
+  instances,
+  selectedInstanceId,
+  r,
+  c,
+  unitsById,
+}: {
+  instances: UnitInstance[];
+  selectedInstanceId: string;
+  r: number;
+  c: number;
+  unitsById: GameState["unitsById"];
+}) {
+  let next = instances.map((u) =>
+    u.instanceId === selectedInstanceId ? { ...u, pos: { r, c } } : u
+  );
+
+  if (r === 3) {
+    next = next.map((u) => {
+      if (u.instanceId !== selectedInstanceId) return u;
+
+      const form = u.form ?? "base";
+      if (form === "g") return u;
+
+      const def = unitsById[u.unitId];
+      const newMaxHp = getEffectiveMaxHp(def.base.hp, "g");
+      const newHp = Math.min(u.hp + 1, newMaxHp);
+
+      return { ...u, form: "g", hp: newHp };
+    });
+  }
+
+  return next;
 }
