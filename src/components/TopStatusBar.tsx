@@ -1,9 +1,11 @@
-import type { Side } from "../game/types";
 import type { Skin } from "../assets/imagePaths";
+import type { Side } from "../game/types";
 
 type TopStatusBarProps = {
-  skin: Skin;
-  onSkinChange: (skin: Skin) => void;
+  southSkin: Skin;
+  northSkin: Skin;
+  onSouthSkinChange: (skin: Skin) => void;
+  onNorthSkinChange: (skin: Skin) => void;
   turn: Side;
   cpuEnabled: boolean;
   onToggleCpu: () => void;
@@ -14,9 +16,47 @@ type TopStatusBarProps = {
   handNorthCount: number;
 };
 
+const SKIN_OPTIONS: Skin[] = ["default", "dark", "travel"];
+
+function SkinSelect({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: Skin;
+  onChange: (skin: Skin) => void;
+}) {
+  return (
+    <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 12, opacity: 0.9 }}>
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as Skin)}
+        style={{
+          padding: "6px 8px",
+          background: "#111",
+          color: "#fff",
+          border: "1px solid #444",
+          borderRadius: 8,
+          fontWeight: 800,
+        }}
+      >
+        {SKIN_OPTIONS.map((skin) => (
+          <option key={skin} value={skin}>
+            {skin}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 export function TopStatusBar({
-  skin,
-  onSkinChange,
+  southSkin,
+  northSkin,
+  onSouthSkinChange,
+  onNorthSkinChange,
   turn,
   cpuEnabled,
   onToggleCpu,
@@ -30,27 +70,11 @@ export function TopStatusBar({
     <>
       <h2>Gの部屋 TCG</h2>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
-        <div style={{ fontSize: 12, opacity: 0.85 }}>スキン:</div>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
+        <SkinSelect label="味方スキン:" value={southSkin} onChange={onSouthSkinChange} />
+        <SkinSelect label="CPUスキン:" value={northSkin} onChange={onNorthSkinChange} />
 
-        <select
-          value={skin}
-          onChange={(e) => onSkinChange(e.target.value as Skin)}
-          style={{
-            padding: "6px 8px",
-            background: "#111",
-            color: "#fff",
-            border: "1px solid #444",
-            borderRadius: 8,
-            fontWeight: 800,
-          }}
-        >
-          <option value="default">default</option>
-          <option value="dark">dark</option>
-          <option value="travel">travel</option>
-        </select>
-
-        <div style={{ fontSize: 12, opacity: 0.7 }}>未作成の画像は default にフォールバック推奨</div>
+        <div style={{ fontSize: 12, opacity: 0.7 }}>未作成の画像は default にフォールバック</div>
       </div>
 
       <div

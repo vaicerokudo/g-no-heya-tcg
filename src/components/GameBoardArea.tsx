@@ -18,7 +18,7 @@ type GameBoardAreaProps = BoardComponentProps & {
   deployPlaced: number;
   battleDeployUsed: boolean;
   unitsById: Record<string, UnitDef>;
-  skin: Skin;
+  southSkin: Skin;
   getDeckBackPath: (skin: Skin) => string;
   getHandCardSrc: (unitId: string, side: Side, skin: Skin) => string;
   getHandFallbackSrc: (unitId: string, side: Side, skin: Skin) => string;
@@ -35,7 +35,7 @@ export function GameBoardArea({
   deployPlaced,
   battleDeployUsed,
   unitsById,
-  skin,
+  southSkin,
   getDeckBackPath,
   getHandCardSrc,
   getHandFallbackSrc,
@@ -54,7 +54,7 @@ export function GameBoardArea({
         paddingBottom: bottomBarH + 12,
       }}
     >
-      {showSouthHandDeck && <SouthDeck deckSouth={deckSouth} skin={skin} getDeckBackPath={getDeckBackPath} />}
+      {showSouthHandDeck && <SouthDeck deckSouth={deckSouth} skin={southSkin} getDeckBackPath={getDeckBackPath} />}
 
       <div style={{ flex: "0 0 auto" }}>
         <Board {...boardProps} unitsById={unitsById} />
@@ -70,7 +70,7 @@ export function GameBoardArea({
           deployPlaced={deployPlaced}
           battleDeployUsed={battleDeployUsed}
           unitsById={unitsById}
-          skin={skin}
+          skin={southSkin}
           getHandCardSrc={getHandCardSrc}
           getHandFallbackSrc={getHandFallbackSrc}
         />

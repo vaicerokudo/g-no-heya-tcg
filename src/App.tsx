@@ -120,7 +120,8 @@ export default function App() {
   const [victory, setVictory] = useState<null | { winner: Side; detail: string }>(null);
   const gameOver = victory !== null;
 
-  const [skin, setSkin] = useState<Skin>("default");
+  const [southSkin, setSouthSkin] = useState<Skin>("default");
+  const [northSkin, setNorthSkin] = useState<Skin>("default");
 
   const [popupId, setPopupId] = useState<string | null>(null);
   const popupOpen = popupId !== null;
@@ -1019,8 +1020,16 @@ const reinforceSet = useMemo(() => {
     return m;
   }, [skillImpactFxEvents]);
 
-  function handleSkinChange(nextSkin: Skin) {
-    setSkin(nextSkin);
+  function getSkinForSide(side: Side) {
+    return side === "south" ? southSkin : northSkin;
+  }
+
+  function handleSouthSkinChange(nextSkin: Skin) {
+    setSouthSkin(nextSkin);
+  }
+
+  function handleNorthSkinChange(nextSkin: Skin) {
+    setNorthSkin(nextSkin);
   }
 
   function toggleCpuEnabled() {
@@ -1038,7 +1047,7 @@ const reinforceSet = useMemo(() => {
         usedSkills={usedSkills}
         onClose={() => setPopupId(null)}
         getCardCandidates={(unitId: string, side: "south" | "north", form?: "base" | "g") =>
-          cardCandidates(unitId, side, form ?? "base", skin)
+          cardCandidates(unitId, side, form ?? "base", getSkinForSide(side))
         }
       />
 
@@ -1063,8 +1072,10 @@ const reinforceSet = useMemo(() => {
       />
 
       <TopStatusBar
-        skin={skin}
-        onSkinChange={handleSkinChange}
+        southSkin={southSkin}
+        northSkin={northSkin}
+        onSouthSkinChange={handleSouthSkinChange}
+        onNorthSkinChange={handleNorthSkinChange}
         turn={turn}
         cpuEnabled={cpuEnabled}
         onToggleCpu={toggleCpuEnabled}
@@ -1088,7 +1099,7 @@ const reinforceSet = useMemo(() => {
         deployPlaced={deployPlaced}
         battleDeployUsed={battleDeployUsed}
         unitsById={unitsById}
-        skin={skin}
+        southSkin={southSkin}
         getDeckBackPath={getDeckBackPath}
         getHandCardSrc={getHandCardSrc}
         getHandFallbackSrc={getHandFallbackSrc}
@@ -1109,8 +1120,10 @@ const reinforceSet = useMemo(() => {
         skillTargetSet={skillTargetSet}
         debugTargetId={null}
         onShiftEnemyPick={() => {}}
-        getPortrait={(unitId, side, form) => getPortraitPath(unitId, side, form ?? "base", skin)}
-        getPortraitCandidates={(unitId, side, form) => portraitCandidates(unitId, side, form ?? "base", skin)}
+        getPortrait={(unitId, side, form) => getPortraitPath(unitId, side, form ?? "base", getSkinForSide(side))}
+        getPortraitCandidates={(unitId, side, form) =>
+          portraitCandidates(unitId, side, form ?? "base", getSkinForSide(side))
+        }
         posKey={posKey}
         canSelect={canSelect}
         onLongPressUnit={handleBoardLongPressUnit}
