@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useLongPress } from "../../hooks/useLongPress";
+import { buildStatusIcons } from "../../game/ui/statusIcons";
 import { UnitSprite } from "../UnitSprite";
 
 
@@ -134,6 +135,7 @@ const denom = (maxHp ?? inst?.hp ?? 1);
 const pct = inst ? Math.max(0, Math.min(1, (inst.hp ?? 0) / denom)) * 100 : 0;
 const ringSize = Math.round(cellSize * 1.40);
 const burstSize = Math.round(cellSize * 1.65);
+const statusIcons = buildStatusIcons(inst);
 
 
 type Form = "base" | "g";
@@ -293,6 +295,47 @@ zIndex: 5,
               background: "rgba(255,215,0,0.85)",
             }}
           />
+        </div>
+      )}
+
+      {inst && statusIcons.length > 0 && (
+        <div
+          style={{
+            position: "absolute",
+            top: 12,
+            left: 4,
+            right: 24,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 2,
+            alignItems: "flex-start",
+            pointerEvents: "none",
+            zIndex: 5,
+          }}
+        >
+          {statusIcons.map((icon) => (
+            <span
+              key={icon.key}
+              title={icon.title}
+              style={{
+                maxWidth: "100%",
+                padding: "1px 4px",
+                borderRadius: 999,
+                border: "1px solid rgba(255,255,255,0.24)",
+                background: "rgba(0,0,0,0.58)",
+                color: "rgba(255,255,255,0.92)",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
+                fontSize: 8,
+                fontWeight: 950,
+                lineHeight: 1.15,
+                letterSpacing: 0,
+                textShadow: "0 1px 2px rgba(0,0,0,0.65)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {icon.label}
+            </span>
+          ))}
         </div>
       )}
 
