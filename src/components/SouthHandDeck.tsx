@@ -41,7 +41,7 @@ export function SouthDeck({ deckSouth, skin, getDeckBackPath }: SouthDeckProps) 
             padding: 6,
             cursor: "default",
           }}
-          title="蛻晏屓縺ｯ閾ｪ蜍輔〒5譫壹ラ繝ｭ繝ｼ貂医∩"
+          title="初回は自動で5枚ドロー済み"
         >
           <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", position: "relative" }}>
             <img
@@ -90,10 +90,12 @@ export function SouthHand({
   return (
     <div style={{ width: 260, flex: "0 0 auto" }}>
       <div style={{ padding: 10, border: "1px solid #444", borderRadius: 12 }}>
-        <div style={{ fontWeight: 900, marginBottom: 6 }}>手札（South） {handSouth.length}枚</div>
+        <div style={{ fontWeight: 900, marginBottom: 6 }}>手札（South）{handSouth.length}枚</div>
 
         {phase === "setup_deploy" ? (
-          <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 8 }}>出撃：{deployPlaced}/3（最下段クリックで配置）</div>
+          <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 8 }}>
+            出撃：{deployPlaced}/3（下段クリックで配置）
+          </div>
         ) : (
           <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 8 }}>
             増援：{battleDeployUsed ? "済（このターンは終了）" : "未"}（手札を選んで下段をクリック / 1ターン1回）
@@ -179,7 +181,7 @@ export function SouthHand({
         </div>
 
         {!selectedHandUnitId && (
-          <div style={{ marginTop: 10, fontSize: 12, opacity: 0.75 }}>縺ｾ縺壽焔譛ｭ縺九ｉ1譫夐∈繧薙〒縺ｭ</div>
+          <div style={{ marginTop: 10, fontSize: 12, opacity: 0.75 }}>まず手札からカードを1枚選んでください</div>
         )}
       </div>
     </div>
