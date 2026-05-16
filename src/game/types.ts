@@ -14,7 +14,9 @@ export type UnitInstance = {
   form: Form;      // ★ここが必須
   stun?: number;
   burn?: number;
+  dmgReduction?: number;
   hibikiShieldAllActive?: boolean;
+  aegisLineActive?: boolean;
   dmgBonus?: number;
 };
 

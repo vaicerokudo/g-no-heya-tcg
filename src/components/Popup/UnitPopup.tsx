@@ -64,7 +64,39 @@ function getStatusBadges(unit: any): { key: string; label: string; title?: strin
   const dr = Number(unit?.dmgReduction ?? 0);
   if (dr > 0) badges.push({ key: "dr", label: `軽減:-${dr}`, title: "被ダメージ軽減" });
 
+  const dmgBonus = Number(unit?.dmgBonus ?? 0);
+  if (dmgBonus > 0)
+    badges.push({ key: "dmgBonus", label: `ATK+${dmgBonus}`, title: "通常攻撃ダメージ上昇" });
+
+  if (unit?.hibikiShieldAllActive)
+    badges.push({ key: "hibikiShieldAll", label: "守護", title: "距離2以内の味方を守る" });
+
+  if (unit?.aegisLineActive)
+    badges.push({ key: "aegisLine", label: "守護結界", title: "味方への被ダメージを軽減" });
+
   return badges;
+}
+
+function buildStatusRows(unit: any): string[] {
+  const rows: string[] = [];
+
+  const stun = Number(unit?.stun ?? 0);
+  if (stun > 0) rows.push(`スタン中：あと${stun}ターン`);
+
+  const burn = Number(unit?.burn ?? 0);
+  if (burn > 0) rows.push(`炎上中：あと${burn}ターン`);
+
+  const dmgBonus = Number(unit?.dmgBonus ?? 0);
+  if (dmgBonus > 0) rows.push(`通常攻撃 +${dmgBonus}`);
+
+  const dmgReduction = Number(unit?.dmgReduction ?? 0);
+  if (dmgReduction > 0) rows.push(`被ダメージ -${dmgReduction}`);
+
+  if (unit?.hibikiShieldAllActive) rows.push("守護中：距離2以内の味方を守る");
+
+  if (unit?.aegisLineActive) rows.push("守護結界：味方への被ダメージを軽減");
+
+  return rows;
 }
 
 type Props = {
@@ -117,6 +149,7 @@ export function UnitPopup({
   const atk = getEffectiveAtk(def.base.atk, form);
 
   const statusBadges = getStatusBadges(unit);
+  const statusRows = buildStatusRows(unit);
 
   return (
     <div
@@ -341,13 +374,35 @@ export function UnitPopup({
                 </div>
               </div>
 
-              {/* ★状態の説明行（数値がある時だけ） */}
-              {statusBadges.length > 0 ? (
-                <div style={{ marginTop: 10, fontSize: 12, opacity: 0.86, lineHeight: 1.35 }}>
-                  {Number(unit?.stun ?? 0) > 0 ? "スタン中：このターン行動不可。 " : ""}
-                  {Number(unit?.burn ?? 0) > 0 ? "毒：ターン終了時に1ダメージ（残りターン数表示）。" : ""}
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: "10px 10px",
+                  borderRadius: 14,
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  background: "rgba(0,0,0,0.18)",
+                }}
+              >
+                <div style={{ fontSize: 12, opacity: 0.78, fontWeight: 950 }}>現在の状態</div>
+                <div
+                  style={{
+                    marginTop: 8,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 5,
+                    fontSize: 12,
+                    lineHeight: 1.35,
+                    opacity: 0.9,
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  {statusRows.length > 0 ? (
+                    statusRows.map((row) => <div key={row}>{row}</div>)
+                  ) : (
+                    <div>なし</div>
+                  )}
                 </div>
-              ) : null}
+              </div>
             </div>
 
             <div style={{ marginTop: 14 }}>
