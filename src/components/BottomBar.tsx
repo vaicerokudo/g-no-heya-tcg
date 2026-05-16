@@ -44,6 +44,27 @@ export function BottomBar({
 }: BottomBarProps) {
   const waitDisabled = !selected || !!gameOver || selected.side !== turn || (perUnitTurn[selected.instanceId]?.done ?? false);
   const endTurnDisabled = gameOver || !!skillMode;
+  const disabledSkillReasons = selected
+    ? Array.from(
+        new Set(
+          selectedSkills
+            .map((skill) => {
+              const key = skillKey(turn, selected.instanceId, skill.id);
+              const { canUse, btnTitle } = getSkillButtonState({
+                skill,
+                selected,
+                turn,
+                gameOver,
+                perUnitTurn,
+                usedSkills,
+                key,
+              });
+              return !canUse && btnTitle ? btnTitle : "";
+            })
+            .filter(Boolean)
+        )
+      )
+    : [];
 
   return (
     <div
@@ -102,6 +123,19 @@ export function BottomBar({
               })
             : null}
         </div>
+
+        {disabledSkillReasons.length > 0 && (
+          <div
+            style={{
+              fontSize: 12,
+              lineHeight: 1.35,
+              opacity: 0.86,
+              overflowWrap: "anywhere",
+            }}
+          >
+            使用不可：{disabledSkillReasons.join(" / ")}
+          </div>
+        )}
 
         <div style={{ display: "flex", gap: 8 }}>
           <button

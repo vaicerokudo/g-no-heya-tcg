@@ -26,16 +26,30 @@ export function getSkillButtonState({
   const used = isSkillUsed(usedSkills, key);
   const formOk = !skill.requiresForm || selected.form === skill.requiresForm;
   const me = perUnitTurn[selected.instanceId];
+  const done = me?.done ?? false;
   const canUse =
     !gameOver &&
     selected.side === turn &&
-    !(me?.done ?? false) &&
+    !done &&
     formOk &&
     canUseSkillByUsage(skill, usedSkills, key);
+  const btnTitle = gameOver
+    ? "ゲーム終了済み"
+    : selected.side !== turn
+      ? "自分のターンではありません"
+      : done
+        ? "このユニットは行動済み"
+        : !formOk
+          ? skill.requiresForm === "g"
+            ? "進化(G)が必要"
+            : "この形態では使用できません"
+          : used
+            ? "この試合で使用済み"
+            : "";
 
   return {
     canUse,
-    btnTitle: !formOk ? "進化(G)が必要" : used ? "この試合で使用済み" : "",
+    btnTitle,
     onceLabel: skill.oncePerMatch ? "（1回）" : "",
     used,
     formOk,
