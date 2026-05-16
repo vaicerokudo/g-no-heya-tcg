@@ -362,6 +362,7 @@ export function UnitPopup({
                   const used = !!usedSkills[usedKey];
 
                   const desc = autoDesc(full);
+                  const naturalDesc = typeof full.desc === "string" ? full.desc.trim() : "";
 
                   return (
                     <div
@@ -434,6 +435,12 @@ export function UnitPopup({
                           </span>
                         ) : null}
                       </div>
+
+                      {naturalDesc ? (
+                        <div style={{ marginTop: 8, fontSize: 13, opacity: 0.92, lineHeight: 1.45 }}>
+                          {naturalDesc}
+                        </div>
+                      ) : null}
 
                       {/* ★ autoDesc 表示（modeは日本語化される） */}
                       {desc ? (

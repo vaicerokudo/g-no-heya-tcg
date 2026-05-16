@@ -22,6 +22,11 @@ type BottomBarProps = {
   onEndTurn: () => void;
 };
 
+function buildSkillButtonDescription(skill: SkillDef, disabledReason: string) {
+  const skillDescription = `${skill.label}${skill.desc ? `：${skill.desc}` : ""}`;
+  return disabledReason ? `${disabledReason}。${skillDescription}` : skillDescription;
+}
+
 export function BottomBar({
   bottomBarRef,
   selected,
@@ -71,12 +76,14 @@ export function BottomBar({
                   usedSkills,
                   key,
                 });
+                const buttonDescription = buildSkillButtonDescription(skill, btnTitle);
 
                 return (
                   <button
                     key={skill.id}
                     disabled={!canUse}
-                    title={btnTitle}
+                    title={buttonDescription}
+                    aria-label={buttonDescription}
                     onClick={() => onSkillButtonClick(skill)}
                     style={{
                       padding: "8px 10px",
