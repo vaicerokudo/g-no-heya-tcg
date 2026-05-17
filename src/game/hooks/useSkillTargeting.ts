@@ -119,11 +119,14 @@ export function useSkillTargeting({
 
     if (def.targetMode === "chooseFront3Cells") {
       const fr = selected.side === "south" ? -1 : 1;
-      const rr = selected.pos.r + fr;
-      for (const dc of [-1, 0, 1]) {
-        const cc = selected.pos.c + dc;
-        if (rr < 0 || rr >= rows || cc < 0 || cc >= cols) continue;
-        s.add(posKey(rr, cc));
+      const frontRows = def.frontRows ?? 1;
+      for (let row = 1; row <= frontRows; row++) {
+        const rr = selected.pos.r + fr * row;
+        for (const dc of [-1, 0, 1]) {
+          const cc = selected.pos.c + dc;
+          if (rr < 0 || rr >= rows || cc < 0 || cc >= cols) continue;
+          s.add(posKey(rr, cc));
+        }
       }
     }
 

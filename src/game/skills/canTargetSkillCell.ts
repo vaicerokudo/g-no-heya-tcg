@@ -33,10 +33,13 @@ export function canTargetSkillCell({
   switch (def.targetMode) {
     case "chooseFront3Cells": {
       const fr = selected.side === "south" ? -1 : 1;
-      const rr = selected.pos.r + fr;
+      const frontRows = def.frontRows ?? 1;
+      const forwardDistance = (target.r - selected.pos.r) / fr;
 
       return (
-        target.r === rr &&
+        Number.isInteger(forwardDistance) &&
+        forwardDistance >= 1 &&
+        forwardDistance <= frontRows &&
         (target.c === selected.pos.c - 1 || target.c === selected.pos.c || target.c === selected.pos.c + 1)
       );
     }

@@ -158,6 +158,7 @@ export type SkillDef =
   | (Common & {
       targetMode: "chooseFront3Cells";
       damage: number;
+      frontRows?: number;
       execute: (args: ChooseFront3CellsArgs) => any[];
     })
   | (Common & {
@@ -214,6 +215,7 @@ function defineInstant(
 function defineChooseFront3Cells(
   def: DefBase & {
     damage: number;
+    frontRows?: number;
     execute: (args: ChooseFront3CellsArgs) => any[];
   }
 ): SkillDef {
@@ -534,6 +536,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
     requiresForm: "g",
     oncePerMatch: true,
     damage: 2,
+    frontRows: 2,
     burnTicks: 3,
     stunTurns: 1,
     execute: ({ stateLike, casterId, damage, burnTicks, stunTurns }) => {
@@ -542,24 +545,26 @@ export const SKILLS: Record<SkillId, SkillDef> = {
       if (!casterSnap) return inst;
 
       const fr = casterSnap.side === "south" ? -1 : 1;
-      const rr = casterSnap.pos.r + fr;
-
       let next = inst;
 
-      for (const dc of [-1, 0, 1]) {
-        const cc = casterSnap.pos.c + dc;
+      for (const row of [1, 2]) {
+        const rr = casterSnap.pos.r + fr * row;
 
-        const caster = next.find((u: any) => u.instanceId === casterId);
-        const t = next.find((u: any) => u.pos.r === rr && u.pos.c === cc);
-        if (!caster || !t) continue;
-        if (t.side === caster.side) continue;
+        for (const dc of [-1, 0, 1]) {
+          const cc = casterSnap.pos.c + dc;
 
-        const raw = damage ?? 0;
-        const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
+          const caster = next.find((u: any) => u.instanceId === casterId);
+          const t = next.find((u: any) => u.pos.r === rr && u.pos.c === cc);
+          if (!caster || !t) continue;
+          if (t.side === caster.side) continue;
 
-        next = dealDamage(next, t.instanceId, finalDmg);
-        next = addBurn(next, t.instanceId, burnTicks ?? 3);
-        next = addStun(next, t.instanceId, stunTurns ?? 1);
+          const raw = damage ?? 0;
+          const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
+
+          next = dealDamage(next, t.instanceId, finalDmg);
+          next = addBurn(next, t.instanceId, burnTicks ?? 3);
+          next = addStun(next, t.instanceId, stunTurns ?? 1);
+        }
       }
 
       next = removeDead(next);
