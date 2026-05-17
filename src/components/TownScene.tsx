@@ -212,7 +212,8 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
           )}
 
           {activeDialog === "reception" && (
-            <div style={dialogPanelStyle}>
+            <div style={dialogOverlayStyle}>
+              <div style={dialogPanelStyle}>
               <img src={reception7171} alt="7171受付" style={dialogPortraitStyle} />
               <div style={dialogBodyStyle}>
                 <div style={dialogNameStyle}>7171</div>
@@ -235,6 +236,7 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
                 <button onClick={() => setActiveDialog(null)} style={dialogChoiceButtonStyle(false)}>
                   閉じる
                 </button>
+              </div>
               </div>
             </div>
           )}
@@ -420,89 +422,109 @@ const promptStyle: CSSProperties = {
   zIndex: 10,
 };
 
-const dialogPanelStyle: CSSProperties = {
+const dialogOverlayStyle: CSSProperties = {
   position: "absolute",
-  left: "50%",
-  bottom: 14,
-  transform: "translateX(-50%)",
-  width: "min(560px, calc(100% - 28px))",
-  padding: "12px 14px",
-  borderRadius: 14,
-  background: "rgba(27,18,13,0.86)",
-  border: "1px solid rgba(255,216,102,0.58)",
-  boxShadow: "0 16px 32px rgba(0,0,0,0.38)",
-  display: "grid",
-  gridTemplateColumns: "82px minmax(0, 1fr) auto",
-  gap: 10,
+  inset: 0,
+  zIndex: 30,
+  display: "flex",
   alignItems: "center",
-  zIndex: 12,
+  justifyContent: "center",
+  boxSizing: "border-box",
+  padding: 12,
+  background: "rgba(6, 5, 5, 0.62)",
+  backdropFilter: "blur(2px)",
+};
+
+const dialogPanelStyle: CSSProperties = {
+  position: "relative",
+  width: "min(860px, calc(100% - 24px))",
+  maxHeight: "calc(100% - 24px)",
+  overflowY: "auto",
+  boxSizing: "border-box",
+  padding: "22px 24px",
+  borderRadius: 20,
+  background: "linear-gradient(180deg, rgba(38,25,17,0.96), rgba(17,13,12,0.96))",
+  border: "1px solid rgba(255,216,102,0.58)",
+  boxShadow: "0 24px 58px rgba(0,0,0,0.58), inset 0 0 34px rgba(255,198,86,0.08)",
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 18,
+  alignItems: "stretch",
 };
 
 const dialogPortraitStyle: CSSProperties = {
-  width: 82,
-  height: 110,
-  maxWidth: "22vw",
-  maxHeight: "28vh",
+  flex: "0 1 300px",
+  width: "clamp(190px, 34vw, 300px)",
+  height: "clamp(230px, 52vh, 420px)",
+  maxWidth: "100%",
   objectFit: "cover",
   objectPosition: "center 18%",
-  borderRadius: 12,
-  border: "1px solid rgba(255,232,180,0.32)",
-  boxShadow: "0 8px 18px rgba(0,0,0,0.34)",
+  borderRadius: 18,
+  border: "1px solid rgba(255,232,180,0.42)",
+  boxShadow: "0 14px 32px rgba(0,0,0,0.44)",
 };
 
 const dialogBodyStyle: CSSProperties = {
   minWidth: 0,
+  flex: "1 1 300px",
+  padding: "4px 0 0",
 };
 
 const dialogNameStyle: CSSProperties = {
   color: "#ffd66d",
   fontWeight: 950,
+  fontSize: 24,
+  lineHeight: 1.1,
 };
 
 const dialogTopicStyle: CSSProperties = {
-  marginTop: 2,
+  marginTop: 8,
   color: "rgba(255,232,180,0.78)",
-  fontSize: 11,
+  fontSize: 13,
   fontWeight: 900,
 };
 
 const dialogTextStyle: CSSProperties = {
-  marginTop: 4,
+  marginTop: 14,
   color: "#fff6df",
-  fontSize: 13,
-  lineHeight: 1.5,
+  fontSize: 17,
+  lineHeight: 1.75,
 };
 
 const dialogCloseButtonStyle: CSSProperties = {
-  minHeight: 34,
-  padding: "0 12px",
-  borderRadius: 10,
+  position: "absolute",
+  right: 14,
+  top: 14,
+  minHeight: 38,
+  padding: "0 14px",
+  borderRadius: 12,
   border: "1px solid rgba(255,232,180,0.28)",
-  background: "rgba(255,241,204,0.12)",
+  background: "rgba(255,241,204,0.14)",
   color: "#fff1cc",
   fontWeight: 900,
   touchAction: "manipulation",
 };
 
 const dialogChoicesStyle: CSSProperties = {
-  gridColumn: "1 / -1",
+  flex: "1 0 100%",
   display: "flex",
   flexWrap: "wrap",
   gap: 8,
+  marginTop: 4,
 };
 
 function dialogChoiceButtonStyle(active: boolean): CSSProperties {
   return {
-    minHeight: 34,
-    padding: "0 12px",
-    borderRadius: 10,
+    minHeight: 42,
+    padding: "0 14px",
+    borderRadius: 12,
     border: active
       ? "1px solid rgba(255,216,102,0.9)"
       : "1px solid rgba(255,232,180,0.24)",
     background: active ? "rgba(255,216,102,0.24)" : "rgba(255,241,204,0.1)",
     color: "#fff1cc",
     boxShadow: active ? "0 0 14px rgba(255,204,90,0.18)" : "none",
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: 900,
     touchAction: "manipulation",
   };
