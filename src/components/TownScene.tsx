@@ -9,8 +9,8 @@ type TownSceneProps = {
 
 type Pos = { x: number; y: number };
 type InteractionArea = { x: number; y: number; w: number; h: number };
-type InteractionTarget = "table" | "reception" | null;
-type TownDialog = "reception" | null;
+type InteractionTarget = "table" | "reception" | "collection" | null;
+type TownDialog = "reception" | "collection" | null;
 type ReceptionTopic = "home" | "first" | "table" | "skin";
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
@@ -18,8 +18,9 @@ type SpriteState = "idle" | "running-left" | "running-right";
 const PLAYER_WIDTH = 68;
 const PLAYER_HEIGHT = 74;
 const STEP = 18;
-const TABLE = { x: 66, y: 32, w: 21, h: 20 };
+const TABLE = { x: 74, y: 60, w: 20, h: 20 };
 const RECEPTION = { x: 48, y: 58, w: 30, h: 14 };
+const COLLECTION = { x: 11, y: 35, w: 21, h: 27 };
 const INTERACTION_THRESHOLD = 4;
 const SPRITE_CELL_WIDTH = 192;
 const SPRITE_CELL_HEIGHT = 208;
@@ -72,16 +73,21 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
   const moveStopTimerRef = useRef<number | null>(null);
   const nearTable = useMemo(() => isNearArea(pos, TABLE), [pos]);
   const nearReception = useMemo(() => isNearArea(pos, RECEPTION), [pos]);
+  const nearCollection = useMemo(() => isNearArea(pos, COLLECTION), [pos]);
   const interactionTarget: InteractionTarget = nearReception
     ? "reception"
-    : nearTable
-      ? "table"
-      : null;
+    : nearCollection
+      ? "collection"
+      : nearTable
+        ? "table"
+        : null;
 
   const handleInteract = () => {
     if (interactionTarget === "reception") {
       setReceptionTopic("home");
       setActiveDialog("reception");
+    } else if (interactionTarget === "collection") {
+      setActiveDialog("collection");
     } else if (interactionTarget === "table") {
       onEnterTcg();
     }
@@ -158,7 +164,13 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
 
   const safeFrameIndex = frameIndex % spriteAnim.frames;
   const interactionButtonLabel =
-    interactionTarget === "reception" ? "話す" : interactionTarget === "table" ? "対戦" : "移動";
+    interactionTarget === "reception"
+      ? "話す"
+      : interactionTarget === "collection"
+        ? "見る"
+        : interactionTarget === "table"
+          ? "対戦"
+          : "移動";
   const receptionDialog = RECEPTION_DIALOG[receptionTopic];
 
   return (
@@ -195,12 +207,40 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
             <div style={tableSubLabelStyle}>対戦台</div>
           </div>
 
+          <div
+            style={{
+              ...collectionBoardStyle,
+              left: `${COLLECTION.x}%`,
+              top: `${COLLECTION.y}%`,
+              width: `${COLLECTION.w}%`,
+              height: `${COLLECTION.h}%`,
+              border: nearCollection
+                ? "2px solid rgba(255, 221, 128, 0.96)"
+                : "1px solid rgba(255, 232, 180, 0.32)",
+              boxShadow: nearCollection
+                ? "0 0 0 5px rgba(255, 204, 90, 0.18), 0 0 28px rgba(255, 190, 72, 0.28), 0 14px 28px rgba(0,0,0,0.34)"
+                : "0 12px 24px rgba(0,0,0,0.32)",
+            }}
+          >
+            <div style={collectionTitleStyle}>カード収集</div>
+            <div style={collectionGridStyle}>
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} style={collectionCardSlotStyle} />
+              ))}
+            </div>
+          </div>
+
           {interactionTarget && (
             <div style={promptStyle}>
               {interactionTarget === "reception" ? (
                 <>
                   <strong>受付：7171に話しかける</strong>
                   <span>Enter または「話す」ボタン</span>
+                </>
+              ) : interactionTarget === "collection" ? (
+                <>
+                  <strong>カード収集表</strong>
+                  <span>Enter または「見る」ボタンで確認</span>
                 </>
               ) : (
                 <>
@@ -238,6 +278,16 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
                 </button>
               </div>
               </div>
+            </div>
+          )}
+
+          {activeDialog === "collection" && (
+            <div style={collectionDialogStyle}>
+              <div style={dialogNameStyle}>カード収集</div>
+              <div style={dialogTextStyle}>集めたカードを確認できる場所にする予定です。</div>
+              <button onClick={() => setActiveDialog(null)} style={dialogChoiceButtonStyle(false)}>
+                閉じる
+              </button>
             </div>
           )}
 
@@ -404,6 +454,42 @@ const tableSubLabelStyle: CSSProperties = {
   color: "rgba(255,244,216,0.76)",
 };
 
+const collectionBoardStyle: CSSProperties = {
+  position: "absolute",
+  borderRadius: 14,
+  padding: "8px 9px",
+  boxSizing: "border-box",
+  background: "linear-gradient(180deg, rgba(97,61,34,0.92), rgba(38,25,17,0.92))",
+  display: "grid",
+  gridTemplateRows: "auto 1fr",
+  gap: 6,
+  zIndex: 4,
+};
+
+const collectionTitleStyle: CSSProperties = {
+  color: "#fff1cc",
+  fontSize: 12,
+  fontWeight: 950,
+  textAlign: "center",
+  textShadow: "0 2px 8px rgba(0,0,0,0.55)",
+};
+
+const collectionGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(4, 1fr)",
+  gap: 4,
+  minHeight: 0,
+};
+
+const collectionCardSlotStyle: CSSProperties = {
+  minHeight: 18,
+  borderRadius: 4,
+  border: "1px solid rgba(255, 232, 180, 0.38)",
+  background:
+    "linear-gradient(180deg, rgba(255,241,204,0.18), rgba(0,0,0,0.18)), radial-gradient(circle at 50% 22%, rgba(255,216,102,0.22), transparent 56%)",
+  boxShadow: "inset 0 0 10px rgba(0,0,0,0.22)",
+};
+
 const promptStyle: CSSProperties = {
   position: "absolute",
   left: "50%",
@@ -433,6 +519,22 @@ const dialogOverlayStyle: CSSProperties = {
   padding: "clamp(12px, 3dvh, 24px) 10px",
   background: "rgba(6, 5, 5, 0.62)",
   backdropFilter: "blur(2px)",
+};
+
+const collectionDialogStyle: CSSProperties = {
+  position: "absolute",
+  left: "50%",
+  bottom: 18,
+  transform: "translateX(-50%)",
+  width: "min(420px, calc(100% - 28px))",
+  padding: "14px 16px",
+  borderRadius: 14,
+  background: "rgba(27,18,13,0.9)",
+  border: "1px solid rgba(255,216,102,0.58)",
+  boxShadow: "0 16px 32px rgba(0,0,0,0.38)",
+  display: "grid",
+  gap: 10,
+  zIndex: 12,
 };
 
 const dialogPanelStyle: CSSProperties = {
