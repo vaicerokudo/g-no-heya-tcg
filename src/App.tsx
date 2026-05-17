@@ -1029,7 +1029,7 @@ const reinforceSet = useMemo(() => {
   }
 
   return (
-    <>
+    <div className="tcgScene">
       <UnitPopup
         open={popupOpen}
         unit={popupUnit}
@@ -1160,7 +1160,7 @@ const reinforceSet = useMemo(() => {
         onUndoMove={undoMove}
         onEndTurn={endTurn}
       />
-    </>
+    </div>
   );
 }
 
