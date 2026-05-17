@@ -22,9 +22,10 @@ const PLAYER_WIDTH = 68;
 const PLAYER_HEIGHT = 74;
 const STEP = 18;
 const TABLE = { x: 74, y: 60, w: 20, h: 20 };
-const RECEPTION = { x: 48, y: 58, w: 30, h: 14 };
+const RECEPTION = { x: 47, y: 50, w: 16, h: 10 };
 const COLLECTION = { x: 11, y: 35, w: 21, h: 27 };
 const INTERACTION_THRESHOLD = 4;
+const RECEPTION_INTERACTION_THRESHOLD = 2.5;
 const SPRITE_CELL_WIDTH = 192;
 const SPRITE_CELL_HEIGHT = 208;
 const PLAYER_SCALE = PLAYER_WIDTH / SPRITE_CELL_WIDTH;
@@ -75,7 +76,7 @@ export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
   const [frameIndex, setFrameIndex] = useState(0);
   const moveStopTimerRef = useRef<number | null>(null);
   const nearTable = useMemo(() => isNearArea(pos, TABLE), [pos]);
-  const nearReception = useMemo(() => isNearArea(pos, RECEPTION), [pos]);
+  const nearReception = useMemo(() => isNearArea(pos, RECEPTION, RECEPTION_INTERACTION_THRESHOLD), [pos]);
   const nearCollection = useMemo(() => isNearArea(pos, COLLECTION), [pos]);
   const interactionTarget: InteractionTarget = nearReception
     ? "reception"
