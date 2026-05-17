@@ -423,22 +423,22 @@ const promptStyle: CSSProperties = {
 };
 
 const dialogOverlayStyle: CSSProperties = {
-  position: "absolute",
+  position: "fixed",
   inset: 0,
-  zIndex: 30,
+  zIndex: 12000,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   boxSizing: "border-box",
-  padding: 12,
+  padding: "clamp(12px, 3dvh, 24px) 10px",
   background: "rgba(6, 5, 5, 0.62)",
   backdropFilter: "blur(2px)",
 };
 
 const dialogPanelStyle: CSSProperties = {
   position: "relative",
-  width: "min(860px, calc(100% - 24px))",
-  maxHeight: "calc(100% - 24px)",
+  width: "min(860px, calc(100% - 20px))",
+  maxHeight: "calc(100dvh - 24px)",
   overflowY: "auto",
   boxSizing: "border-box",
   padding: "22px 24px",
@@ -450,15 +450,16 @@ const dialogPanelStyle: CSSProperties = {
   flexWrap: "wrap",
   gap: 18,
   alignItems: "stretch",
+  justifyContent: "center",
 };
 
 const dialogPortraitStyle: CSSProperties = {
   flex: "0 1 300px",
-  width: "clamp(190px, 34vw, 300px)",
-  height: "clamp(230px, 52vh, 420px)",
+  width: "clamp(220px, 56vw, 300px)",
+  height: "clamp(280px, 56dvh, 420px)",
   maxWidth: "100%",
-  objectFit: "cover",
-  objectPosition: "center 18%",
+  objectFit: "contain",
+  objectPosition: "center",
   borderRadius: 18,
   border: "1px solid rgba(255,232,180,0.42)",
   boxShadow: "0 14px 32px rgba(0,0,0,0.44)",
