@@ -7,6 +7,9 @@ type TownSceneProps = {
 };
 
 type Pos = { x: number; y: number };
+type InteractionArea = { x: number; y: number; w: number; h: number };
+type InteractionTarget = "table" | "reception" | null;
+type TownDialog = "reception" | null;
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
 
@@ -14,6 +17,8 @@ const PLAYER_WIDTH = 68;
 const PLAYER_HEIGHT = 74;
 const STEP = 18;
 const TABLE = { x: 66, y: 32, w: 21, h: 20 };
+const RECEPTION = { x: 48, y: 58, w: 30, h: 14 };
+const INTERACTION_THRESHOLD = 4;
 const SPRITE_CELL_WIDTH = 192;
 const SPRITE_CELL_HEIGHT = 208;
 const PLAYER_SCALE = PLAYER_WIDTH / SPRITE_CELL_WIDTH;
@@ -28,21 +33,36 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-function isNearTable(pos: Pos) {
-  const playerCenter = { x: pos.x + PLAYER_WIDTH / 2, y: pos.y + PLAYER_HEIGHT / 2 };
-  const tableCenter = { x: TABLE.x + TABLE.w / 2, y: TABLE.y + TABLE.h / 2 };
-  const dx = playerCenter.x - tableCenter.x;
-  const dy = playerCenter.y - tableCenter.y;
-  return Math.hypot(dx, dy) <= 25;
+function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THRESHOLD) {
+  const closestX = clamp(pos.x, area.x, area.x + area.w);
+  const closestY = clamp(pos.y, area.y, area.y + area.h);
+  const dx = pos.x - closestX;
+  const dy = pos.y - closestY;
+  return Math.hypot(dx, dy) <= threshold;
 }
 
 export function TownScene({ onEnterTcg }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 44, y: 68 });
+  const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
   const [facing, setFacing] = useState<Facing>("right");
   const [isMoving, setIsMoving] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
   const moveStopTimerRef = useRef<number | null>(null);
-  const nearTable = useMemo(() => isNearTable(pos), [pos]);
+  const nearTable = useMemo(() => isNearArea(pos, TABLE), [pos]);
+  const nearReception = useMemo(() => isNearArea(pos, RECEPTION), [pos]);
+  const interactionTarget: InteractionTarget = nearReception
+    ? "reception"
+    : nearTable
+      ? "table"
+      : null;
+
+  const handleInteract = () => {
+    if (interactionTarget === "reception") {
+      setActiveDialog("reception");
+    } else if (interactionTarget === "table") {
+      onEnterTcg();
+    }
+  };
 
   const moveBy = (dx: number, dy: number) => {
     if (dx < 0) setFacing("left");
@@ -64,9 +84,9 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-      if (key === "enter" && nearTable) {
+      if (key === "enter" && interactionTarget) {
         event.preventDefault();
-        onEnterTcg();
+        handleInteract();
         return;
       }
 
@@ -87,7 +107,7 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [nearTable, onEnterTcg]);
+  }, [interactionTarget, onEnterTcg]);
 
   useEffect(() => {
     return () => {
@@ -114,6 +134,8 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
   }, [spriteAnim.frames, spriteAnim.intervalMs, spriteState]);
 
   const safeFrameIndex = frameIndex % spriteAnim.frames;
+  const interactionButtonLabel =
+    interactionTarget === "reception" ? "話す" : interactionTarget === "table" ? "対戦" : "移動";
 
   return (
     <div style={sceneStyle}>
@@ -149,10 +171,29 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
             <div style={tableSubLabelStyle}>対戦台</div>
           </div>
 
-          {nearTable && (
+          {interactionTarget && (
             <div style={promptStyle}>
-              <strong>対戦台：試練の盤</strong>
-              <span>Enter または「対戦」ボタンでTCG開始</span>
+              {interactionTarget === "reception" ? (
+                <>
+                  <strong>受付：7171に話しかける</strong>
+                  <span>Enter または「話す」ボタン</span>
+                </>
+              ) : (
+                <>
+                  <strong>対戦台：試練の盤</strong>
+                  <span>Enter または「対戦」ボタンでTCG開始</span>
+                </>
+              )}
+            </div>
+          )}
+
+          {activeDialog === "reception" && (
+            <div style={dialogPanelStyle}>
+              <div style={dialogNameStyle}>7171</div>
+              <div style={dialogTextStyle}>ようこそ、Gの部屋へにゃ。</div>
+              <button onClick={() => setActiveDialog(null)} style={dialogCloseButtonStyle}>
+                閉じる
+              </button>
             </div>
           )}
 
@@ -190,11 +231,11 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
             ←
           </button>
           <button
-            onClick={onEnterTcg}
-            disabled={!nearTable}
-            style={battleButtonStyle(nearTable)}
+            onClick={handleInteract}
+            disabled={!interactionTarget}
+            style={battleButtonStyle(!!interactionTarget)}
           >
-            対戦
+            {interactionButtonLabel}
           </button>
           <button aria-label="右へ移動" onClick={() => moveBy(STEP, 0)} style={padButtonStyle}>
             →
@@ -335,6 +376,46 @@ const promptStyle: CSSProperties = {
   fontSize: 12,
   pointerEvents: "none",
   zIndex: 10,
+};
+
+const dialogPanelStyle: CSSProperties = {
+  position: "absolute",
+  left: "50%",
+  bottom: 14,
+  transform: "translateX(-50%)",
+  width: "min(420px, calc(100% - 28px))",
+  padding: "12px 14px",
+  borderRadius: 14,
+  background: "rgba(27,18,13,0.86)",
+  border: "1px solid rgba(255,216,102,0.58)",
+  boxShadow: "0 16px 32px rgba(0,0,0,0.38)",
+  display: "grid",
+  gridTemplateColumns: "auto 1fr auto",
+  gap: 10,
+  alignItems: "center",
+  zIndex: 12,
+};
+
+const dialogNameStyle: CSSProperties = {
+  color: "#ffd66d",
+  fontWeight: 950,
+};
+
+const dialogTextStyle: CSSProperties = {
+  color: "#fff6df",
+  fontSize: 13,
+  lineHeight: 1.5,
+};
+
+const dialogCloseButtonStyle: CSSProperties = {
+  minHeight: 34,
+  padding: "0 12px",
+  borderRadius: 10,
+  border: "1px solid rgba(255,232,180,0.28)",
+  background: "rgba(255,241,204,0.12)",
+  color: "#fff1cc",
+  fontWeight: 900,
+  touchAction: "manipulation",
 };
 
 const controlsWrapStyle: CSSProperties = {
