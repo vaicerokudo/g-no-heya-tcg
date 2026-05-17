@@ -170,7 +170,14 @@
         "hp": 4,
         "movePattern": {
           "type": "custom",
-          "movesRelative": [{ "dx": -2, "dy": 0 }, { "dx": 2, "dy": 0 }],
+          "movesRelative": [
+            { "dx": -2, "dy": 0 },
+            { "dx": 2, "dy": 0 },
+            { "dx": -1, "dy": -1 },
+            { "dx": 1, "dy": -1 },
+            { "dx": -1, "dy": 1 },
+            { "dx": 1, "dy": 1 }
+          ],
           "canPassThroughUnits": true
         }
       },
