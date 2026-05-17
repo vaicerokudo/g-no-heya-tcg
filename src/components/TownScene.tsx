@@ -1,17 +1,27 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import playerSprite from "../assets/pets/roku/idle-00.png";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import playerSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
 };
 
 type Pos = { x: number; y: number };
-type Direction = "left" | "right";
+type Facing = "left" | "right";
+type SpriteState = "idle" | "running-left" | "running-right";
 
 const PLAYER_WIDTH = 68;
 const PLAYER_HEIGHT = 74;
 const STEP = 18;
 const TABLE = { x: 66, y: 32, w: 21, h: 20 };
+const SPRITE_CELL_WIDTH = 192;
+const SPRITE_CELL_HEIGHT = 208;
+const PLAYER_SCALE = PLAYER_WIDTH / SPRITE_CELL_WIDTH;
+const MOVE_ANIMATION_MS = 180;
+const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalMs: number }> = {
+  idle: { row: 0, frames: 6, intervalMs: 190 },
+  "running-right": { row: 1, frames: 8, intervalMs: 105 },
+  "running-left": { row: 2, frames: 8, intervalMs: 105 },
+};
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -27,14 +37,23 @@ function isNearTable(pos: Pos) {
 
 export function TownScene({ onEnterTcg }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 44, y: 68 });
-  const [direction, setDirection] = useState<Direction>("right");
-  const [walkTick, setWalkTick] = useState(0);
+  const [facing, setFacing] = useState<Facing>("right");
+  const [isMoving, setIsMoving] = useState(false);
+  const [frameIndex, setFrameIndex] = useState(0);
+  const moveStopTimerRef = useRef<number | null>(null);
   const nearTable = useMemo(() => isNearTable(pos), [pos]);
 
   const moveBy = (dx: number, dy: number) => {
-    if (dx < 0) setDirection("left");
-    if (dx > 0) setDirection("right");
-    setWalkTick((value) => value + 1);
+    if (dx < 0) setFacing("left");
+    if (dx > 0) setFacing("right");
+    setIsMoving(true);
+    if (moveStopTimerRef.current !== null) {
+      window.clearTimeout(moveStopTimerRef.current);
+    }
+    moveStopTimerRef.current = window.setTimeout(() => {
+      setIsMoving(false);
+      moveStopTimerRef.current = null;
+    }, MOVE_ANIMATION_MS);
     setPos((current) => ({
       x: clamp(current.x + dx, 2, 98 - PLAYER_WIDTH / 4),
       y: clamp(current.y + dy, 12, 96 - PLAYER_HEIGHT / 4),
@@ -69,7 +88,31 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [nearTable, onEnterTcg]);
 
-  const playerBob = walkTick % 2 === 0 ? 0 : -2;
+  useEffect(() => {
+    return () => {
+      if (moveStopTimerRef.current !== null) {
+        window.clearTimeout(moveStopTimerRef.current);
+      }
+    };
+  }, []);
+
+  const spriteState: SpriteState = isMoving
+    ? facing === "left"
+      ? "running-left"
+      : "running-right"
+    : "idle";
+  const spriteAnim = SPRITE_ANIMS[spriteState];
+
+  useEffect(() => {
+    setFrameIndex(0);
+    const timerId = window.setInterval(() => {
+      setFrameIndex((current) => (current + 1) % spriteAnim.frames);
+    }, spriteAnim.intervalMs);
+
+    return () => window.clearInterval(timerId);
+  }, [spriteAnim.frames, spriteAnim.intervalMs, spriteState]);
+
+  const safeFrameIndex = frameIndex % spriteAnim.frames;
 
   return (
     <div style={sceneStyle}>
@@ -119,21 +162,23 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
             </div>
           )}
 
-          <img
-            src={playerSprite}
-            alt="ロク"
-            draggable={false}
+          <div
+            aria-label="ロク"
+            role="img"
             style={{
               position: "absolute",
               left: `${pos.x}%`,
               top: `${pos.y}%`,
-              width: PLAYER_WIDTH,
-              height: PLAYER_HEIGHT,
-              objectFit: "contain",
-              transform: `translate(-50%, -50%) translateY(${playerBob}px) scaleX(${
-                direction === "left" ? -1 : 1
-              })`,
-              transition: "left 140ms ease, top 140ms ease, transform 120ms ease",
+              width: SPRITE_CELL_WIDTH,
+              height: SPRITE_CELL_HEIGHT,
+              backgroundImage: `url(${playerSpriteSheet})`,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "1536px 1872px",
+              backgroundPosition: `-${safeFrameIndex * SPRITE_CELL_WIDTH}px -${
+                spriteAnim.row * SPRITE_CELL_HEIGHT
+              }px`,
+              transform: `translate(-50%, -50%) scale(${PLAYER_SCALE})`,
+              transition: "left 140ms ease, top 140ms ease",
               filter: "drop-shadow(0 10px 12px rgba(0,0,0,0.48))",
               userSelect: "none",
               zIndex: 8,
