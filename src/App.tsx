@@ -65,7 +65,7 @@ function getHandFallbackSrc(unitId: string, side: Side, skin: Skin) {
   return getPortraitPath(unitId, side, "base", skin);
 }
 
-// 縺ｾ縺壹し繝繝搾ｼ郁ｻｽ縺・ｼ峨ｒ霑斐☆縲りｪｭ繧√↑縺代ｌ縺ｰ onError 縺ｧ fallback 縺ｸ縲・
+// Prefer the lightweight hand thumbnail; image onError falls back to the full card.
 function getHandCardSrc(unitId: string, side: Side, skin: Skin) {
   return getHandThumbSrc(unitId, side, skin);
 }
@@ -94,7 +94,7 @@ export default function App() {
   const cols = initial.cols;
   const unitsById = initial.unitsById;
 
-  // ===== turn state (邨ｱ蜷・ =====
+  // ===== turn state =====
   const [turnState, setTurnState] = useState<{ side: Side; seq: number }>({
     side: "south",
     seq: 0,
@@ -102,7 +102,7 @@ export default function App() {
   const turn = turnState.side;
   const turnSeq = turnState.seq;
 
-  // ===== state (蜈ｨ驛ｨ縺薙％縺ｫ髮・ｴ・ =====
+  // ===== state =====
   const [phase, setPhase] = useState<Phase>("setup_draw");
   const [cpuEnabled, setCpuEnabled] = useState(true);
 
@@ -147,29 +147,25 @@ export default function App() {
   const [bottomBarH, setBottomBarH] = useState(0);
   const bottomBarRef = useRef<HTMLDivElement | null>(null);
 
-  // ===== refs (CPU/蜷・ｨｮ繧ｬ繝ｼ繝臥畑) =====
+  // ===== refs =====
 
   const didInitRef = useRef(false);
 
   const gameIdRef = useRef(`${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
-  // draw驥崎､・ぎ繝ｼ繝・
+  // Draw guard.
   const lastDrawKeyRef = useRef<string>("");
 
-  // 繧ｿ繝ｼ繝ｳ髢句ｧ九ぎ繝ｼ繝・
+  // Turn start guard.
   const lastTurnStartKeyRef = useRef<string>("");
 
-  // CPU莠碁㍾襍ｷ蜍輔ぎ繝ｼ繝・
-
-  // endTurn驥崎､・ぎ繝ｼ繝会ｼ遺ｻ繧ｿ繝ｼ繝ｳ繧ｭ繝ｼ縺悟､峨ｏ繧九→縺吶ｊ謚懊￠繧句庄閭ｽ諤ｧ縺後≠繧九・縺ｧ縲》ick繝ｭ繝・け繧ゆｽｵ逕ｨ・・
+  // Prevent duplicate endTurn runs for the same turn key.
   const lastEndTurnKeyRef = useRef<string>("");
 
-  // 笘・tick荳ｭ縺ｮ endTurn 騾｣謇薙ｒ遒ｺ螳溘↓貎ｰ縺吶Ο繝・け
+  // Blocks repeated endTurn calls inside the same tick.
   const endTurnTickLockRef = useRef(false);
 
-  // 笘・CPU縺九ｉ縺ｮ endTurn 繧・runId 縺ｧ縲・蝗槭□縺代阪↓縺吶ｋ
-
-  // battle遯∝・蛻､螳夂畑
+  // Tracks phase transitions into battle.
   const prevPhaseRef = useRef<Phase>("setup_draw");
 
 
@@ -243,7 +239,7 @@ export default function App() {
     if (opts.unitId === "HIBIKI") passive.dmgReduction = 1;
 
     const form = opts.form ?? "base";
-    const hp = opts.hp ?? def.base.hp; // form縺携縺ｪ繧牙ｰ・擂縺薙％縺ｧ陬懈ｭ｣縺励※繧ゅ＞縺・
+    const hp = opts.hp ?? def.base.hp;
 
     return {
       instanceId: opts.instanceId,
@@ -478,7 +474,6 @@ export default function App() {
     const { allUnitIds, deckSouth, handSouth: initialHandSouth, deckNorth, handNorth: initialHandNorth } =
       buildInitialHandsAndDecks(unitsById);
 
-    // name縺ｧ繝ｦ繝九・繧ｯ蛹厄ｼ域怙蛻昴↓隕九▽縺九▲縺溘ｂ縺ｮ繧呈治逕ｨ・・
     console.log("[SETUP] ALL", allUnitIds);
     console.log("[SETUP] ALL uniq", new Set(allUnitIds).size, "/", allUnitIds.length);
 
@@ -517,7 +512,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ===== reinforcement (north: 繧ｿ繝ｼ繝ｳ髢句ｧ区凾縺ｫ荳頑ｮｵ縺ｸ1菴・ =====
+  // ===== reinforcement (north: one unit at turn start) =====
   useEffect(() => {
     tryNorthReinforce({
       phase: phaseRef.current,
@@ -563,9 +558,6 @@ const deploySouthReinforceAt = (r: number, c: number) => {
 
 
 
-
-
-    // 縺薙・north繧ｿ繝ｼ繝ｳ縺ｧ蜃ｦ逅・☆繧矩・分繧貞崋螳・
   function resetGame() {
     startSetup();
   }
@@ -611,7 +603,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
 
     emitDamageFx(born);
 
-    // 笘・ム繝｡繝ｼ繧ｸ蜿肴丐蠕後↓螟芽ｺｫ繝√ぉ繝・け
+    // Apply transform checks after damage fx is derived from the pre-transform board.
     const next2 = applyYabukoTransform(next as any, unitsById);
 
     commitInstancesAndVictory(next2 as any);
@@ -823,9 +815,6 @@ const reinforceSet = useMemo(() => {
   function tryExecuteSkillOnCell(opts: { r: number; c: number; inst: any | null }) {
     if (!skillMode) return false;
 
-    // 繧ｿ繝ｼ繧ｲ繝・ヨ螟悶ｒ繧ｯ繝ｪ繝・け縺励◆繧芽ｧ｣髯､
-
-    // 騾ｲ蛹匁擅莉ｶ
     const executed = tryExecuteCellSkill({
       skillMode,
       selected,
@@ -922,7 +911,6 @@ const reinforceSet = useMemo(() => {
   }
 
   const endTurn = () => {
-    // 笘・tick繝ｭ繝・け・亥酔繝輔Ξ繝ｼ繝/蜷荊ick縺ｮ騾｣謇薙ｒ遒ｺ螳溘↓貎ｰ縺呻ｼ・
     if (!beginEndTurnOnce()) return;
 
     prepareEndTurnRun();
@@ -948,15 +936,6 @@ const reinforceSet = useMemo(() => {
     applyNextInstances: (next) => applyNextInstances(next as any),
     endTurn,
   });
-
-  // CPU繝ｫ繝ｼ繝鈴幕蟋具ｼ・orth縺ｮbattle繧ｿ繝ｼ繝ｳ縺ｮ縺ｿ・・
-  
-
-    // 蜷御ｸ繧ｿ繝ｼ繝ｳ縺ｯ莠碁㍾襍ｷ蜍輔＠縺ｪ縺・
-    
-
-    // 萓晏ｭ倥′螟峨ｏ繧・繧｢繝ｳ繝槭え繝ｳ繝域凾縺ｯ蠢・★豁｢繧√ｋ・亥ｹｽ髴翫ち繧､繝槭・髦ｲ豁｢・・
-  
 
   useEffect(() => {
     const el = bottomBarRef.current;

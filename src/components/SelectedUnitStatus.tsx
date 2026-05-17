@@ -37,11 +37,13 @@ export function SelectedUnitStatus({ selected, unitsById, perUnitTurn }: Selecte
             overflowWrap: "anywhere",
           }}
         >
-          状態：{statusRows.join(" / ")}
+          状態: {statusRows.join(" / ")}
         </div>
       )}
 
-      <div style={{ marginBottom: 8, fontSize: 13, opacity: 0.9 }}>邱托ｼ晉ｧｻ蜍・/ 襍､・晄判謦・ｯｾ雎｡ / 鮟・ｼ晏ｰ・ｨ・/ ﾃ暦ｼ晞・阡ｽ</div>
+      <div style={{ marginBottom: 8, fontSize: 13, opacity: 0.9 }}>
+        緑: 移動 / 赤: 攻撃対象 / 黄: 射程・スキル対象 / ×: 遮蔽
+      </div>
     </>
   );
 }

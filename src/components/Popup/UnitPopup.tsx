@@ -10,19 +10,15 @@ import { getEffectiveAtk, getEffectiveMaxHp } from "../../game/stats";
 import { buildStatusRows } from "../../game/ui/statusRows";
 import { useImgFallback } from "../imgFallback";
 
-// ---------- utils ----------
-function modeLabel(mode: any) {
+function modeLabel(mode: unknown) {
   const m = String(mode ?? "");
   const dict: Record<string, string> = {
-    // いま使ってるやつ（App内の分岐と揃える）
-    chooseLineDirection: "直線方向指定",
-    chooseEnemyAdjacent: "隣接の敵を指定",
+    chooseLineDirection: "直線方向を指定",
+    chooseEnemyAdjacent: "隣接する敵を指定",
     enemiesInRange: "範囲内の敵すべて",
-    instant: "即時発動（範囲）",
-    chooseFront3Cells: "正面3マス指定",
+    instant: "即時発動",
+    chooseFront3Cells: "正面3マスを指定",
     chooseAllyInRange: "範囲内の味方を指定",
-
-    // 将来増えても自然に読めるように（保険）
     self: "自分",
     ally: "味方",
     enemy: "敵",
@@ -43,12 +39,9 @@ function autoDesc(s: any) {
   if (s?.heal != null) parts.push(`回復: ${s.heal}`);
   if (s?.knockback != null) parts.push(`KB: ${s.knockback}`);
   if (s?.stunTurns != null) parts.push(`スタン: ${s.stunTurns}`);
-  // ★「毒」表記（burn流用）。descが「燃焼」より分かりやすい
-  if (s?.burnTicks != null) parts.push(`毒: ${s.burnTicks}`);
-
-  if (s?.requiresForm)
-    parts.push(`条件: 進化(${String(s.requiresForm).toUpperCase()})`);
-  if (s?.oncePerMatch) parts.push(`制限: 1回/試合`);
+  if (s?.burnTicks != null) parts.push(`炎上: ${s.burnTicks}`);
+  if (s?.requiresForm) parts.push(`条件: 進化(${String(s.requiresForm).toUpperCase()})`);
+  if (s?.oncePerMatch) parts.push("制限: 1試合1回");
 
   return parts.join(" / ");
 }
@@ -57,17 +50,16 @@ function getStatusBadges(unit: any): { key: string; label: string; title?: strin
   const badges: { key: string; label: string; title?: string }[] = [];
 
   const stun = Number(unit?.stun ?? 0);
-  if (stun > 0) badges.push({ key: "stun", label: `スタン:${stun}`, title: "行動不可" });
+  if (stun > 0) badges.push({ key: "stun", label: `スタン:${stun}`, title: "行動不能" });
 
   const burn = Number(unit?.burn ?? 0);
-  if (burn > 0) badges.push({ key: "poison", label: `毒:${burn}`, title: "ターン終了時に1ダメージ" });
+  if (burn > 0) badges.push({ key: "burn", label: `炎上:${burn}`, title: "ターン終了時に1ダメージ" });
 
   const dr = Number(unit?.dmgReduction ?? 0);
-  if (dr > 0) badges.push({ key: "dr", label: `軽減:-${dr}`, title: "被ダメージ軽減" });
+  if (dr > 0) badges.push({ key: "dr", label: `軽減-${dr}`, title: "被ダメージ軽減" });
 
   const dmgBonus = Number(unit?.dmgBonus ?? 0);
-  if (dmgBonus > 0)
-    badges.push({ key: "dmgBonus", label: `ATK+${dmgBonus}`, title: "通常攻撃ダメージ上昇" });
+  if (dmgBonus > 0) badges.push({ key: "dmgBonus", label: `ATK+${dmgBonus}`, title: "通常攻撃ダメージ上昇" });
 
   if (unit?.hibikiShieldAllActive)
     badges.push({ key: "hibikiShieldAll", label: "守護", title: "距離2以内の味方を守る" });
@@ -84,8 +76,6 @@ type Props = {
   unitsById: any;
   usedSkills: Record<string, boolean>;
   onClose: () => void;
-
-  // フォールバック候補（Appから渡す）
   getCardCandidates: (
     unitId: string,
     side: "south" | "north",
@@ -112,13 +102,10 @@ export function UnitPopup({
   }, []);
 
   const isNarrow = w < 720;
-
-  // ★ここ重要：open/unitに関係なく「毎回」同じ順で計算する
   const form = (unit?.form ?? "base") as "base" | "g";
   const cardCands = unit ? getCardCandidates(unit.unitId, unit.side, form) : [];
   const fb = useImgFallback(cardCands, { placeholder: "" });
 
-  // ★早期returnは Hooks の後ろへ
   if (!open || !unit) return null;
 
   const def = unitsById?.[unit.unitId];
@@ -126,7 +113,6 @@ export function UnitPopup({
 
   const maxHp = getEffectiveMaxHp(def.base.hp, form);
   const atk = getEffectiveAtk(def.base.atk, form);
-
   const statusBadges = getStatusBadges(unit);
   const statusRows = buildStatusRows(unit);
 
@@ -158,7 +144,6 @@ export function UnitPopup({
           color: "rgba(255,255,255,0.92)",
         }}
       >
-        {/* --- Sticky Header --- */}
         <div
           style={{
             position: "sticky",
@@ -224,7 +209,6 @@ export function UnitPopup({
                 ID: {String(unit.instanceId)}
               </span>
 
-              {/* ★状態バッジ（スタン/毒/軽減） */}
               {statusBadges.map((b) => (
                 <span
                   key={b.key}
@@ -262,7 +246,6 @@ export function UnitPopup({
           </button>
         </div>
 
-        {/* --- Body --- */}
         <div
           style={{
             padding: 14,
@@ -272,7 +255,6 @@ export function UnitPopup({
             alignItems: "start",
           }}
         >
-          {/* --- Left: Card --- */}
           <div
             style={{
               position: isNarrow ? "relative" : "sticky",
@@ -309,11 +291,10 @@ export function UnitPopup({
             </div>
 
             <div style={{ marginTop: 10, fontSize: 12, opacity: 0.72 }}>
-              ※画像が無い場合は候補へフォールバック
+              画像がない場合は候補からフォールバックします
             </div>
           </div>
 
-          {/* --- Right: Info --- */}
           <div style={{ minWidth: 0 }}>
             <div
               style={{
@@ -391,10 +372,8 @@ export function UnitPopup({
                 {getAvailableSkillsForUnit(unit.unitId).map((s) => {
                   const full = { ...(s as any), ...(SKILLS?.[s.id] ?? {}) };
                   const formOk = !full.requiresForm || form === full.requiresForm;
-
                   const usedKey = skillKey(unit.side as Side, unit.instanceId, s.id as SkillId);
                   const used = !!usedSkills[usedKey];
-
                   const desc = autoDesc(full);
                   const naturalDesc = typeof full.desc === "string" ? full.desc.trim() : "";
 
@@ -450,7 +429,7 @@ export function UnitPopup({
                               opacity: 0.9,
                             }}
                           >
-                            使用済
+                            使用済み
                           </span>
                         )}
 
@@ -476,7 +455,6 @@ export function UnitPopup({
                         </div>
                       ) : null}
 
-                      {/* ★ autoDesc 表示（modeは日本語化される） */}
                       {desc ? (
                         <div style={{ marginTop: 8, fontSize: 12, opacity: 0.86, lineHeight: 1.35 }}>
                           {desc}
