@@ -11,6 +11,7 @@ type Pos = { x: number; y: number };
 type InteractionArea = { x: number; y: number; w: number; h: number };
 type InteractionTarget = "table" | "reception" | null;
 type TownDialog = "reception" | null;
+type ReceptionTopic = "home" | "first" | "table" | "skin";
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
 
@@ -29,6 +30,25 @@ const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalM
   "running-right": { row: 1, frames: 8, intervalMs: 105 },
   "running-left": { row: 2, frames: 8, intervalMs: 105 },
 };
+const RECEPTION_DIALOG: Record<ReceptionTopic, { label: string; text: string }> = {
+  home: {
+    label: "案内",
+    text: "ようこそ、Gの部屋へにゃ。聞きたいことを選ぶにゃ。",
+  },
+  first: {
+    label: "はじめての説明",
+    text: "ここはGの部屋ロビーにゃ。まずは対戦台に近づいて、試練の盤を始めるにゃ。",
+  },
+  table: {
+    label: "対戦台について",
+    text: "光っている対戦台からTCGを始められるにゃ。Enterか対戦ボタンで入れるにゃ。",
+  },
+  skin: {
+    label: "スキンについて",
+    text: "スキンは見た目だけ変わるにゃ。強さは変わらないから安心するにゃ。",
+  },
+};
+const RECEPTION_CHOICES: ReceptionTopic[] = ["first", "table", "skin"];
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -45,6 +65,7 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
 export function TownScene({ onEnterTcg }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 44, y: 68 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
+  const [receptionTopic, setReceptionTopic] = useState<ReceptionTopic>("home");
   const [facing, setFacing] = useState<Facing>("right");
   const [isMoving, setIsMoving] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
@@ -59,6 +80,7 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
 
   const handleInteract = () => {
     if (interactionTarget === "reception") {
+      setReceptionTopic("home");
       setActiveDialog("reception");
     } else if (interactionTarget === "table") {
       onEnterTcg();
@@ -137,6 +159,7 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
   const safeFrameIndex = frameIndex % spriteAnim.frames;
   const interactionButtonLabel =
     interactionTarget === "reception" ? "話す" : interactionTarget === "table" ? "対戦" : "移動";
+  const receptionDialog = RECEPTION_DIALOG[receptionTopic];
 
   return (
     <div style={sceneStyle}>
@@ -193,11 +216,26 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
               <img src={reception7171} alt="7171受付" style={dialogPortraitStyle} />
               <div style={dialogBodyStyle}>
                 <div style={dialogNameStyle}>7171</div>
-                <div style={dialogTextStyle}>ようこそ、Gの部屋へにゃ。</div>
+                <div style={dialogTopicStyle}>{receptionDialog.label}</div>
+                <div style={dialogTextStyle}>{receptionDialog.text}</div>
               </div>
               <button onClick={() => setActiveDialog(null)} style={dialogCloseButtonStyle}>
                 閉じる
               </button>
+              <div style={dialogChoicesStyle}>
+                {RECEPTION_CHOICES.map((topic) => (
+                  <button
+                    key={topic}
+                    onClick={() => setReceptionTopic(topic)}
+                    style={dialogChoiceButtonStyle(topic === receptionTopic)}
+                  >
+                    {RECEPTION_DIALOG[topic].label}
+                  </button>
+                ))}
+                <button onClick={() => setActiveDialog(null)} style={dialogChoiceButtonStyle(false)}>
+                  閉じる
+                </button>
+              </div>
             </div>
           )}
 
@@ -421,7 +459,15 @@ const dialogNameStyle: CSSProperties = {
   fontWeight: 950,
 };
 
+const dialogTopicStyle: CSSProperties = {
+  marginTop: 2,
+  color: "rgba(255,232,180,0.78)",
+  fontSize: 11,
+  fontWeight: 900,
+};
+
 const dialogTextStyle: CSSProperties = {
+  marginTop: 4,
   color: "#fff6df",
   fontSize: 13,
   lineHeight: 1.5,
@@ -437,6 +483,30 @@ const dialogCloseButtonStyle: CSSProperties = {
   fontWeight: 900,
   touchAction: "manipulation",
 };
+
+const dialogChoicesStyle: CSSProperties = {
+  gridColumn: "1 / -1",
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 8,
+};
+
+function dialogChoiceButtonStyle(active: boolean): CSSProperties {
+  return {
+    minHeight: 34,
+    padding: "0 12px",
+    borderRadius: 10,
+    border: active
+      ? "1px solid rgba(255,216,102,0.9)"
+      : "1px solid rgba(255,232,180,0.24)",
+    background: active ? "rgba(255,216,102,0.24)" : "rgba(255,241,204,0.1)",
+    color: "#fff1cc",
+    boxShadow: active ? "0 0 14px rgba(255,204,90,0.18)" : "none",
+    fontSize: 12,
+    fontWeight: 900,
+    touchAction: "manipulation",
+  };
+}
 
 const controlsWrapStyle: CSSProperties = {
   marginTop: 12,
