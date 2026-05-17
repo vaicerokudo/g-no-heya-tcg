@@ -56,14 +56,14 @@ export function GameBoardArea({
       className="gameBoardArea"
       style={areaStyle}
     >
+      {showSouthHandDeck && <SouthDeck deckSouth={deckSouth} skin={southSkin} getDeckBackPath={getDeckBackPath} />}
+
       <div className="gameBoardBoard" style={{ flex: "0 0 auto" }}>
         <Board {...boardProps} unitsById={unitsById} />
       </div>
 
       {showSouthHandDeck && (
         <div className="southHandDeckRail">
-          <SouthDeck deckSouth={deckSouth} skin={southSkin} getDeckBackPath={getDeckBackPath} />
-
           <SouthHand
             phase={phase}
             handSouth={handSouth}
