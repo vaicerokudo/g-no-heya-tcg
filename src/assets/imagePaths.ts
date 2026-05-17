@@ -59,3 +59,22 @@ export function portraitCandidates(
   ];
   return Array.from(new Set(list));
 }
+
+export function portraitThumbCandidates(
+  unitId: string,
+  side: Side,
+  form: Form = "base",
+  skin: Skin = "default"
+) {
+  const id = normId(unitId);
+  const list = [
+    `/portraits/thumb/${side}/${skin}/${form}/${id}.webp`,
+    `/portraits/thumb/${side}/default/${form}/${id}.webp`,
+    `/portraits/thumb/${side}/default/base/${id}.webp`,
+    `/portraits/${side}/${skin}/${form}/${id}.png`,
+    `/portraits/${side}/default/${form}/${id}.png`,
+    `/portraits/${side}/default/base/${id}.png`,
+    `/portraits/unknown.png`,
+  ];
+  return Array.from(new Set(list));
+}

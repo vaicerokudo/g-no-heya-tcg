@@ -47,7 +47,7 @@ import {
 import {
   getPortrait as getPortraitPath,
   cardCandidates,
-  portraitCandidates,
+  portraitThumbCandidates,
   type Skin,
 } from "./assets/imagePaths";
 
@@ -1148,7 +1148,7 @@ const reinforceSet = useMemo(() => {
         onShiftEnemyPick={() => {}}
         getPortrait={(unitId, side, form) => getPortraitPath(unitId, side, form ?? "base", getSkinForSide(side))}
         getPortraitCandidates={(unitId, side, form) =>
-          portraitCandidates(unitId, side, form ?? "base", getSkinForSide(side))
+          portraitThumbCandidates(unitId, side, form ?? "base", getSkinForSide(side))
         }
         posKey={posKey}
         canSelect={canSelect}
