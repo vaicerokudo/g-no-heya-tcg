@@ -516,7 +516,12 @@
         "hp": 5,
         "movePattern": {
           "type": "custom",
-          "movesRelative": [{ "dx": -1, "dy": 0 }, { "dx": 1, "dy": 0 }, { "dx": 0, "dy": 1 }],
+          "movesRelative": [
+            { "dx": -1, "dy": -1 },
+            { "dx": 1, "dy": -1 },
+            { "dx": -1, "dy": 1 },
+            { "dx": 1, "dy": 1 }
+          ],
           "canPassThroughUnits": false
         }
       },
@@ -528,6 +533,7 @@
           "effect": "negateDebuffsAndRevealStealth"
         }
       ],
+      "attacks": { "normalAttack": { "type": "rangedLine", "range": 2, "lineOfSightBlockedByUnits": true } },
       "skills": {
         "skill1": {
           "id": "DELI_THROW",
