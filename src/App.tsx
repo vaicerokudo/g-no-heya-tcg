@@ -34,6 +34,7 @@ import { UnitPopup } from "./components/Popup/UnitPopup";
 import { SelectedUnitStatus } from "./components/SelectedUnitStatus";
 import { SkillModeBanner } from "./components/SkillModeBanner";
 import { TopStatusBar } from "./components/TopStatusBar";
+import { TownScene } from "./components/TownScene";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
 
@@ -75,6 +76,7 @@ type SkillMotionEvent = { id: string; instanceId: string };
 type AttackMotionEvent = { id: string; instanceId: string; dr: number; dc: number };
 type MoveMotionEvent = { id: string; instanceId: string };
 type ImpactFxEvent = { id: string; targetId: string; r: number; c: number };
+type Scene = "town" | "tcg";
 type SkillImpactFxEvent = {
   id: string;
   skillId: SkillId;
@@ -122,6 +124,7 @@ export default function App() {
 
   const [southSkin, setSouthSkin] = useState<Skin>("default");
   const [northSkin, setNorthSkin] = useState<Skin>("default");
+  const [scene, setScene] = useState<Scene>("town");
 
   const [popupId, setPopupId] = useState<string | null>(null);
   const popupOpen = popupId !== null;
@@ -1038,6 +1041,10 @@ const reinforceSet = useMemo(() => {
 
   const canSelect = (inst: any) => canSelectUnit({ inst, gameOver, turn, perUnitTurn });
 
+  if (scene === "town") {
+    return <TownScene onEnterTcg={() => setScene("tcg")} />;
+  }
+
   return (
     <>
       <UnitPopup
@@ -1087,6 +1094,25 @@ const reinforceSet = useMemo(() => {
       />
 
       <SelectedUnitStatus selected={selected} unitsById={unitsById} perUnitTurn={perUnitTurn} />
+
+      <button
+        onClick={() => setScene("town")}
+        style={{
+          position: "fixed",
+          right: 12,
+          top: 12,
+          zIndex: 9100,
+          padding: "7px 10px",
+          borderRadius: 10,
+          border: "1px solid rgba(255,255,255,0.22)",
+          background: "rgba(0,0,0,0.56)",
+          color: "#fff",
+          fontWeight: 900,
+          cursor: "pointer",
+        }}
+      >
+        街へ戻る
+      </button>
 
       <GameBoardArea
         phase={phase}
