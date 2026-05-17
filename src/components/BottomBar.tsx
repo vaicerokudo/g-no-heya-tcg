@@ -103,6 +103,7 @@ export function BottomBar({
                 return (
                   <button
                     key={skill.id}
+                    className={`skillButton${canUse ? "" : " skillButtonDisabled"}`}
                     disabled={!canUse}
                     title={buttonDescription}
                     aria-label={buttonDescription}
@@ -110,8 +111,8 @@ export function BottomBar({
                     style={{
                       padding: "8px 10px",
                       borderRadius: 10,
-                      border: "1px solid #444",
-                      background: canUse ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.15)",
+                      border: canUse ? "1px solid #444" : "1px solid rgba(255,255,255,0.12)",
+                      background: canUse ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.34)",
                       color: "#fff",
                       fontWeight: 900,
                       whiteSpace: "nowrap",

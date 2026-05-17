@@ -104,6 +104,20 @@ html { overflow-y: scroll; }
   order: 3;
 }
 
+.skillButton {
+  transition: opacity 140ms ease, filter 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.skillButtonDisabled {
+  cursor: not-allowed;
+  filter: grayscale(0.42) brightness(0.78);
+  opacity: 0.55;
+}
+
+.skillButtonDisabled:hover {
+  opacity: 0.58;
+}
+
 @media (max-width: 720px) {
   .bottomBar {
     left: 10px !important;
