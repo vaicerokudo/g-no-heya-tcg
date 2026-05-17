@@ -69,6 +69,7 @@ export function BottomBar({
   return (
     <div
       ref={bottomBarRef}
+      className="bottomBar"
       style={{
         position: "fixed",
         left: 0,

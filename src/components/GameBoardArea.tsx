@@ -1,4 +1,4 @@
-import type { ComponentProps, Dispatch, SetStateAction } from "react";
+import type { ComponentProps, CSSProperties, Dispatch, SetStateAction } from "react";
 import type { Skin } from "../assets/imagePaths";
 import type { Side, UnitDef } from "../game/types";
 import { Board } from "./Board/Board";
@@ -42,17 +42,19 @@ export function GameBoardArea({
   ...boardProps
 }: GameBoardAreaProps) {
   const showSouthHandDeck = phase !== "setup_draw";
+  const areaStyle = {
+    display: "flex",
+    gap: 12,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    maxWidth: "100%",
+    "--bottom-bar-space": `${bottomBarH + 12}px`,
+  } as CSSProperties;
 
   return (
     <div
-      style={{
-        display: "flex",
-        gap: 12,
-        alignItems: "flex-start",
-        justifyContent: "center",
-        maxWidth: "100%",
-        paddingBottom: bottomBarH + 12,
-      }}
+      className="gameBoardArea"
+      style={areaStyle}
     >
       {showSouthHandDeck && <SouthDeck deckSouth={deckSouth} skin={southSkin} getDeckBackPath={getDeckBackPath} />}
 
