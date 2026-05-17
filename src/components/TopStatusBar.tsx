@@ -16,7 +16,7 @@ type TopStatusBarProps = {
   handNorthCount: number;
 };
 
-const SKIN_OPTIONS: Skin[] = ["default", "dark", "travel"];
+const SKIN_OPTIONS: Skin[] = ["default", "dark", "travel", "comic"];
 
 function SkinSelect({
   label,

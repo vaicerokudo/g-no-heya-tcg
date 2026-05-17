@@ -1,7 +1,7 @@
 // src/assets/imagePaths.ts
 export type Side = "north" | "south";
 export type Form = "base" | "g";
-export type Skin = "default" | "dark" | "travel"; // 増えたら追加
+export type Skin = "default" | "dark" | "travel" | "comic"; // add new skin names here
 
 function normId(unitId: string) {
   return unitId.trim().toLowerCase();
@@ -25,8 +25,6 @@ export function getPortrait(
   return `/portraits/${side}/${skin}/${form}/${normId(unitId)}.png`;
 }
 
-// 既存の export type Side/Form/Skin と normId はそのまま
-
 export function cardCandidates(
   unitId: string,
   side: Side,
@@ -40,7 +38,6 @@ export function cardCandidates(
     `/cards/${side}/default/base/${id}.png`,
     `/cards/unknown.png`,
   ];
-  // 重複除去（skin=defaultの時など）
   return Array.from(new Set(list));
 }
 

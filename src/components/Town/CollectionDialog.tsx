@@ -9,7 +9,7 @@ type CollectionDialogProps = {
   onClose: () => void;
 };
 
-const SKINS: Skin[] = ["default", "dark", "travel"];
+const SKINS: Skin[] = ["default", "dark", "travel", "comic"];
 
 function describeMove(unit: UnitDef) {
   const pattern = unit.base.movePattern;
