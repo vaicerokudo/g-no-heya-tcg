@@ -940,6 +940,8 @@ const reinforceSet = useMemo(() => {
   });
 
   useEffect(() => {
+    if (scene !== "tcg") return;
+
     const el = bottomBarRef.current;
     if (!el) return;
 
@@ -951,7 +953,7 @@ const reinforceSet = useMemo(() => {
     setBottomBarH(el.getBoundingClientRect().height);
 
     return () => ro.disconnect();
-  }, []);
+  }, [scene]);
 
   const dmgByInstanceId = useMemo(() => {
     const m = new Map<string, { id: string; amount: number }>();
