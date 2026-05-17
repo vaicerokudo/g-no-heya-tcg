@@ -44,7 +44,7 @@ export function GameBoardArea({
   const showSouthHandDeck = phase !== "setup_draw";
   const areaStyle = {
     display: "flex",
-    gap: 12,
+    gap: "var(--game-board-area-gap, 12px)",
     alignItems: "flex-start",
     justifyContent: "center",
     maxWidth: "100%",

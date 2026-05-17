@@ -26,8 +26,8 @@ type SouthHandProps = {
 
 export function SouthDeck({ deckSouth, skin, getDeckBackPath }: SouthDeckProps) {
   return (
-    <div style={{ width: 180, flex: "0 0 auto" }}>
-      <div style={{ padding: 10, border: "1px solid #444", borderRadius: 12 }}>
+    <div className="southDeckPanel" style={{ width: "var(--south-deck-width, 180px)", flex: "0 0 auto" }}>
+      <div style={{ padding: "var(--south-panel-padding, 10px)", border: "1px solid #444", borderRadius: 12 }}>
         <div style={{ fontWeight: 900, marginBottom: 6 }}>山札（South）</div>
 
         <button
@@ -38,7 +38,7 @@ export function SouthDeck({ deckSouth, skin, getDeckBackPath }: SouthDeckProps) 
             borderRadius: 12,
             border: "1px solid #6a5a00",
             background: "rgba(0,0,0,0.35)",
-            padding: 6,
+            padding: "var(--south-card-padding, 6px)",
             cursor: "default",
           }}
           title="初回は自動で5枚ドロー済み"
@@ -88,28 +88,29 @@ export function SouthHand({
   getHandFallbackSrc,
 }: SouthHandProps) {
   return (
-    <div style={{ width: 260, flex: "0 0 auto" }}>
-      <div style={{ padding: 10, border: "1px solid #444", borderRadius: 12 }}>
+    <div className="southHandPanel" style={{ width: "var(--south-hand-width, 260px)", flex: "0 0 auto" }}>
+      <div style={{ padding: "var(--south-panel-padding, 10px)", border: "1px solid #444", borderRadius: 12 }}>
         <div style={{ fontWeight: 900, marginBottom: 6 }}>手札（South）: {handSouth.length}枚</div>
 
         {phase === "setup_deploy" ? (
-          <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 8 }}>
+          <div className="southHandNote" style={{ fontSize: "var(--south-note-font-size, 12px)", opacity: 0.85, marginBottom: 8 }}>
             出撃: {deployPlaced}/3（下段クリックで配置）
           </div>
         ) : (
-          <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 8 }}>
+          <div className="southHandNote" style={{ fontSize: "var(--south-note-font-size, 12px)", opacity: 0.85, marginBottom: 8 }}>
             増援: {battleDeployUsed ? "済（このターンは終了）" : "未"}（手札を選んで下段をクリック / 1ターン1回）
           </div>
         )}
 
         <div
+          className="southHandGrid"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: 10,
-            maxHeight: "calc(100vh - 220px)",
+            gap: "var(--south-hand-grid-gap, 10px)",
+            maxHeight: "var(--south-hand-max-height, calc(100vh - 220px))",
             overflowY: "auto",
-            paddingRight: 6,
+            paddingRight: "var(--south-hand-grid-padding-right, 6px)",
           }}
         >
           {handSouth.map((uid, i) => {
@@ -121,10 +122,11 @@ export function SouthHand({
             return (
               <button
                 key={key}
+                className="southHandCardButton"
                 onClick={() => setSelectedHandKey(key)}
                 style={{
                   textAlign: "left",
-                  padding: 8,
+                  padding: "var(--south-card-button-padding, 8px)",
                   borderRadius: 12,
                   border: isSelected ? "2px solid gold" : "1px solid #444",
                   background: "rgba(0,0,0,0.20)",
@@ -134,9 +136,10 @@ export function SouthHand({
                 }}
               >
                 <div
+                  className="southHandCardImage"
                   style={{
                     width: "100%",
-                    maxWidth: 180,
+                    maxWidth: "var(--south-hand-card-max-width, 180px)",
                     margin: "0 auto",
                     aspectRatio: "63 / 88",
                     borderRadius: 10,
@@ -181,7 +184,7 @@ export function SouthHand({
         </div>
 
         {!selectedHandUnitId && (
-          <div style={{ marginTop: 10, fontSize: 12, opacity: 0.75 }}>
+          <div className="southHandNote" style={{ marginTop: 10, fontSize: "var(--south-note-font-size, 12px)", opacity: 0.75 }}>
             まず手札からカードを1枚選んでください
           </div>
         )}

@@ -76,7 +76,29 @@ html { overflow-y: scroll; }
   }
 
   .gameBoardArea {
+    --game-board-area-gap: 6px;
     padding-bottom: calc(var(--bottom-bar-space) + 36px);
+  }
+
+  .southDeckPanel {
+    --south-deck-width: 96px;
+    --south-panel-padding: 6px;
+    --south-card-padding: 4px;
+  }
+
+  .southHandPanel {
+    --south-hand-width: 156px;
+    --south-panel-padding: 6px;
+    --south-hand-grid-gap: 6px;
+    --south-hand-grid-padding-right: 3px;
+    --south-hand-max-height: calc(100dvh - 260px);
+    --south-card-button-padding: 5px;
+    --south-hand-card-max-width: 92px;
+    --south-note-font-size: 10px;
+  }
+
+  .southHandNote {
+    line-height: 1.35;
   }
 }
 
