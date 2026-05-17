@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import playerSpriteSheet from "../assets/pets/roku/spritesheet.webp";
+import guildLobby from "../assets/town/guild-lobby.png";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
@@ -126,13 +127,6 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
         </div>
 
         <div style={mapStyle}>
-          <div style={{ ...lanternGlowStyle, left: "7%", top: "8%" }} />
-          <div style={{ ...lanternGlowStyle, right: "7%", top: "8%" }} />
-
-          <div style={guildSignStyle}>Gの部屋</div>
-          <div style={backCounterStyle} />
-          <div style={rugStyle} />
-
           <div
             style={{
               ...duelTableStyle,
@@ -266,60 +260,12 @@ const mapStyle: CSSProperties = {
   overflow: "hidden",
   border: "1px solid rgba(255,229,172,0.25)",
   borderRadius: 16,
-  background:
-    "linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(180deg, #4a4540 0 28%, #393631 28% 41%, #6a4429 41% 42%, #5a3424 42% 100%)",
-  backgroundSize: "38px 38px, 38px 38px, 100% 100%",
+  backgroundImage: `url(${guildLobby})`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+  backgroundColor: "#211913",
   boxShadow: "0 22px 56px rgba(0,0,0,0.46), inset 0 0 48px rgba(0,0,0,0.28)",
-};
-
-const lanternGlowStyle: CSSProperties = {
-  position: "absolute",
-  width: 74,
-  height: 74,
-  borderRadius: "999px",
-  background:
-    "radial-gradient(circle, rgba(255,202,105,0.8) 0 10%, rgba(255,148,54,0.28) 28%, transparent 72%)",
-  filter: "blur(1px)",
-  pointerEvents: "none",
-};
-
-const guildSignStyle: CSSProperties = {
-  position: "absolute",
-  left: "50%",
-  top: "7%",
-  transform: "translateX(-50%)",
-  padding: "7px 18px",
-  borderRadius: 10,
-  color: "#f9ddb1",
-  background: "linear-gradient(180deg, #5c3d25, #2d1d14)",
-  border: "1px solid rgba(255,225,165,0.28)",
-  boxShadow: "0 8px 18px rgba(0,0,0,0.3)",
-  fontWeight: 950,
-};
-
-const backCounterStyle: CSSProperties = {
-  position: "absolute",
-  left: "8%",
-  right: "8%",
-  top: "31%",
-  height: "10%",
-  borderRadius: 12,
-  background: "linear-gradient(180deg, #7c5131, #3e271b)",
-  border: "1px solid rgba(255,239,205,0.18)",
-  boxShadow: "0 12px 24px rgba(0,0,0,0.28)",
-};
-
-const rugStyle: CSSProperties = {
-  position: "absolute",
-  left: "58%",
-  top: "47%",
-  width: "34%",
-  height: "28%",
-  borderRadius: "48%",
-  background:
-    "radial-gradient(ellipse, rgba(139,42,43,0.72) 0 55%, rgba(82,28,35,0.72) 57% 100%)",
-  border: "1px solid rgba(255,221,153,0.12)",
-  boxShadow: "inset 0 0 26px rgba(0,0,0,0.22)",
 };
 
 const duelTableStyle: CSSProperties = {
