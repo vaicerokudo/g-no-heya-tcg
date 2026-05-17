@@ -64,6 +64,22 @@ html { overflow-y: scroll; }
   padding-bottom: var(--bottom-bar-space);
 }
 
+.southHandDeckRail {
+  display: contents;
+}
+
+.southDeckPanel {
+  order: 1;
+}
+
+.gameBoardBoard {
+  order: 2;
+}
+
+.southHandPanel {
+  order: 3;
+}
+
 @media (max-width: 720px) {
   .bottomBar {
     left: 10px !important;
@@ -77,23 +93,53 @@ html { overflow-y: scroll; }
 
   .gameBoardArea {
     --game-board-area-gap: 6px;
+    flex-direction: column;
+    align-items: center;
     padding-bottom: calc(var(--bottom-bar-space) + 36px);
+  }
+
+  .gameBoardBoard {
+    order: 1;
+    max-width: 100%;
+  }
+
+  .southHandDeckRail {
+    display: flex;
+    order: 2;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 6px;
+    align-items: flex-start;
+    overflow-x: auto;
+    padding: 0 4px 4px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .southDeckPanel {
     --south-deck-width: 96px;
+    --south-deck-flex: 0 0 auto;
     --south-panel-padding: 6px;
     --south-card-padding: 4px;
   }
 
   .southHandPanel {
-    --south-hand-width: 156px;
+    --south-hand-width: min(260px, calc(100vw - 120px));
+    --south-hand-flex: 1 1 auto;
     --south-panel-padding: 6px;
+    min-width: 0;
     --south-hand-grid-gap: 6px;
     --south-hand-grid-padding-right: 3px;
-    --south-hand-max-height: calc(100dvh - 260px);
+    --south-hand-max-height: none;
+    --south-hand-grid-display: flex;
+    --south-hand-grid-template-columns: none;
+    --south-hand-grid-flex-wrap: nowrap;
+    --south-hand-grid-overflow-x: auto;
+    --south-hand-grid-overflow-y: hidden;
     --south-card-button-padding: 5px;
     --south-hand-card-max-width: 92px;
+    --south-hand-card-flex: 0 0 auto;
+    --south-hand-card-width: 104px;
     --south-note-font-size: 10px;
   }
 

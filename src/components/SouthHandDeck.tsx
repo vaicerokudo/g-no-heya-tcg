@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import type { Skin } from "../assets/imagePaths";
 import type { Side, UnitDef } from "../game/types";
 
@@ -26,7 +26,10 @@ type SouthHandProps = {
 
 export function SouthDeck({ deckSouth, skin, getDeckBackPath }: SouthDeckProps) {
   return (
-    <div className="southDeckPanel" style={{ width: "var(--south-deck-width, 180px)", flex: "0 0 auto" }}>
+    <div
+      className="southDeckPanel"
+      style={{ width: "var(--south-deck-width, 180px)", flex: "var(--south-deck-flex, 0 0 auto)" }}
+    >
       <div style={{ padding: "var(--south-panel-padding, 10px)", border: "1px solid #444", borderRadius: 12 }}>
         <div style={{ fontWeight: 900, marginBottom: 6 }}>山札（South）</div>
 
@@ -88,7 +91,10 @@ export function SouthHand({
   getHandFallbackSrc,
 }: SouthHandProps) {
   return (
-    <div className="southHandPanel" style={{ width: "var(--south-hand-width, 260px)", flex: "0 0 auto" }}>
+    <div
+      className="southHandPanel"
+      style={{ width: "var(--south-hand-width, 260px)", flex: "var(--south-hand-flex, 0 0 auto)" }}
+    >
       <div style={{ padding: "var(--south-panel-padding, 10px)", border: "1px solid #444", borderRadius: 12 }}>
         <div style={{ fontWeight: 900, marginBottom: 6 }}>手札（South）: {handSouth.length}枚</div>
 
@@ -105,11 +111,13 @@ export function SouthHand({
         <div
           className="southHandGrid"
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            display: "var(--south-hand-grid-display, grid)",
+            gridTemplateColumns: "var(--south-hand-grid-template-columns, 1fr 1fr)",
+            flexWrap: "var(--south-hand-grid-flex-wrap, initial)" as CSSProperties["flexWrap"],
             gap: "var(--south-hand-grid-gap, 10px)",
             maxHeight: "var(--south-hand-max-height, calc(100vh - 220px))",
-            overflowY: "auto",
+            overflowX: "var(--south-hand-grid-overflow-x, visible)" as CSSProperties["overflowX"],
+            overflowY: "var(--south-hand-grid-overflow-y, auto)" as CSSProperties["overflowY"],
             paddingRight: "var(--south-hand-grid-padding-right, 6px)",
           }}
         >
@@ -133,6 +141,8 @@ export function SouthHand({
                   color: "#fff",
                   fontWeight: 900,
                   cursor: "pointer",
+                  flex: "var(--south-hand-card-flex, initial)",
+                  width: "var(--south-hand-card-width, auto)",
                 }}
               >
                 <div

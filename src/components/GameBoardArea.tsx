@@ -56,26 +56,28 @@ export function GameBoardArea({
       className="gameBoardArea"
       style={areaStyle}
     >
-      {showSouthHandDeck && <SouthDeck deckSouth={deckSouth} skin={southSkin} getDeckBackPath={getDeckBackPath} />}
-
-      <div style={{ flex: "0 0 auto" }}>
+      <div className="gameBoardBoard" style={{ flex: "0 0 auto" }}>
         <Board {...boardProps} unitsById={unitsById} />
       </div>
 
       {showSouthHandDeck && (
-        <SouthHand
-          phase={phase}
-          handSouth={handSouth}
-          selectedHandKey={selectedHandKey}
-          setSelectedHandKey={setSelectedHandKey}
-          selectedHandUnitId={selectedHandUnitId}
-          deployPlaced={deployPlaced}
-          battleDeployUsed={battleDeployUsed}
-          unitsById={unitsById}
-          skin={southSkin}
-          getHandCardSrc={getHandCardSrc}
-          getHandFallbackSrc={getHandFallbackSrc}
-        />
+        <div className="southHandDeckRail">
+          <SouthDeck deckSouth={deckSouth} skin={southSkin} getDeckBackPath={getDeckBackPath} />
+
+          <SouthHand
+            phase={phase}
+            handSouth={handSouth}
+            selectedHandKey={selectedHandKey}
+            setSelectedHandKey={setSelectedHandKey}
+            selectedHandUnitId={selectedHandUnitId}
+            deployPlaced={deployPlaced}
+            battleDeployUsed={battleDeployUsed}
+            unitsById={unitsById}
+            skin={southSkin}
+            getHandCardSrc={getHandCardSrc}
+            getHandFallbackSrc={getHandFallbackSrc}
+          />
+        </div>
       )}
     </div>
   );
