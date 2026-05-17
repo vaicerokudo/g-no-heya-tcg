@@ -2,9 +2,12 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import playerSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import guildLobby from "../assets/town/guild-lobby.png";
 import reception7171 from "../assets/town/reception-7171.png";
+import type { UnitDef } from "../game/types";
+import { CollectionDialog } from "./Town/CollectionDialog";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
+  unitsById: Record<string, UnitDef>;
 };
 
 type Pos = { x: number; y: number };
@@ -63,7 +66,7 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
   return Math.hypot(dx, dy) <= threshold;
 }
 
-export function TownScene({ onEnterTcg }: TownSceneProps) {
+export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 44, y: 68 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
   const [receptionTopic, setReceptionTopic] = useState<ReceptionTopic>("home");
@@ -282,13 +285,7 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
           )}
 
           {activeDialog === "collection" && (
-            <div style={collectionDialogStyle}>
-              <div style={dialogNameStyle}>カード収集</div>
-              <div style={dialogTextStyle}>集めたカードを確認できる場所にする予定です。</div>
-              <button onClick={() => setActiveDialog(null)} style={dialogChoiceButtonStyle(false)}>
-                閉じる
-              </button>
-            </div>
+            <CollectionDialog unitsById={unitsById} onClose={() => setActiveDialog(null)} />
           )}
 
           <div
@@ -519,22 +516,6 @@ const dialogOverlayStyle: CSSProperties = {
   padding: "clamp(12px, 3dvh, 24px) 10px",
   background: "rgba(6, 5, 5, 0.62)",
   backdropFilter: "blur(2px)",
-};
-
-const collectionDialogStyle: CSSProperties = {
-  position: "absolute",
-  left: "50%",
-  bottom: 18,
-  transform: "translateX(-50%)",
-  width: "min(420px, calc(100% - 28px))",
-  padding: "14px 16px",
-  borderRadius: 14,
-  background: "rgba(27,18,13,0.9)",
-  border: "1px solid rgba(255,216,102,0.58)",
-  boxShadow: "0 16px 32px rgba(0,0,0,0.38)",
-  display: "grid",
-  gap: 10,
-  zIndex: 12,
 };
 
 const dialogPanelStyle: CSSProperties = {

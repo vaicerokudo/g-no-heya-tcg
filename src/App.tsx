@@ -1025,7 +1025,7 @@ const reinforceSet = useMemo(() => {
   const canSelect = (inst: any) => canSelectUnit({ inst, gameOver, turn, perUnitTurn });
 
   if (scene === "town") {
-    return <TownScene onEnterTcg={() => setScene("tcg")} />;
+    return <TownScene onEnterTcg={() => setScene("tcg")} unitsById={unitsById} />;
   }
 
   return (
