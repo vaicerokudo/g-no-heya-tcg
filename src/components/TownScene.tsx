@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import playerSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import guildLobby from "../assets/town/guild-lobby.png";
+import reception7171 from "../assets/town/reception-7171.png";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
@@ -189,8 +190,11 @@ export function TownScene({ onEnterTcg }: TownSceneProps) {
 
           {activeDialog === "reception" && (
             <div style={dialogPanelStyle}>
-              <div style={dialogNameStyle}>7171</div>
-              <div style={dialogTextStyle}>ようこそ、Gの部屋へにゃ。</div>
+              <img src={reception7171} alt="7171受付" style={dialogPortraitStyle} />
+              <div style={dialogBodyStyle}>
+                <div style={dialogNameStyle}>7171</div>
+                <div style={dialogTextStyle}>ようこそ、Gの部屋へにゃ。</div>
+              </div>
               <button onClick={() => setActiveDialog(null)} style={dialogCloseButtonStyle}>
                 閉じる
               </button>
@@ -383,17 +387,33 @@ const dialogPanelStyle: CSSProperties = {
   left: "50%",
   bottom: 14,
   transform: "translateX(-50%)",
-  width: "min(420px, calc(100% - 28px))",
+  width: "min(560px, calc(100% - 28px))",
   padding: "12px 14px",
   borderRadius: 14,
   background: "rgba(27,18,13,0.86)",
   border: "1px solid rgba(255,216,102,0.58)",
   boxShadow: "0 16px 32px rgba(0,0,0,0.38)",
   display: "grid",
-  gridTemplateColumns: "auto 1fr auto",
+  gridTemplateColumns: "82px minmax(0, 1fr) auto",
   gap: 10,
   alignItems: "center",
   zIndex: 12,
+};
+
+const dialogPortraitStyle: CSSProperties = {
+  width: 82,
+  height: 110,
+  maxWidth: "22vw",
+  maxHeight: "28vh",
+  objectFit: "cover",
+  objectPosition: "center 18%",
+  borderRadius: 12,
+  border: "1px solid rgba(255,232,180,0.32)",
+  boxShadow: "0 8px 18px rgba(0,0,0,0.34)",
+};
+
+const dialogBodyStyle: CSSProperties = {
+  minWidth: 0,
 };
 
 const dialogNameStyle: CSSProperties = {
