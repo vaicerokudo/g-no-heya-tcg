@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { cardCandidates, type Skin } from "../../assets/imagePaths";
+import { getSkinLabel } from "../../assets/skinLabels";
 import type { UnitDef } from "../../game/types";
 import { getAvailableSkillsForUnit, SKILLS } from "../../game/skills/registry";
 import { useImgFallback } from "../imgFallback";
@@ -102,7 +103,7 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
                 onClick={() => setSkin(nextSkin)}
                 style={tabButtonStyle(nextSkin === skin)}
               >
-                {nextSkin}
+                {getSkinLabel(nextSkin)}
               </button>
             ))}
           </div>

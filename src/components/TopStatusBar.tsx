@@ -1,4 +1,5 @@
 import type { Skin } from "../assets/imagePaths";
+import { getSkinLabel } from "../assets/skinLabels";
 import type { Side } from "../game/types";
 
 type TopStatusBarProps = {
@@ -44,7 +45,7 @@ function SkinSelect({
       >
         {SKIN_OPTIONS.map((skin) => (
           <option key={skin} value={skin}>
-            {skin}
+            {getSkinLabel(skin)}
           </option>
         ))}
       </select>
