@@ -8,6 +8,7 @@ import { CollectionDialog } from "./Town/CollectionDialog";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
+  onSkinUnlocked?: () => void;
   unitsById: Record<string, UnitDef>;
 };
 
@@ -94,7 +95,7 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
   return Math.hypot(dx, dy) <= threshold;
 }
 
-export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
+export function TownScene({ onEnterTcg, onSkinUnlocked, unitsById }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 44, y: 68 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
   const [receptionTopic, setReceptionTopic] = useState<ReceptionTopic>("home");
@@ -138,10 +139,12 @@ export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
 
     const unlockResult = unlockSkin(unlockConfig.skinId);
     if (unlockResult === "already-unlocked") {
+      onSkinUnlocked?.();
       setPassphraseMessage(unlockConfig.alreadyUnlockedMessage);
       return;
     }
 
+    onSkinUnlocked?.();
     setPassphraseMessage(unlockConfig.unlockedMessage);
   };
 

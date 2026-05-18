@@ -125,7 +125,7 @@ export default function App() {
 
   const [southSkin, setSouthSkin] = useState<Skin>("default");
   const [northSkin, setNorthSkin] = useState<Skin>("default");
-  const [unlockedSkins] = useState<Skin[]>(() => readUnlockedSkins());
+  const [unlockedSkins, setUnlockedSkins] = useState<Skin[]>(() => readUnlockedSkins());
   const [scene, setScene] = useState<Scene>("town");
 
   const [popupId, setPopupId] = useState<string | null>(null);
@@ -1031,6 +1031,10 @@ const reinforceSet = useMemo(() => {
     setNorthSkin(nextSkin);
   }
 
+  function refreshUnlockedSkins() {
+    setUnlockedSkins(readUnlockedSkins());
+  }
+
   useEffect(() => {
     if (!isSkinUnlocked(southSkin, unlockedSkins)) setSouthSkin("default");
     if (!isSkinUnlocked(northSkin, unlockedSkins)) setNorthSkin("default");
@@ -1043,7 +1047,13 @@ const reinforceSet = useMemo(() => {
   const canSelect = (inst: any) => canSelectUnit({ inst, gameOver, turn, perUnitTurn });
 
   if (scene === "town") {
-    return <TownScene onEnterTcg={() => setScene("tcg")} unitsById={unitsById} />;
+    return (
+      <TownScene
+        onEnterTcg={() => setScene("tcg")}
+        onSkinUnlocked={refreshUnlockedSkins}
+        unitsById={unitsById}
+      />
+    );
   }
 
   return (
