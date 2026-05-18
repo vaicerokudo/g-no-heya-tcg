@@ -187,6 +187,7 @@ export function AstoriaMapScene({ onEnterLobby }: AstoriaMapSceneProps) {
               key={spot.id}
               onClick={() => handleHotspot(spot.id)}
               disabled={isMoving}
+              title={`${spot.label}: ${spot.subLabel}`}
               style={{
                 ...hotspotStyle,
                 ...(isMoving ? hotspotDisabledStyle : null),
@@ -329,16 +330,13 @@ const mapStyle: CSSProperties = {
 
 const hotspotStyle: CSSProperties = {
   position: "absolute",
-  display: "grid",
-  placeItems: "center",
-  gap: 2,
-  padding: 6,
-  borderRadius: 14,
-  border: "1px solid rgba(255,232,180,0.62)",
-  background: "rgba(29,20,16,0.66)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 0,
+  border: 0,
+  background: "transparent",
   color: "#fff1cc",
-  boxShadow: "0 10px 24px rgba(0,0,0,0.32), inset 0 0 20px rgba(255,216,102,0.08)",
-  fontWeight: 950,
   touchAction: "manipulation",
   cursor: "pointer",
 };
@@ -349,12 +347,33 @@ const hotspotDisabledStyle: CSSProperties = {
 };
 
 const hotspotLabelStyle: CSSProperties = {
-  fontSize: 14,
+  minWidth: 72,
+  maxWidth: 112,
+  minHeight: 34,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "6px 10px",
+  boxSizing: "border-box",
+  borderRadius: 999,
+  border: "1px solid rgba(255,225,149,0.78)",
+  background: "linear-gradient(180deg, rgba(58,39,25,0.82), rgba(23,17,14,0.72))",
+  color: "#fff1cc",
+  boxShadow: "0 8px 18px rgba(0,0,0,0.26), 0 0 12px rgba(255,214,109,0.18)",
+  fontSize: 13,
+  lineHeight: 1.1,
+  fontWeight: 950,
+  textAlign: "center",
+  textShadow: "0 1px 3px rgba(0,0,0,0.65)",
 };
 
 const hotspotSubLabelStyle: CSSProperties = {
-  fontSize: 10,
-  color: "rgba(255,246,223,0.74)",
+  position: "absolute",
+  width: 1,
+  height: 1,
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  whiteSpace: "nowrap",
 };
 
 const rokuSpriteStyle: CSSProperties = {
