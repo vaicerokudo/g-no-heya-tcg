@@ -357,6 +357,7 @@
         "hp": 5,
         "movePattern": { "type": "orthogonal", "range": 2, "diagonal": false, "canPassThroughUnits": false }
       },
+      "attacks": { "normalAttack": { "type": "rangedLine", "range": 2, "lineOfSightBlockedByUnits": true } },
       "passives": [{ "id": "PLAYER_REFLECT", "name": "反射", "effect": "onDamagedDealDamageBack", "params": { "damage": 1 } }],
       "skills": {
         "skill1": {
