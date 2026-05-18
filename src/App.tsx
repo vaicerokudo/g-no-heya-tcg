@@ -48,6 +48,7 @@ import { VictoryModal } from "./components/UI/VictoryModal";
 import {
   buildInitialNorthDeployCols,
   buildInitialNorthInstances,
+  buildSouthInitialDeploySet,
   buildSouthReinforceSet,
 } from "./game/deploy";
 
@@ -85,6 +86,7 @@ type AttackMotionEvent = { id: string; instanceId: string; dr: number; dc: numbe
 type MoveMotionEvent = { id: string; instanceId: string };
 type ImpactFxEvent = { id: string; targetId: string; r: number; c: number };
 type Scene = "astoria" | "town" | "tcg";
+type BoardPreviewMode = "move" | "attack";
 type SkillImpactFxEvent = {
   id: string;
   skillId: SkillId;
@@ -127,6 +129,7 @@ export default function App() {
 
   const [instances, setInstances] = useState(initial.instances);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [boardPreviewMode, setBoardPreviewMode] = useState<BoardPreviewMode>("move");
 
   
 
@@ -329,6 +332,7 @@ export default function App() {
 
     setSelectedId(null);
     setSelectedHandKey(null);
+    setBoardPreviewMode("move");
   }
 
   function applyInitialHandsAndDecks({
@@ -354,6 +358,7 @@ export default function App() {
     setSkillMode(null);
     setShowEndTurnConfirm(false);
     setSelectedHandKey(null);
+    setBoardPreviewMode("move");
   }
 
   function resetTurnStartRuleState() {
@@ -685,6 +690,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     if (!selected) return [];
     if (gameOver) return [];
     if (selected.side !== turn) return [];
+    if (boardPreviewMode !== "move") return [];
 
     const me = perUnitTurn[selected.instanceId];
     if (me?.done) return [];
@@ -698,7 +704,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
       selectedInstanceId: selectedId,
     };
     return getLegalMoves(stateLike as any, selected as any);
-  }, [selected, gameOver, turn, rows, cols, unitsById, instances, selectedId, perUnitTurn]);
+  }, [selected, gameOver, turn, boardPreviewMode, rows, cols, unitsById, instances, selectedId, perUnitTurn]);
 
   const legalMoveSet = useMemo(() => {
     const s = new Set<string>();
@@ -720,6 +726,18 @@ const reinforceSet = useMemo(() => {
   return s;
 }, [gameOver, phase, turn, selectedHandKey, battleDeployUsed, rows, cols, occ]);
 
+  const initialDeploySet = useMemo(() => {
+    return buildSouthInitialDeploySet({
+      gameOver,
+      phase,
+      selectedHandPick,
+      rows,
+      cols,
+      candidateCols: initialDeployCandidateCols,
+      isOccupied: (r, c) => occ.has(posKey(r, c)),
+    });
+  }, [gameOver, phase, selectedHandPick, rows, cols, initialDeployCandidateCols, occ]);
+
 
 
   const attackMarks = useMemo(() => {
@@ -729,7 +747,7 @@ const reinforceSet = useMemo(() => {
 
     const me = perUnitTurn[selected.instanceId];
     if (me?.done) return [];
-    if (!me?.moved) return [];
+    if (!me?.moved && boardPreviewMode !== "attack") return [];
     if (me?.attacked) return [];
 
     const stateLike = {
@@ -740,7 +758,7 @@ const reinforceSet = useMemo(() => {
       selectedInstanceId: selectedId,
     };
     return getAttackMarks(stateLike as any, selected as any);
-  }, [selected, gameOver, turn, rows, cols, unitsById, instances, selectedId, perUnitTurn]);
+  }, [selected, gameOver, turn, boardPreviewMode, rows, cols, unitsById, instances, selectedId, perUnitTurn]);
 
   const attackRangeSet = useMemo(() => {
     const s = new Set<string>();
@@ -806,7 +824,7 @@ const reinforceSet = useMemo(() => {
   });
 
   function doAttack(targetId: string) {
-    tryNormalAttack({
+    const attacked = tryNormalAttack({
       selected,
       gameOver,
       turn,
@@ -818,10 +836,11 @@ const reinforceSet = useMemo(() => {
       instances: instances as any,
       selectedId,
     });
+    if (attacked) setBoardPreviewMode("move");
   }
 
   const moveTo = (r: number, c: number) => {
-    tryMove({
+    const moved = tryMove({
       selected,
       gameOver,
       turn,
@@ -833,6 +852,7 @@ const reinforceSet = useMemo(() => {
       instances: instances as any,
       unitsById,
     });
+    if (moved) setBoardPreviewMode("attack");
   };
 
   const {
@@ -903,12 +923,14 @@ const reinforceSet = useMemo(() => {
     });
 
     setSelectedId(null);
+    setBoardPreviewMode("move");
   }
 
   function handleBoardLongPressUnit(inst: any) {
     if (gameOver) return;
 
     setSelectedId(inst.instanceId);
+    setBoardPreviewMode("move");
     setPopupId(inst.instanceId);
     setSkillMode(null);
   }
@@ -941,7 +963,13 @@ const reinforceSet = useMemo(() => {
         return;
       }
       if (canSelect(inst)) {
-        setSelectedId(inst.instanceId);
+        if (selectedId === inst.instanceId) {
+          const me = perUnitTurn[inst.instanceId];
+          setBoardPreviewMode((mode) => (me?.moved ? "attack" : mode === "move" ? "attack" : "move"));
+        } else {
+          setSelectedId(inst.instanceId);
+          setBoardPreviewMode("move");
+        }
       }
       return;
     }
@@ -1190,6 +1218,7 @@ const reinforceSet = useMemo(() => {
         turn={turn}
         gameOver={gameOver}
         legalMoveSet={legalMoveSet}
+        initialDeploySet={initialDeploySet}
         reinforceSet={reinforceSet}
         attackRangeSet={attackRangeSet}
         attackBlockerSet={attackBlockerSet}

@@ -45,6 +45,46 @@ export function canStartSouthDeploy({
   return true;
 }
 
+export function buildSouthInitialDeploySet({
+  gameOver,
+  phase,
+  selectedHandPick,
+  rows,
+  cols,
+  candidateCols,
+  isOccupied,
+}: {
+  gameOver: boolean;
+  phase: "setup_draw" | "setup_deploy" | "battle";
+  selectedHandPick: unknown;
+  rows: number;
+  cols: number;
+  candidateCols?: readonly number[];
+  isOccupied: (r: number, c: number) => boolean;
+}) {
+  const deploySet = new Set<string>();
+  if (gameOver) return deploySet;
+
+  for (let c = 0; c < cols; c++) {
+    const r = rows - 1;
+    if (
+      canStartSouthDeploy({
+        phase,
+        selectedHandPick,
+        r,
+        c,
+        rows,
+        candidateCols,
+        occupied: isOccupied(r, c),
+      })
+    ) {
+      deploySet.add(`${r},${c}`);
+    }
+  }
+
+  return deploySet;
+}
+
 export function canStartSouthReinforce({
   phase,
   turn,

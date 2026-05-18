@@ -118,6 +118,20 @@ html { overflow-y: scroll; }
   opacity: 0.58;
 }
 
+.initialDeployPreview {
+  position: absolute;
+  inset: 5px;
+  border-radius: 8px;
+  border: 2px dashed rgba(142, 230, 255, 0.9);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(107, 213, 255, 0.22), rgba(107, 213, 255, 0.06) 62%, transparent 72%);
+  box-shadow:
+    inset 0 0 14px rgba(108, 213, 255, 0.24),
+    0 0 10px rgba(108, 213, 255, 0.18);
+  pointer-events: none;
+  z-index: 3;
+}
+
 .normalAttackPreviewRange,
 .normalAttackPreviewTarget {
   position: absolute;

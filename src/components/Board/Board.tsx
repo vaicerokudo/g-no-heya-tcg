@@ -17,6 +17,7 @@ type BoardProps = {
   gameOver: boolean;
 
   legalMoveSet: Set<string>;
+  initialDeploySet: Set<string>;
   attackRangeSet: Set<string>;
   attackBlockerSet: Set<string>;
   attackSet: Set<string>;
@@ -67,6 +68,7 @@ export function Board(props: BoardProps) {
     turn,
     gameOver,
     legalMoveSet,
+    initialDeploySet,
     attackRangeSet,
     attackBlockerSet,
     attackSet,
@@ -146,6 +148,7 @@ export function Board(props: BoardProps) {
 
               const inSkill = !!skillMode;
               const isLegalMove = legalMoveSet.has(k);
+              const isInitialDeploy = initialDeploySet.has(k);
               const isAttackRange = attackRangeSet.has(k);
               const isAttackBlocker = attackBlockerSet.has(k);
               const isAttackableEnemy = !!inst && inst.side !== turn && attackSet.has(inst.instanceId);
@@ -166,6 +169,7 @@ export function Board(props: BoardProps) {
                   ? "rgba(42,26,26,0.55)"
                   : "";
 
+              const showInitialDeploy = !inSkill && isInitialDeploy;
               const showMove = !inSkill && isLegalMove;
               const showRng = !inSkill && isAttackRange;
 
@@ -201,7 +205,7 @@ export function Board(props: BoardProps) {
                     : isAttackableEnemy
                       ? "pointer"
                       : "not-allowed"
-                  : isReinforce && !gameOver
+                  : (showInitialDeploy || isReinforce) && !gameOver
                     ? "pointer"
                     : isLegalMove && !gameOver
                       ? "pointer"
@@ -220,6 +224,7 @@ export function Board(props: BoardProps) {
                   inst={inst}
                   bg={bg}
                   cursor={cursor}
+                  showInitialDeploy={showInitialDeploy}
                   showRng={showRng}
                   isAttackBlocker={isAttackBlocker}
                   isAttackableEnemy={isAttackableEnemy}

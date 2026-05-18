@@ -34,6 +34,7 @@ getPortraitCandidates?: (
   bg: string;
   cursor: string;
 
+  showInitialDeploy: boolean;
   showRng: boolean;
   isAttackBlocker: boolean;
   isAttackableEnemy: boolean;
@@ -64,6 +65,7 @@ const {
   inst,
   bg,
   cursor,
+  showInitialDeploy,
   showRng,
   isAttackBlocker,
   isAttackableEnemy,
@@ -244,6 +246,8 @@ return (
       }}
       title={label}
     >
+      {showInitialDeploy && <div className="initialDeployPreview" />}
+
       {showRng && (
         <div
           className={isAttackableEnemy ? "normalAttackPreviewTarget" : "normalAttackPreviewRange"}
