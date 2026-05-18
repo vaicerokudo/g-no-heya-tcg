@@ -22,7 +22,7 @@ type SpriteState = "idle" | "running-left" | "running-right";
 const COMIC_PASSPHRASE = "サウンドコミック";
 const PASSWORD_DIALOG = {
   label: "合言葉を伝える",
-  text: "合言葉を言うにゃ。……間違えても怒らないにゃ。",
+  text: "合言葉を言うにゃ。\n……間違えても怒らないにゃ。",
 };
 const PLAYER_WIDTH = 68;
 const PLAYER_HEIGHT = 74;
@@ -110,17 +110,19 @@ export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
   const handlePassphraseSubmit = () => {
     const passphrase = passphraseInput.trim();
     if (passphrase !== COMIC_PASSPHRASE) {
-      setPassphraseMessage("違うにゃ。……でも、近い気配はしたにゃ。");
+      setPassphraseMessage("違うにゃ。\n……でも、近い気配はしたにゃ。");
       return;
     }
 
     const unlockResult = unlockSkin(COMIC_SKIN_ID);
     if (unlockResult === "already-unlocked") {
-      setPassphraseMessage("それはもう解放済みにゃ。ちゃんと覚えてるにゃ。");
+      setPassphraseMessage("それはもう解放済みにゃ。\n上のスキン選択から、いつでも選べるにゃ。");
       return;
     }
 
-    setPassphraseMessage("……合ってるにゃ。サウンドコミック、解放しておくにゃ。");
+    setPassphraseMessage(
+      "……合ってるにゃ。\nサウンドコミック、解放しておくにゃ。\n上のスキン選択から使えるようになったにゃ。"
+    );
   };
 
   const moveBy = (dx: number, dy: number) => {
@@ -626,6 +628,7 @@ const dialogTextStyle: CSSProperties = {
   color: "#fff6df",
   fontSize: 17,
   lineHeight: 1.75,
+  whiteSpace: "pre-line",
 };
 
 const passphraseFormStyle: CSSProperties = {
@@ -666,6 +669,7 @@ const passphraseMessageStyle: CSSProperties = {
   color: "#ffe2a3",
   fontSize: 14,
   lineHeight: 1.55,
+  whiteSpace: "pre-line",
 };
 
 const dialogCloseButtonStyle: CSSProperties = {
