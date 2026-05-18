@@ -50,6 +50,7 @@ import {
   portraitThumbCandidates,
   type Skin,
 } from "./assets/imagePaths";
+import { isSkinUnlocked, readUnlockedSkins } from "./assets/skinUnlocks";
 
 function posKey(r: number, c: number) {
   return `${r},${c}`;
@@ -124,6 +125,7 @@ export default function App() {
 
   const [southSkin, setSouthSkin] = useState<Skin>("default");
   const [northSkin, setNorthSkin] = useState<Skin>("default");
+  const [unlockedSkins] = useState<Skin[]>(() => readUnlockedSkins());
   const [scene, setScene] = useState<Scene>("town");
 
   const [popupId, setPopupId] = useState<string | null>(null);
@@ -1014,12 +1016,25 @@ const reinforceSet = useMemo(() => {
   }
 
   function handleSouthSkinChange(nextSkin: Skin) {
+    if (!isSkinUnlocked(nextSkin, unlockedSkins)) {
+      setSouthSkin("default");
+      return;
+    }
     setSouthSkin(nextSkin);
   }
 
   function handleNorthSkinChange(nextSkin: Skin) {
+    if (!isSkinUnlocked(nextSkin, unlockedSkins)) {
+      setNorthSkin("default");
+      return;
+    }
     setNorthSkin(nextSkin);
   }
+
+  useEffect(() => {
+    if (!isSkinUnlocked(southSkin, unlockedSkins)) setSouthSkin("default");
+    if (!isSkinUnlocked(northSkin, unlockedSkins)) setNorthSkin("default");
+  }, [northSkin, southSkin, unlockedSkins]);
 
   function toggleCpuEnabled() {
     setCpuEnabled((v) => !v);
@@ -1067,6 +1082,7 @@ const reinforceSet = useMemo(() => {
       <TopStatusBar
         southSkin={southSkin}
         northSkin={northSkin}
+        isSkinUnlocked={(skin) => isSkinUnlocked(skin, unlockedSkins)}
         onSouthSkinChange={handleSouthSkinChange}
         onNorthSkinChange={handleNorthSkinChange}
         turn={turn}

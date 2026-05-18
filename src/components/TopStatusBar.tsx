@@ -5,6 +5,7 @@ import type { Side } from "../game/types";
 type TopStatusBarProps = {
   southSkin: Skin;
   northSkin: Skin;
+  isSkinUnlocked: (skin: Skin) => boolean;
   onSouthSkinChange: (skin: Skin) => void;
   onNorthSkinChange: (skin: Skin) => void;
   turn: Side;
@@ -22,10 +23,12 @@ const SKIN_OPTIONS: Skin[] = ["default", "dark", "travel", "comic"];
 function SkinSelect({
   label,
   value,
+  isSkinUnlocked,
   onChange,
 }: {
   label: string;
   value: Skin;
+  isSkinUnlocked: (skin: Skin) => boolean;
   onChange: (skin: Skin) => void;
 }) {
   return (
@@ -44,8 +47,8 @@ function SkinSelect({
         }}
       >
         {SKIN_OPTIONS.map((skin) => (
-          <option key={skin} value={skin}>
-            {getSkinLabel(skin)}
+          <option key={skin} value={skin} disabled={!isSkinUnlocked(skin)}>
+            {isSkinUnlocked(skin) ? getSkinLabel(skin) : `${getSkinLabel(skin)}（未解放）`}
           </option>
         ))}
       </select>
@@ -56,6 +59,7 @@ function SkinSelect({
 export function TopStatusBar({
   southSkin,
   northSkin,
+  isSkinUnlocked,
   onSouthSkinChange,
   onNorthSkinChange,
   turn,
@@ -72,8 +76,8 @@ export function TopStatusBar({
       <h2>Gの部屋 TCG</h2>
 
       <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
-        <SkinSelect label="味方スキン:" value={southSkin} onChange={onSouthSkinChange} />
-        <SkinSelect label="CPUスキン:" value={northSkin} onChange={onNorthSkinChange} />
+        <SkinSelect label="味方スキン:" value={southSkin} isSkinUnlocked={isSkinUnlocked} onChange={onSouthSkinChange} />
+        <SkinSelect label="CPUスキン:" value={northSkin} isSkinUnlocked={isSkinUnlocked} onChange={onNorthSkinChange} />
 
         <div style={{ fontSize: 12, opacity: 0.7 }}>未作成の画像は default にフォールバック</div>
       </div>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import playerSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import guildLobby from "../assets/town/guild-lobby.png";
 import reception7171 from "../assets/town/reception-7171.png";
+import { COMIC_SKIN_ID, unlockSkin } from "../assets/skinUnlocks";
 import type { UnitDef } from "../game/types";
 import { CollectionDialog } from "./Town/CollectionDialog";
 
@@ -18,8 +19,6 @@ type ReceptionTopic = "home" | "first" | "table" | "skin" | "password";
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
 
-const UNLOCKED_SKINS_STORAGE_KEY = "gnoheya_tcg_unlocked_skins";
-const COMIC_SKIN_ID = "comic";
 const COMIC_PASSPHRASE = "サウンドコミック";
 const PASSWORD_DIALOG = {
   label: "合言葉を伝える",
@@ -74,21 +73,6 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
   return Math.hypot(dx, dy) <= threshold;
 }
 
-function readUnlockedSkins(): string[] {
-  try {
-    const raw = window.localStorage.getItem(UNLOCKED_SKINS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveUnlockedSkins(skins: string[]) {
-  window.localStorage.setItem(UNLOCKED_SKINS_STORAGE_KEY, JSON.stringify(skins));
-}
-
 export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 44, y: 68 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
@@ -130,13 +114,12 @@ export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
       return;
     }
 
-    const unlockedSkins = readUnlockedSkins();
-    if (unlockedSkins.includes(COMIC_SKIN_ID)) {
+    const unlockResult = unlockSkin(COMIC_SKIN_ID);
+    if (unlockResult === "already-unlocked") {
       setPassphraseMessage("それはもう解放済みにゃ。ちゃんと覚えてるにゃ。");
       return;
     }
 
-    saveUnlockedSkins([...unlockedSkins, COMIC_SKIN_ID]);
     setPassphraseMessage("……合ってるにゃ。サウンドコミック、解放しておくにゃ。");
   };
 
