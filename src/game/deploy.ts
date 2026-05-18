@@ -1,7 +1,7 @@
 import { shuffle } from "./deck";
 import type { UnitInstance } from "./state";
 import type { Side } from "./types";
-import { getInitialDeployCandidateCols, getSouthReinforceStartRow } from "./boardConfig";
+import { getInitialDeployCandidateCols, getSouthGateRow } from "./boardConfig";
 
 type SpawnDeployUnit = (opts: {
   unitId: string;
@@ -17,8 +17,15 @@ export function canDeployCellSouth(r: number, rows: number, c?: number, candidat
   return candidateCols.includes(c);
 }
 
-export function canDeployCellSouthReinforce(r: number, rows: number) {
-  return r >= getSouthReinforceStartRow(rows) && r <= rows - 1;
+export function canDeployCellSouthReinforce(
+  r: number,
+  rows: number,
+  c?: number,
+  candidateCols?: readonly number[]
+) {
+  if (r !== getSouthGateRow(rows)) return false;
+  if (c === undefined || !candidateCols) return true;
+  return candidateCols.includes(c);
 }
 
 export function canStartSouthDeploy({
@@ -91,7 +98,9 @@ export function canStartSouthReinforce({
   battleDeployUsed,
   selectedHandPick,
   r,
+  c,
   rows,
+  candidateCols,
   occupied,
 }: {
   phase: "setup_draw" | "setup_deploy" | "battle";
@@ -99,14 +108,16 @@ export function canStartSouthReinforce({
   battleDeployUsed: boolean;
   selectedHandPick: unknown;
   r: number;
+  c?: number;
   rows: number;
+  candidateCols?: readonly number[];
   occupied: boolean;
 }) {
   if (phase !== "battle") return false;
   if (turn !== "south") return false;
   if (battleDeployUsed) return false;
   if (!selectedHandPick) return false;
-  if (!canDeployCellSouthReinforce(r, rows)) return false;
+  if (!canDeployCellSouthReinforce(r, rows, c, candidateCols)) return false;
   if (occupied) return false;
   return true;
 }
@@ -191,6 +202,7 @@ export function buildSouthReinforceSet({
   battleDeployUsed,
   rows,
   cols,
+  candidateCols,
   isOccupied,
 }: {
   gameOver: boolean;
@@ -200,6 +212,7 @@ export function buildSouthReinforceSet({
   battleDeployUsed: boolean;
   rows: number;
   cols: number;
+  candidateCols?: readonly number[];
   isOccupied: (r: number, c: number) => boolean;
 }) {
   const reinforceSet = new Set<string>();
@@ -209,9 +222,10 @@ export function buildSouthReinforceSet({
   if (!selectedHandKey) return reinforceSet;
   if (battleDeployUsed) return reinforceSet;
 
-  for (let r = getSouthReinforceStartRow(rows); r <= rows - 1; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (!isOccupied(r, c)) reinforceSet.add(`${r},${c}`);
+  const r = getSouthGateRow(rows);
+  for (let c = 0; c < cols; c++) {
+    if (canDeployCellSouthReinforce(r, rows, c, candidateCols) && !isOccupied(r, c)) {
+      reinforceSet.add(`${r},${c}`);
     }
   }
 

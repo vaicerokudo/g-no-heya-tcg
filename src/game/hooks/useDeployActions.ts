@@ -61,6 +61,7 @@ type TrySouthReinforceArgs = {
   r: number;
   c: number;
   rows: number;
+  initialDeployCandidateCols?: readonly number[];
   spawnUnit: Parameters<typeof buildDeployInstances>[0]["spawnUnit"];
 };
 
@@ -182,6 +183,7 @@ export function useDeployActions({
     r,
     c,
     rows,
+    initialDeployCandidateCols,
     spawnUnit,
   }: TrySouthReinforceArgs) {
     const occupied = instances.some((u) => u.pos.r === r && u.pos.c === c);
@@ -192,7 +194,9 @@ export function useDeployActions({
         battleDeployUsed,
         selectedHandPick,
         r,
+        c,
         rows,
+        candidateCols: initialDeployCandidateCols,
         occupied,
       })
     ) {

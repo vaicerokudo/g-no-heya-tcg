@@ -587,6 +587,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     r,
     c,
     rows,
+    initialDeployCandidateCols,
     spawnUnit,
   });
 };
@@ -721,10 +722,11 @@ const reinforceSet = useMemo(() => {
     battleDeployUsed,
     rows,
     cols,
+    candidateCols: initialDeployCandidateCols,
     isOccupied: (r, c) => occ.has(posKey(r, c)),
   });
   return s;
-}, [gameOver, phase, turn, selectedHandKey, battleDeployUsed, rows, cols, occ]);
+}, [gameOver, phase, turn, selectedHandKey, battleDeployUsed, rows, cols, initialDeployCandidateCols, occ]);
 
   const initialDeploySet = useMemo(() => {
     return buildSouthInitialDeploySet({
