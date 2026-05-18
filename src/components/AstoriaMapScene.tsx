@@ -16,6 +16,10 @@ type Hotspot = {
   y: number;
   w: number;
   h: number;
+  labelX: number;
+  labelY: number;
+  targetX: number;
+  targetY: number;
 };
 
 type DialogContent = {
@@ -51,24 +55,75 @@ const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalM
 };
 
 const HOTSPOTS: Hotspot[] = [
-  { id: "gRoom", label: "Gの部屋", subLabel: "ロビーへ", x: 64, y: 14, w: 29, h: 21 },
-  { id: "blacksmith", label: "鍛冶屋", subLabel: "サッグ", x: 4, y: 25, w: 31, h: 18 },
-  { id: "generalStore", label: "雑貨屋", subLabel: "スタンプ", x: 3, y: 44, w: 31, h: 17 },
-  { id: "plaza", label: "広場", subLabel: "門天", x: 43, y: 50, w: 35, h: 18 },
-  { id: "gate", label: "門", subLabel: "準備中", x: 34, y: 73, w: 32, h: 17 },
+  {
+    id: "gRoom",
+    label: "Gの部屋",
+    subLabel: "ロビーへ",
+    x: 64,
+    y: 14,
+    w: 29,
+    h: 21,
+    labelX: 80,
+    labelY: 11.5,
+    targetX: 78.5,
+    targetY: 33.5,
+  },
+  {
+    id: "blacksmith",
+    label: "鍛冶屋",
+    subLabel: "サッグ",
+    x: 4,
+    y: 25,
+    w: 31,
+    h: 18,
+    labelX: 17,
+    labelY: 21.5,
+    targetX: 19.5,
+    targetY: 41,
+  },
+  {
+    id: "generalStore",
+    label: "雑貨屋",
+    subLabel: "スタンプ",
+    x: 3,
+    y: 44,
+    w: 31,
+    h: 17,
+    labelX: 17,
+    labelY: 44,
+    targetX: 18.5,
+    targetY: 59.5,
+  },
+  {
+    id: "plaza",
+    label: "広場",
+    subLabel: "門天",
+    x: 43,
+    y: 50,
+    w: 35,
+    h: 18,
+    labelX: 66,
+    labelY: 49.5,
+    targetX: 60.5,
+    targetY: 67,
+  },
+  {
+    id: "gate",
+    label: "門",
+    subLabel: "準備中",
+    x: 34,
+    y: 73,
+    w: 32,
+    h: 17,
+    labelX: 50,
+    labelY: 77,
+    targetX: 50,
+    targetY: 75,
+  },
 ];
 
 function getHotspotDestination(spot: Hotspot): MapPos {
-  const centerX = spot.x + spot.w / 2;
-  const centerY = spot.y + spot.h / 2;
-
-  if (spot.id === "gate") return { x: centerX, y: spot.y + 2 };
-  if (spot.id === "plaza") return { x: centerX, y: centerY + 8 };
-  if (spot.id === "gRoom") return { x: centerX, y: centerY + 9 };
-  if (spot.id === "blacksmith") return { x: centerX, y: centerY + 7 };
-  if (spot.id === "generalStore") return { x: centerX, y: centerY + 7 };
-
-  return { x: centerX, y: centerY };
+  return { x: spot.targetX, y: spot.targetY };
 }
 
 const DIALOGS: Record<DialogId, DialogContent> = {
@@ -197,7 +252,15 @@ export function AstoriaMapScene({ onEnterLobby }: AstoriaMapSceneProps) {
                 height: `${spot.h}%`,
               }}
             >
-              <span style={hotspotLabelStyle}>{spot.label}</span>
+              <span
+                style={{
+                  ...hotspotLabelStyle,
+                  left: `${((spot.labelX - spot.x) / spot.w) * 100}%`,
+                  top: `${((spot.labelY - spot.y) / spot.h) * 100}%`,
+                }}
+              >
+                {spot.label}
+              </span>
               <span style={hotspotSubLabelStyle}>{spot.subLabel}</span>
             </button>
           ))}
@@ -347,6 +410,8 @@ const hotspotDisabledStyle: CSSProperties = {
 };
 
 const hotspotLabelStyle: CSSProperties = {
+  position: "absolute",
+  transform: "translate(-50%, -50%)",
   minWidth: 72,
   maxWidth: 112,
   minHeight: 34,
