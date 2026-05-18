@@ -765,7 +765,6 @@ const reinforceSet = useMemo(() => {
 
     const me = perUnitTurn[selected.instanceId];
     if (me?.done) return [];
-    if (!me?.moved) return [];
     if (me?.attacked) return [];
 
     const stateLike = {
@@ -783,6 +782,11 @@ const reinforceSet = useMemo(() => {
     for (const t of attackables as any[]) s.add(t.instanceId);
     return s;
   }, [attackables]);
+
+  const visibleAttackSet = useMemo(() => {
+    if (attackMarks.length === 0) return new Set<string>();
+    return attackSet;
+  }, [attackMarks, attackSet]);
 
   const { tryMove, tryNormalAttack, undoMove, canUndoMove } = usePlayerActions({
     applyNextInstances: (next) => applyNextInstances(next as any),
@@ -1189,7 +1193,7 @@ const reinforceSet = useMemo(() => {
         reinforceSet={reinforceSet}
         attackRangeSet={attackRangeSet}
         attackBlockerSet={attackBlockerSet}
-        attackSet={attackSet}
+        attackSet={visibleAttackSet}
         skillMode={skillMode}
         skillTargetSet={skillTargetSet}
         debugTargetId={null}

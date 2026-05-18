@@ -3,7 +3,7 @@ import { getLegalMoves } from "../move";
 import { getAttackableTargets, applyNormalAttack } from "../attack";
 import { getEffectiveMaxHp } from "../stats";
 import type { Side } from "../types";
-import { getEvolveRow } from "../boardConfig";
+import { isAtOrBeyondEvolveRow } from "../boardConfig";
 
 import { pickBest, type CpuAction, type EvalCtx } from "./eval";
 
@@ -15,8 +15,8 @@ type StateLike = {
   selectedInstanceId?: string | null;
 };
 
-function isEvolveCell(r: number, rows: number) {
-  return r === getEvolveRow(rows);
+function isEvolveCell(side: Side, r: number, rows: number) {
+  return isAtOrBeyondEvolveRow(side, r, rows);
 }
 
 function simulateMoveAndEvolve(params: {
@@ -35,12 +35,12 @@ function simulateMoveAndEvolve(params: {
 
   let evolved = false;
 
-  if (isEvolveCell(to.r, rows)) {
+  if (isEvolveCell(actor.side, to.r, rows)) {
     next = next.map((u) => {
       if (u.instanceId !== actor.instanceId) return u;
 
       const form = u.form ?? "base";
-      if (form === "g") return u;
+      if (form !== "base") return u;
 
       const def = unitsById[u.unitId];
       const newMaxHp = getEffectiveMaxHp(def.base.hp, "g");

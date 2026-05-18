@@ -1,3 +1,5 @@
+import type { Side } from "./types";
+
 export type BoardSizeMode = "starter7" | "intermediate9";
 
 export type BoardSizeConfig = {
@@ -38,6 +40,11 @@ export function getLetters(cols: number) {
 
 export function getEvolveRow(rows: number) {
   return Math.floor(rows / 2);
+}
+
+export function isAtOrBeyondEvolveRow(side: Side, r: number, rows: number) {
+  const evolveRow = getEvolveRow(rows);
+  return side === "south" ? r <= evolveRow : r >= evolveRow;
 }
 
 export function getGateCols(cols: number) {

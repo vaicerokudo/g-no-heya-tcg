@@ -1,7 +1,7 @@
 import type { GameState, Pos, UnitInstance } from "./state";
 import type { Side } from "./types";
 import { getEffectiveMaxHp } from "./stats";
-import { getEvolveRow } from "./boardConfig";
+import { isAtOrBeyondEvolveRow } from "./boardConfig";
 
 function inBounds(r: number, c: number, rows: number, cols: number) {
   return r >= 0 && r < rows && c >= 0 && c < cols;
@@ -99,16 +99,17 @@ export function buildMoveInstances({
   rows: number;
   unitsById: GameState["unitsById"];
 }) {
+  const movingUnit = instances.find((u) => u.instanceId === selectedInstanceId);
   let next = instances.map((u) =>
     u.instanceId === selectedInstanceId ? { ...u, pos: { r, c } } : u
   );
 
-  if (r === getEvolveRow(rows)) {
+  if (movingUnit && isAtOrBeyondEvolveRow(movingUnit.side, r, rows)) {
     next = next.map((u) => {
       if (u.instanceId !== selectedInstanceId) return u;
 
       const form = u.form ?? "base";
-      if (form === "g") return u;
+      if (form !== "base") return u;
 
       const def = unitsById[u.unitId];
       const newMaxHp = getEffectiveMaxHp(def.base.hp, "g");
