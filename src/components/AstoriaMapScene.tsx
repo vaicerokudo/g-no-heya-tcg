@@ -30,14 +30,15 @@ type DialogContent = {
 
 const YOUTUBE_URL = "https://www.youtube.com/@Gnoheya-6910";
 const LINE_STAMP_URL = "https://store.line.me/stickershop/product/32711346/ja?from=sticker";
+const ASTORIA_MAP_IMAGE_URL = "/backgrounds/astoria-map.png";
 const SAGG_IMAGE_URL = "/characters/sagg.png";
 
 const HOTSPOTS: Hotspot[] = [
-  { id: "gRoom", label: "Gの部屋", subLabel: "ロビーへ", x: 56, y: 34, w: 20, h: 18 },
-  { id: "blacksmith", label: "鍛冶屋", subLabel: "サッグ", x: 13, y: 51, w: 20, h: 17 },
-  { id: "generalStore", label: "雑貨屋", subLabel: "スタンプ", x: 68, y: 58, w: 21, h: 16 },
-  { id: "plaza", label: "広場", subLabel: "門天", x: 39, y: 56, w: 21, h: 17 },
-  { id: "gate", label: "門", subLabel: "準備中", x: 42, y: 13, w: 17, h: 15 },
+  { id: "gRoom", label: "Gの部屋", subLabel: "ロビーへ", x: 71, y: 20, w: 19, h: 16 },
+  { id: "blacksmith", label: "鍛冶屋", subLabel: "サッグ", x: 9, y: 20, w: 21, h: 16 },
+  { id: "generalStore", label: "雑貨屋", subLabel: "スタンプ", x: 9, y: 56, w: 21, h: 17 },
+  { id: "plaza", label: "広場", subLabel: "門天", x: 39, y: 44, w: 23, h: 18 },
+  { id: "gate", label: "門", subLabel: "準備中", x: 41, y: 76, w: 18, h: 15 },
 ];
 
 const DIALOGS: Record<DialogId, DialogContent> = {
@@ -99,12 +100,6 @@ export function AstoriaMapScene({ onEnterLobby }: AstoriaMapSceneProps) {
         </header>
 
         <div style={mapStyle}>
-          <div style={skyGlowStyle} />
-          <div style={mainRoadStyle} />
-          <div style={plazaStyle} />
-          <div style={buildingClusterStyle("left")} />
-          <div style={buildingClusterStyle("right")} />
-
           {HOTSPOTS.map((spot) => (
             <button
               key={spot.id}
@@ -226,55 +221,12 @@ const mapStyle: CSSProperties = {
   borderRadius: 18,
   border: "1px solid rgba(255,229,172,0.25)",
   background:
-    "linear-gradient(180deg, rgba(78,101,122,0.86), rgba(49,56,54,0.78) 38%, rgba(42,33,24,0.92) 100%), radial-gradient(circle at 50% 58%, rgba(255,216,102,0.16), transparent 30%)",
+    `linear-gradient(180deg, rgba(10,12,18,0.08), rgba(20,14,10,0.16)), url(${ASTORIA_MAP_IMAGE_URL}), linear-gradient(180deg, rgba(78,101,122,0.86), rgba(49,56,54,0.78) 38%, rgba(42,33,24,0.92) 100%)`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
   boxShadow: "0 22px 60px rgba(0,0,0,0.48), inset 0 0 62px rgba(0,0,0,0.28)",
 };
-
-const skyGlowStyle: CSSProperties = {
-  position: "absolute",
-  inset: "0 0 52%",
-  background: "radial-gradient(circle at 50% 10%, rgba(255,230,167,0.22), transparent 35%)",
-  pointerEvents: "none",
-};
-
-const mainRoadStyle: CSSProperties = {
-  position: "absolute",
-  left: "42%",
-  top: "24%",
-  width: "16%",
-  height: "84%",
-  transform: "skewX(-7deg)",
-  background: "linear-gradient(90deg, rgba(155,126,92,0.8), rgba(98,78,58,0.9))",
-  borderLeft: "1px solid rgba(255,232,180,0.18)",
-  borderRight: "1px solid rgba(0,0,0,0.22)",
-};
-
-const plazaStyle: CSSProperties = {
-  position: "absolute",
-  left: "31%",
-  top: "47%",
-  width: "38%",
-  height: "27%",
-  borderRadius: "50%",
-  background:
-    "radial-gradient(circle, rgba(178,139,87,0.86), rgba(86,66,48,0.88) 62%, rgba(0,0,0,0.1) 70%)",
-  border: "1px solid rgba(255,232,180,0.2)",
-};
-
-function buildingClusterStyle(side: "left" | "right"): CSSProperties {
-  return {
-    position: "absolute",
-    left: side === "left" ? "6%" : "67%",
-    top: side === "left" ? "28%" : "31%",
-    width: "25%",
-    height: "36%",
-    borderRadius: 16,
-    background:
-      "linear-gradient(180deg, rgba(107,58,39,0.9), rgba(54,36,28,0.92)), repeating-linear-gradient(90deg, rgba(255,232,180,0.12) 0 2px, transparent 2px 14px)",
-    border: "1px solid rgba(255,232,180,0.18)",
-    boxShadow: "0 16px 34px rgba(0,0,0,0.32)",
-  };
-}
 
 const hotspotStyle: CSSProperties = {
   position: "absolute",
