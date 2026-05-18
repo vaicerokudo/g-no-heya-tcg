@@ -1,4 +1,5 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import rokuSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 
 type AstoriaMapSceneProps = {
   onEnterLobby: () => void;
@@ -28,10 +29,26 @@ type DialogContent = {
   disabledReason?: string;
 };
 
+type MapPos = { x: number; y: number };
+type Facing = "left" | "right";
+type SpriteState = "idle" | "running-left" | "running-right";
+
 const YOUTUBE_URL = "https://www.youtube.com/@Gnoheya-6910";
 const LINE_STAMP_URL = "https://store.line.me/stickershop/product/32711346/ja?from=sticker";
 const ASTORIA_MAP_IMAGE_URL = "/backgrounds/astoria-map.png";
 const SAGG_IMAGE_URL = "/characters/sagg.png";
+const SHOPKEEPER_IMAGE_URL = "/characters/shopkeeper.png";
+const MONTEN_IMAGE_URL = "/characters/monten.png";
+const ROKU_PLAYER_SIZE = 44;
+const ROKU_MOVE_MS = 760;
+const SPRITE_CELL_WIDTH = 192;
+const SPRITE_CELL_HEIGHT = 208;
+const ROKU_SPRITE_SCALE = ROKU_PLAYER_SIZE / SPRITE_CELL_WIDTH;
+const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalMs: number }> = {
+  idle: { row: 0, frames: 6, intervalMs: 190 },
+  "running-right": { row: 1, frames: 8, intervalMs: 105 },
+  "running-left": { row: 2, frames: 8, intervalMs: 105 },
+};
 
 const HOTSPOTS: Hotspot[] = [
   { id: "gRoom", label: "Gの部屋", subLabel: "ロビーへ", x: 64, y: 14, w: 29, h: 21 },
@@ -40,6 +57,19 @@ const HOTSPOTS: Hotspot[] = [
   { id: "plaza", label: "広場", subLabel: "門天", x: 43, y: 50, w: 35, h: 18 },
   { id: "gate", label: "門", subLabel: "準備中", x: 34, y: 73, w: 32, h: 17 },
 ];
+
+function getHotspotDestination(spot: Hotspot): MapPos {
+  const centerX = spot.x + spot.w / 2;
+  const centerY = spot.y + spot.h / 2;
+
+  if (spot.id === "gate") return { x: centerX, y: spot.y + 2 };
+  if (spot.id === "plaza") return { x: centerX, y: centerY + 8 };
+  if (spot.id === "gRoom") return { x: centerX, y: centerY + 9 };
+  if (spot.id === "blacksmith") return { x: centerX, y: centerY + 7 };
+  if (spot.id === "generalStore") return { x: centerX, y: centerY + 7 };
+
+  return { x: centerX, y: centerY };
+}
 
 const DIALOGS: Record<DialogId, DialogContent> = {
   blacksmith: {
@@ -54,6 +84,8 @@ const DIALOGS: Record<DialogId, DialogContent> = {
   },
   generalStore: {
     title: "雑貨屋",
+    portraitUrl: SHOPKEEPER_IMAGE_URL,
+    portraitAlt: "雑貨屋受付",
     text: "いらっしゃいませ。\n旅のお供に、スタンプなんてどうですか？",
     actionLabel: "LINEスタンプを見る",
     actionUrl: LINE_STAMP_URL ?? undefined,
@@ -62,6 +94,8 @@ const DIALOGS: Record<DialogId, DialogContent> = {
   plaza: {
     title: "広場",
     speaker: "門天",
+    portraitUrl: MONTEN_IMAGE_URL,
+    portraitAlt: "門天",
     text: "ここはアストリアの広場だ。\nいずれ知らせや依頼が集まる場所になる。",
   },
   gate: {
@@ -73,20 +107,68 @@ const DIALOGS: Record<DialogId, DialogContent> = {
 export function AstoriaMapScene({ onEnterLobby }: AstoriaMapSceneProps) {
   const [activeDialog, setActiveDialog] = useState<DialogId | null>(null);
   const [failedPortraits, setFailedPortraits] = useState<Set<string>>(() => new Set());
+  const [rokuPos, setRokuPos] = useState<MapPos>({ x: 50, y: 82 });
+  const [facing, setFacing] = useState<Facing>("right");
+  const [isMoving, setIsMoving] = useState(false);
+  const [frameIndex, setFrameIndex] = useState(0);
+  const moveTimerRef = useRef<number | null>(null);
   const dialog = activeDialog ? DIALOGS[activeDialog] : null;
 
   const handleHotspot = (id: HotspotId) => {
-    if (id === "gRoom") {
-      onEnterLobby();
-      return;
-    }
+    if (isMoving) return;
 
-    setActiveDialog(id);
+    const spot = HOTSPOTS.find((candidate) => candidate.id === id);
+    if (!spot) return;
+
+    const nextPos = getHotspotDestination(spot);
+    setActiveDialog(null);
+    setFacing(nextPos.x < rokuPos.x ? "left" : "right");
+    setIsMoving(true);
+    setRokuPos(nextPos);
+
+    if (moveTimerRef.current !== null) {
+      window.clearTimeout(moveTimerRef.current);
+    }
+    moveTimerRef.current = window.setTimeout(() => {
+      setIsMoving(false);
+      moveTimerRef.current = null;
+
+      if (id === "gRoom") {
+        onEnterLobby();
+        return;
+      }
+
+      setActiveDialog(id);
+    }, ROKU_MOVE_MS);
   };
 
   const openExternal = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
+
+  const spriteState: SpriteState = isMoving
+    ? facing === "left"
+      ? "running-left"
+      : "running-right"
+    : "idle";
+  const spriteAnim = SPRITE_ANIMS[spriteState];
+
+  useEffect(() => {
+    setFrameIndex(0);
+    const timerId = window.setInterval(() => {
+      setFrameIndex((current) => (current + 1) % spriteAnim.frames);
+    }, spriteAnim.intervalMs);
+
+    return () => window.clearInterval(timerId);
+  }, [spriteAnim.frames, spriteAnim.intervalMs, spriteState]);
+
+  useEffect(() => {
+    return () => {
+      if (moveTimerRef.current !== null) {
+        window.clearTimeout(moveTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div style={sceneStyle}>
@@ -104,8 +186,10 @@ export function AstoriaMapScene({ onEnterLobby }: AstoriaMapSceneProps) {
             <button
               key={spot.id}
               onClick={() => handleHotspot(spot.id)}
+              disabled={isMoving}
               style={{
                 ...hotspotStyle,
+                ...(isMoving ? hotspotDisabledStyle : null),
                 left: `${spot.x}%`,
                 top: `${spot.y}%`,
                 width: `${spot.w}%`,
@@ -116,6 +200,19 @@ export function AstoriaMapScene({ onEnterLobby }: AstoriaMapSceneProps) {
               <span style={hotspotSubLabelStyle}>{spot.subLabel}</span>
             </button>
           ))}
+
+          <div
+            aria-label="ロク"
+            style={{
+              ...rokuSpriteStyle,
+              left: `${rokuPos.x}%`,
+              top: `${rokuPos.y}%`,
+              backgroundImage: `url(${rokuSpriteSheet})`,
+              backgroundPosition: `${-frameIndex * SPRITE_CELL_WIDTH * ROKU_SPRITE_SCALE}px ${
+                -spriteAnim.row * SPRITE_CELL_HEIGHT * ROKU_SPRITE_SCALE
+              }px`,
+            }}
+          />
         </div>
       </div>
 
@@ -246,6 +343,11 @@ const hotspotStyle: CSSProperties = {
   cursor: "pointer",
 };
 
+const hotspotDisabledStyle: CSSProperties = {
+  opacity: 0.68,
+  cursor: "default",
+};
+
 const hotspotLabelStyle: CSSProperties = {
   fontSize: 14,
 };
@@ -253,6 +355,20 @@ const hotspotLabelStyle: CSSProperties = {
 const hotspotSubLabelStyle: CSSProperties = {
   fontSize: 10,
   color: "rgba(255,246,223,0.74)",
+};
+
+const rokuSpriteStyle: CSSProperties = {
+  position: "absolute",
+  width: ROKU_PLAYER_SIZE,
+  height: SPRITE_CELL_HEIGHT * ROKU_SPRITE_SCALE,
+  marginLeft: -ROKU_PLAYER_SIZE / 2,
+  marginTop: -(SPRITE_CELL_HEIGHT * ROKU_SPRITE_SCALE),
+  zIndex: 12,
+  backgroundRepeat: "no-repeat",
+  backgroundSize: `${1536 * ROKU_SPRITE_SCALE}px ${1872 * ROKU_SPRITE_SCALE}px`,
+  filter: "drop-shadow(0 8px 8px rgba(0,0,0,0.45))",
+  pointerEvents: "none",
+  transition: `left ${ROKU_MOVE_MS}ms ease-in-out, top ${ROKU_MOVE_MS}ms ease-in-out`,
 };
 
 const overlayStyle: CSSProperties = {
