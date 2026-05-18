@@ -12,6 +12,9 @@ export type StateLike = {
   selectedInstanceId?: string | null;
 };
 
+type AttackDirectionMode = "all8" | "orthogonal" | "diagonal";
+type AttackDir = { dr: number; dc: number };
+
 function chebDist(a: Pos, b: Pos) {
   return Math.max(Math.abs(a.r - b.r), Math.abs(a.c - b.c));
 }
@@ -47,6 +50,49 @@ function isLine8(a: Pos, b: Pos) {
   if (dr === 0 && dc === 0) return false;
   // orthogonal or diagonal
   return dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc);
+}
+
+function isOrthogonalLine(a: Pos, b: Pos) {
+  const dr = b.r - a.r;
+  const dc = b.c - a.c;
+  return (dr !== 0 || dc !== 0) && (dr === 0 || dc === 0);
+}
+
+function isDiagonalLine(a: Pos, b: Pos) {
+  const dr = b.r - a.r;
+  const dc = b.c - a.c;
+  return dr !== 0 && Math.abs(dr) === Math.abs(dc);
+}
+
+function getAttackDirectionMode(spec: any): AttackDirectionMode {
+  const directions = spec?.directions;
+  if (directions === "orthogonal" || directions === "diagonal") return directions;
+  return "all8";
+}
+
+function isInAttackDirection(a: Pos, b: Pos, mode: AttackDirectionMode) {
+  if (mode === "orthogonal") return isOrthogonalLine(a, b);
+  if (mode === "diagonal") return isDiagonalLine(a, b);
+  return isLine8(a, b);
+}
+
+function getAttackDirs(mode: AttackDirectionMode): AttackDir[] {
+  const orthogonal = [
+    { dr: -1, dc: 0 },
+    { dr: 1, dc: 0 },
+    { dr: 0, dc: -1 },
+    { dr: 0, dc: 1 },
+  ];
+  const diagonal = [
+    { dr: -1, dc: -1 },
+    { dr: -1, dc: 1 },
+    { dr: 1, dc: -1 },
+    { dr: 1, dc: 1 },
+  ];
+
+  if (mode === "orthogonal") return orthogonal;
+  if (mode === "diagonal") return diagonal;
+  return [...orthogonal, ...diagonal];
 }
 
 function stepDir8(a: Pos, b: Pos) {
@@ -88,9 +134,10 @@ function isRangedLineAttackable(
   attacker: any,
   target: any,
   range: number,
-  losBlocked: boolean
+  losBlocked: boolean,
+  directions: AttackDirectionMode
 ) {
-  if (!isLine8(attacker.pos, target.pos)) return false;
+  if (!isInAttackDirection(attacker.pos, target.pos, directions)) return false;
 
   const dist = chebDist(attacker.pos, target.pos);
   if (dist > range) return false;
@@ -120,9 +167,10 @@ export function getAttackableTargets(stateLike: StateLike, attacker: any): any[]
   if (spec?.type === "rangedLine") {
     const range = spec.range ?? 3;
     const blocked = spec.lineOfSightBlockedByUnits ?? true;
+    const directions = getAttackDirectionMode(spec);
 
     return enemies.filter((t) =>
-      isRangedLineAttackable(stateLike, attacker, t, range, blocked)
+      isRangedLineAttackable(stateLike, attacker, t, range, blocked, directions)
     );
   }
 
@@ -202,17 +250,7 @@ export function getAttackMarks(stateLike: StateLike, attacker: any): AttackMark[
   if (spec?.type === "rangedLine") {
     const range = spec.range ?? 3;
     const blocked = spec.lineOfSightBlockedByUnits ?? true;
-
-    const dirs = [
-      { dr: -1, dc: 0 },
-      { dr: 1, dc: 0 },
-      { dr: 0, dc: -1 },
-      { dr: 0, dc: 1 },
-      { dr: -1, dc: -1 },
-      { dr: -1, dc: 1 },
-      { dr: 1, dc: -1 },
-      { dr: 1, dc: 1 },
-    ];
+    const dirs = getAttackDirs(getAttackDirectionMode(spec));
 
     for (const d of dirs) {
       for (let step = 1; step <= range; step++) {
