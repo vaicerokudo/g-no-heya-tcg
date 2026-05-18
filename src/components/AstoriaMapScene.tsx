@@ -1,0 +1,362 @@
+import { useState, type CSSProperties } from "react";
+
+type AstoriaMapSceneProps = {
+  onEnterLobby: () => void;
+};
+
+type HotspotId = "gRoom" | "blacksmith" | "generalStore" | "plaza" | "gate";
+type DialogId = Exclude<HotspotId, "gRoom">;
+
+type Hotspot = {
+  id: HotspotId;
+  label: string;
+  subLabel: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type DialogContent = {
+  title: string;
+  speaker?: string;
+  text: string;
+  actionLabel?: string;
+  actionUrl?: string;
+  disabledReason?: string;
+};
+
+const YOUTUBE_URL = "https://www.youtube.com/@gnoheya";
+const LINE_STAMP_URL: string | null = null; // TODO: LINEスタンプの正式URLが決まったら設定する。
+
+const HOTSPOTS: Hotspot[] = [
+  { id: "gRoom", label: "Gの部屋", subLabel: "ロビーへ", x: 56, y: 34, w: 20, h: 18 },
+  { id: "blacksmith", label: "鍛冶屋", subLabel: "サッグ", x: 13, y: 51, w: 20, h: 17 },
+  { id: "generalStore", label: "雑貨屋", subLabel: "スタンプ", x: 68, y: 58, w: 21, h: 16 },
+  { id: "plaza", label: "広場", subLabel: "門天", x: 39, y: 56, w: 21, h: 17 },
+  { id: "gate", label: "門", subLabel: "準備中", x: 42, y: 13, w: 17, h: 15 },
+];
+
+const DIALOGS: Record<DialogId, DialogContent> = {
+  blacksmith: {
+    title: "鍛冶屋",
+    speaker: "サッグ",
+    text: "おう、来たか。\nGの部屋の記録映像なら、ここから見られるぜ。",
+    actionLabel: "YouTubeを開く",
+    actionUrl: YOUTUBE_URL,
+  },
+  generalStore: {
+    title: "雑貨屋",
+    text: "いらっしゃいませ。\n旅のお供に、スタンプなんてどうですか？",
+    actionLabel: "LINEスタンプを見る",
+    actionUrl: LINE_STAMP_URL ?? undefined,
+    disabledReason: LINE_STAMP_URL ? undefined : "LINEスタンプのURLは準備中です。",
+  },
+  plaza: {
+    title: "広場",
+    speaker: "門天",
+    text: "ここはアストリアの広場だ。\nいずれ知らせや依頼が集まる場所になる。",
+  },
+  gate: {
+    title: "門",
+    text: "この先はまだ準備中です。\n森や鉱山へ続く道は、いずれ開かれます。",
+  },
+};
+
+export function AstoriaMapScene({ onEnterLobby }: AstoriaMapSceneProps) {
+  const [activeDialog, setActiveDialog] = useState<DialogId | null>(null);
+  const dialog = activeDialog ? DIALOGS[activeDialog] : null;
+
+  const handleHotspot = (id: HotspotId) => {
+    if (id === "gRoom") {
+      onEnterLobby();
+      return;
+    }
+
+    setActiveDialog(id);
+  };
+
+  const openExternal = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div style={sceneStyle}>
+      <div style={shellStyle}>
+        <header style={headerStyle}>
+          <div>
+            <div style={eyebrowStyle}>ASTORIA MAP</div>
+            <h1 style={titleStyle}>アストリアの街</h1>
+          </div>
+          <p style={hintStyle}>施設をタップして、会話や導線を確認できます。</p>
+        </header>
+
+        <div style={mapStyle}>
+          <div style={skyGlowStyle} />
+          <div style={mainRoadStyle} />
+          <div style={plazaStyle} />
+          <div style={buildingClusterStyle("left")} />
+          <div style={buildingClusterStyle("right")} />
+
+          {HOTSPOTS.map((spot) => (
+            <button
+              key={spot.id}
+              onClick={() => handleHotspot(spot.id)}
+              style={{
+                ...hotspotStyle,
+                left: `${spot.x}%`,
+                top: `${spot.y}%`,
+                width: `${spot.w}%`,
+                height: `${spot.h}%`,
+              }}
+            >
+              <span style={hotspotLabelStyle}>{spot.label}</span>
+              <span style={hotspotSubLabelStyle}>{spot.subLabel}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {dialog && (
+        <div style={overlayStyle}>
+          <div style={dialogStyle}>
+            <button onClick={() => setActiveDialog(null)} style={closeButtonStyle}>
+              閉じる
+            </button>
+
+            <div style={dialogEyebrowStyle}>{dialog.title}</div>
+            {dialog.speaker ? <div style={speakerStyle}>{dialog.speaker}</div> : null}
+            <div style={dialogTextStyle}>{dialog.text}</div>
+
+            {dialog.actionLabel ? (
+              <button
+                disabled={!dialog.actionUrl}
+                onClick={() => {
+                  if (dialog.actionUrl) openExternal(dialog.actionUrl);
+                }}
+                style={actionButtonStyle(!!dialog.actionUrl)}
+                title={dialog.disabledReason ?? dialog.actionLabel}
+              >
+                {dialog.actionLabel}
+              </button>
+            ) : null}
+
+            {dialog.disabledReason ? <div style={disabledNoteStyle}>{dialog.disabledReason}</div> : null}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const sceneStyle: CSSProperties = {
+  minHeight: "100dvh",
+  boxSizing: "border-box",
+  padding: 14,
+  color: "#fff6df",
+  background:
+    "radial-gradient(circle at 22% 12%, rgba(255,207,112,0.18), transparent 28%), radial-gradient(circle at 78% 8%, rgba(113,169,255,0.14), transparent 26%), linear-gradient(180deg, #1c2430 0%, #181513 54%, #0e1118 100%)",
+  display: "grid",
+  placeItems: "center",
+};
+
+const shellStyle: CSSProperties = {
+  width: "min(900px, 100%)",
+};
+
+const headerStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "end",
+  justifyContent: "space-between",
+  gap: 12,
+  flexWrap: "wrap",
+  marginBottom: 10,
+};
+
+const eyebrowStyle: CSSProperties = {
+  color: "#ffd66d",
+  fontSize: 11,
+  fontWeight: 950,
+  letterSpacing: 0,
+};
+
+const titleStyle: CSSProperties = {
+  margin: 0,
+  color: "#fff1ca",
+  fontSize: 26,
+  textShadow: "0 2px 12px rgba(0,0,0,0.45)",
+};
+
+const hintStyle: CSSProperties = {
+  margin: 0,
+  color: "rgba(255,246,223,0.84)",
+  fontSize: 13,
+  lineHeight: 1.5,
+};
+
+const mapStyle: CSSProperties = {
+  position: "relative",
+  width: "100%",
+  aspectRatio: "16 / 10",
+  minHeight: 360,
+  maxHeight: "78dvh",
+  overflow: "hidden",
+  borderRadius: 18,
+  border: "1px solid rgba(255,229,172,0.25)",
+  background:
+    "linear-gradient(180deg, rgba(78,101,122,0.86), rgba(49,56,54,0.78) 38%, rgba(42,33,24,0.92) 100%), radial-gradient(circle at 50% 58%, rgba(255,216,102,0.16), transparent 30%)",
+  boxShadow: "0 22px 60px rgba(0,0,0,0.48), inset 0 0 62px rgba(0,0,0,0.28)",
+};
+
+const skyGlowStyle: CSSProperties = {
+  position: "absolute",
+  inset: "0 0 52%",
+  background: "radial-gradient(circle at 50% 10%, rgba(255,230,167,0.22), transparent 35%)",
+  pointerEvents: "none",
+};
+
+const mainRoadStyle: CSSProperties = {
+  position: "absolute",
+  left: "42%",
+  top: "24%",
+  width: "16%",
+  height: "84%",
+  transform: "skewX(-7deg)",
+  background: "linear-gradient(90deg, rgba(155,126,92,0.8), rgba(98,78,58,0.9))",
+  borderLeft: "1px solid rgba(255,232,180,0.18)",
+  borderRight: "1px solid rgba(0,0,0,0.22)",
+};
+
+const plazaStyle: CSSProperties = {
+  position: "absolute",
+  left: "31%",
+  top: "47%",
+  width: "38%",
+  height: "27%",
+  borderRadius: "50%",
+  background:
+    "radial-gradient(circle, rgba(178,139,87,0.86), rgba(86,66,48,0.88) 62%, rgba(0,0,0,0.1) 70%)",
+  border: "1px solid rgba(255,232,180,0.2)",
+};
+
+function buildingClusterStyle(side: "left" | "right"): CSSProperties {
+  return {
+    position: "absolute",
+    left: side === "left" ? "6%" : "67%",
+    top: side === "left" ? "28%" : "31%",
+    width: "25%",
+    height: "36%",
+    borderRadius: 16,
+    background:
+      "linear-gradient(180deg, rgba(107,58,39,0.9), rgba(54,36,28,0.92)), repeating-linear-gradient(90deg, rgba(255,232,180,0.12) 0 2px, transparent 2px 14px)",
+    border: "1px solid rgba(255,232,180,0.18)",
+    boxShadow: "0 16px 34px rgba(0,0,0,0.32)",
+  };
+}
+
+const hotspotStyle: CSSProperties = {
+  position: "absolute",
+  display: "grid",
+  placeItems: "center",
+  gap: 2,
+  padding: 6,
+  borderRadius: 14,
+  border: "1px solid rgba(255,232,180,0.62)",
+  background: "rgba(29,20,16,0.66)",
+  color: "#fff1cc",
+  boxShadow: "0 10px 24px rgba(0,0,0,0.32), inset 0 0 20px rgba(255,216,102,0.08)",
+  fontWeight: 950,
+  touchAction: "manipulation",
+  cursor: "pointer",
+};
+
+const hotspotLabelStyle: CSSProperties = {
+  fontSize: 14,
+};
+
+const hotspotSubLabelStyle: CSSProperties = {
+  fontSize: 10,
+  color: "rgba(255,246,223,0.74)",
+};
+
+const overlayStyle: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 14000,
+  display: "grid",
+  placeItems: "center",
+  padding: 14,
+  boxSizing: "border-box",
+  background: "rgba(5,5,8,0.62)",
+  backdropFilter: "blur(2px)",
+};
+
+const dialogStyle: CSSProperties = {
+  position: "relative",
+  width: "min(560px, calc(100% - 10px))",
+  padding: "24px 22px 20px",
+  boxSizing: "border-box",
+  borderRadius: 18,
+  border: "1px solid rgba(255,216,102,0.54)",
+  background: "linear-gradient(180deg, rgba(39,27,20,0.97), rgba(17,14,15,0.97))",
+  boxShadow: "0 24px 58px rgba(0,0,0,0.58), inset 0 0 34px rgba(255,198,86,0.08)",
+};
+
+const closeButtonStyle: CSSProperties = {
+  position: "absolute",
+  top: 12,
+  right: 12,
+  minHeight: 36,
+  padding: "0 12px",
+  borderRadius: 10,
+  border: "1px solid rgba(255,232,180,0.28)",
+  background: "rgba(255,241,204,0.12)",
+  color: "#fff1cc",
+  fontWeight: 900,
+};
+
+const dialogEyebrowStyle: CSSProperties = {
+  color: "rgba(255,232,180,0.78)",
+  fontSize: 12,
+  fontWeight: 950,
+};
+
+const speakerStyle: CSSProperties = {
+  marginTop: 7,
+  color: "#ffd66d",
+  fontSize: 24,
+  lineHeight: 1.1,
+  fontWeight: 950,
+};
+
+const dialogTextStyle: CSSProperties = {
+  marginTop: 16,
+  color: "#fff6df",
+  fontSize: 16,
+  lineHeight: 1.75,
+  whiteSpace: "pre-line",
+};
+
+function actionButtonStyle(enabled: boolean): CSSProperties {
+  return {
+    marginTop: 18,
+    minHeight: 42,
+    padding: "0 16px",
+    borderRadius: 12,
+    border: enabled ? "1px solid rgba(255,216,102,0.82)" : "1px solid rgba(255,232,180,0.22)",
+    background: enabled
+      ? "linear-gradient(180deg, #ffd66d, #c5872d)"
+      : "linear-gradient(180deg, rgba(68,45,31,0.66), rgba(26,20,18,0.86))",
+    color: enabled ? "#2a1a0d" : "rgba(255,241,204,0.64)",
+    fontWeight: 950,
+    opacity: enabled ? 1 : 0.62,
+    touchAction: "manipulation",
+  };
+}
+
+const disabledNoteStyle: CSSProperties = {
+  marginTop: 10,
+  color: "rgba(255,232,180,0.74)",
+  fontSize: 12,
+  lineHeight: 1.5,
+};

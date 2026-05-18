@@ -34,6 +34,7 @@ import { UnitPopup } from "./components/Popup/UnitPopup";
 import { SelectedUnitStatus } from "./components/SelectedUnitStatus";
 import { SkillModeBanner } from "./components/SkillModeBanner";
 import { TopStatusBar } from "./components/TopStatusBar";
+import { AstoriaMapScene } from "./components/AstoriaMapScene";
 import { TownScene } from "./components/TownScene";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
@@ -77,7 +78,7 @@ type SkillMotionEvent = { id: string; instanceId: string };
 type AttackMotionEvent = { id: string; instanceId: string; dr: number; dc: number };
 type MoveMotionEvent = { id: string; instanceId: string };
 type ImpactFxEvent = { id: string; targetId: string; r: number; c: number };
-type Scene = "town" | "tcg";
+type Scene = "astoria" | "town" | "tcg";
 type SkillImpactFxEvent = {
   id: string;
   skillId: SkillId;
@@ -126,7 +127,7 @@ export default function App() {
   const [southSkin, setSouthSkin] = useState<Skin>("default");
   const [northSkin, setNorthSkin] = useState<Skin>("default");
   const [unlockedSkins, setUnlockedSkins] = useState<Skin[]>(() => readUnlockedSkins());
-  const [scene, setScene] = useState<Scene>("town");
+  const [scene, setScene] = useState<Scene>("astoria");
 
   const [popupId, setPopupId] = useState<string | null>(null);
   const popupOpen = popupId !== null;
@@ -1046,9 +1047,14 @@ const reinforceSet = useMemo(() => {
 
   const canSelect = (inst: any) => canSelectUnit({ inst, gameOver, turn, perUnitTurn });
 
+  if (scene === "astoria") {
+    return <AstoriaMapScene onEnterLobby={() => setScene("town")} />;
+  }
+
   if (scene === "town") {
     return (
       <TownScene
+        onExitToMap={() => setScene("astoria")}
         onEnterTcg={() => setScene("tcg")}
         onSkinUnlocked={refreshUnlockedSkins}
         unitsById={unitsById}

@@ -8,6 +8,7 @@ import { CollectionDialog } from "./Town/CollectionDialog";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
+  onExitToMap?: () => void;
   onSkinUnlocked?: () => void;
   unitsById: Record<string, UnitDef>;
 };
@@ -95,7 +96,7 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
   return Math.hypot(dx, dy) <= threshold;
 }
 
-export function TownScene({ onEnterTcg, onSkinUnlocked, unitsById }: TownSceneProps) {
+export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 44, y: 68 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
   const [receptionTopic, setReceptionTopic] = useState<ReceptionTopic>("home");
@@ -237,6 +238,11 @@ export function TownScene({ onEnterTcg, onSkinUnlocked, unitsById }: TownScenePr
             <h2 style={titleStyle}>Gの部屋ロビー</h2>
           </div>
           <div style={hintStyle}>ロクを動かして、光る対戦台に近づいてください。</div>
+          {onExitToMap ? (
+            <button onClick={onExitToMap} style={mapBackButtonStyle}>
+              アストリアMAPへ
+            </button>
+          ) : null}
         </div>
 
         <div style={mapStyle}>
@@ -459,6 +465,17 @@ const hintStyle: CSSProperties = {
   fontSize: 13,
   color: "rgba(255,246,223,0.86)",
   lineHeight: 1.5,
+};
+
+const mapBackButtonStyle: CSSProperties = {
+  minHeight: 36,
+  padding: "0 12px",
+  borderRadius: 11,
+  border: "1px solid rgba(255,232,180,0.32)",
+  background: "rgba(255,241,204,0.12)",
+  color: "#fff1cc",
+  fontWeight: 900,
+  touchAction: "manipulation",
 };
 
 const mapStyle: CSSProperties = {
