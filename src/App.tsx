@@ -700,6 +700,7 @@ const reinforceSet = useMemo(() => {
 
     const me = perUnitTurn[selected.instanceId];
     if (me?.done) return [];
+    if (!me?.moved) return [];
     if (me?.attacked) return [];
 
     const stateLike = {
@@ -735,6 +736,7 @@ const reinforceSet = useMemo(() => {
 
     const me = perUnitTurn[selected.instanceId];
     if (me?.done) return [];
+    if (!me?.moved) return [];
     if (me?.attacked) return [];
 
     const stateLike = {
