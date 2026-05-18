@@ -34,11 +34,11 @@ const ASTORIA_MAP_IMAGE_URL = "/backgrounds/astoria-map.png";
 const SAGG_IMAGE_URL = "/characters/sagg.png";
 
 const HOTSPOTS: Hotspot[] = [
-  { id: "gRoom", label: "Gの部屋", subLabel: "ロビーへ", x: 71, y: 20, w: 19, h: 16 },
-  { id: "blacksmith", label: "鍛冶屋", subLabel: "サッグ", x: 9, y: 20, w: 21, h: 16 },
-  { id: "generalStore", label: "雑貨屋", subLabel: "スタンプ", x: 9, y: 56, w: 21, h: 17 },
-  { id: "plaza", label: "広場", subLabel: "門天", x: 39, y: 44, w: 23, h: 18 },
-  { id: "gate", label: "門", subLabel: "準備中", x: 41, y: 76, w: 18, h: 15 },
+  { id: "gRoom", label: "Gの部屋", subLabel: "ロビーへ", x: 64, y: 14, w: 29, h: 21 },
+  { id: "blacksmith", label: "鍛冶屋", subLabel: "サッグ", x: 4, y: 25, w: 31, h: 18 },
+  { id: "generalStore", label: "雑貨屋", subLabel: "スタンプ", x: 3, y: 44, w: 31, h: 17 },
+  { id: "plaza", label: "広場", subLabel: "門天", x: 43, y: 50, w: 35, h: 18 },
+  { id: "gate", label: "門", subLabel: "準備中", x: 34, y: 73, w: 32, h: 17 },
 ];
 
 const DIALOGS: Record<DialogId, DialogContent> = {
@@ -213,10 +213,12 @@ const hintStyle: CSSProperties = {
 
 const mapStyle: CSSProperties = {
   position: "relative",
-  width: "100%",
-  aspectRatio: "16 / 10",
-  minHeight: 360,
+  width: "min(100%, calc(78dvh * 941 / 1672))",
+  minWidth: "min(100%, 320px)",
+  aspectRatio: "941 / 1672",
+  minHeight: 0,
   maxHeight: "78dvh",
+  margin: "0 auto",
   overflow: "hidden",
   borderRadius: 18,
   border: "1px solid rgba(255,229,172,0.25)",
