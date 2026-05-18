@@ -20,14 +20,17 @@ type Hotspot = {
 type DialogContent = {
   title: string;
   speaker?: string;
+  portraitUrl?: string;
+  portraitAlt?: string;
   text: string;
   actionLabel?: string;
   actionUrl?: string;
   disabledReason?: string;
 };
 
-const YOUTUBE_URL = "https://www.youtube.com/@gnoheya";
+const YOUTUBE_URL = "https://www.youtube.com/@Gnoheya-6910";
 const LINE_STAMP_URL: string | null = null; // TODO: LINEスタンプの正式URLが決まったら設定する。
+const SAGG_IMAGE_URL = "/characters/sagg.png";
 
 const HOTSPOTS: Hotspot[] = [
   { id: "gRoom", label: "Gの部屋", subLabel: "ロビーへ", x: 56, y: 34, w: 20, h: 18 },
@@ -41,7 +44,10 @@ const DIALOGS: Record<DialogId, DialogContent> = {
   blacksmith: {
     title: "鍛冶屋",
     speaker: "サッグ",
-    text: "おう、来たか。\nGの部屋の記録映像なら、ここから見られるぜ。",
+    portraitUrl: SAGG_IMAGE_URL,
+    portraitAlt: "サッグ",
+    text:
+      "おう、来たか。\nGの部屋の記録映像なら、ここから見られるぜ。\n叩いて鍛えるのは鉄だけじゃねぇ。\n物語も、見られて強くなるんだ。",
     actionLabel: "YouTubeを開く",
     actionUrl: YOUTUBE_URL,
   },
@@ -65,6 +71,7 @@ const DIALOGS: Record<DialogId, DialogContent> = {
 
 export function AstoriaMapScene({ onEnterLobby }: AstoriaMapSceneProps) {
   const [activeDialog, setActiveDialog] = useState<DialogId | null>(null);
+  const [failedPortraits, setFailedPortraits] = useState<Set<string>>(() => new Set());
   const dialog = activeDialog ? DIALOGS[activeDialog] : null;
 
   const handleHotspot = (id: HotspotId) => {
@@ -125,8 +132,23 @@ export function AstoriaMapScene({ onEnterLobby }: AstoriaMapSceneProps) {
             </button>
 
             <div style={dialogEyebrowStyle}>{dialog.title}</div>
-            {dialog.speaker ? <div style={speakerStyle}>{dialog.speaker}</div> : null}
-            <div style={dialogTextStyle}>{dialog.text}</div>
+            <div style={dialogContentStyle}>
+              {dialog.portraitUrl && !failedPortraits.has(dialog.portraitUrl) ? (
+                <img
+                  src={dialog.portraitUrl}
+                  alt={dialog.portraitAlt ?? dialog.speaker ?? dialog.title}
+                  style={dialogPortraitStyle}
+                  onError={() => {
+                    setFailedPortraits((current) => new Set(current).add(dialog.portraitUrl!));
+                  }}
+                />
+              ) : null}
+
+              <div style={dialogTextColumnStyle}>
+                {dialog.speaker ? <div style={speakerStyle}>{dialog.speaker}</div> : null}
+                <div style={dialogTextStyle}>{dialog.text}</div>
+              </div>
+            </div>
 
             {dialog.actionLabel ? (
               <button
@@ -321,8 +343,30 @@ const dialogEyebrowStyle: CSSProperties = {
   fontWeight: 950,
 };
 
+const dialogContentStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+  gap: 14,
+  marginTop: 10,
+  flexWrap: "wrap",
+};
+
+const dialogPortraitStyle: CSSProperties = {
+  width: "clamp(104px, 28vw, 154px)",
+  maxHeight: 190,
+  objectFit: "contain",
+  borderRadius: 16,
+  border: "1px solid rgba(255,232,180,0.3)",
+  background: "rgba(255,241,204,0.08)",
+  boxShadow: "0 12px 26px rgba(0,0,0,0.34)",
+};
+
+const dialogTextColumnStyle: CSSProperties = {
+  minWidth: 0,
+  flex: "1 1 260px",
+};
+
 const speakerStyle: CSSProperties = {
-  marginTop: 7,
   color: "#ffd66d",
   fontSize: 24,
   lineHeight: 1.1,
