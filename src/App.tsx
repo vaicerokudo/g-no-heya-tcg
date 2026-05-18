@@ -443,6 +443,7 @@ export default function App() {
   function getDeckBackPath(skin: Skin) {
     if (skin === "dark") return "/cards/back_dark.png";
     if (skin === "travel") return "/cards/back_travel.png";
+    if (skin === "comic") return "/cards/back_comic.png";
     return "/cards/back_default.png";
   }
 
