@@ -14,10 +14,17 @@ type Pos = { x: number; y: number };
 type InteractionArea = { x: number; y: number; w: number; h: number };
 type InteractionTarget = "table" | "reception" | "collection" | null;
 type TownDialog = "reception" | "collection" | null;
-type ReceptionTopic = "home" | "first" | "table" | "skin";
+type ReceptionTopic = "home" | "first" | "table" | "skin" | "password";
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
 
+const UNLOCKED_SKINS_STORAGE_KEY = "gnoheya_tcg_unlocked_skins";
+const COMIC_SKIN_ID = "comic";
+const COMIC_PASSPHRASE = "サウンドコミック";
+const PASSWORD_DIALOG = {
+  label: "合言葉を伝える",
+  text: "合言葉を言うにゃ。……間違えても怒らないにゃ。",
+};
 const PLAYER_WIDTH = 68;
 const PLAYER_HEIGHT = 74;
 const STEP = 18;
@@ -35,7 +42,7 @@ const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalM
   "running-right": { row: 1, frames: 8, intervalMs: 105 },
   "running-left": { row: 2, frames: 8, intervalMs: 105 },
 };
-const RECEPTION_DIALOG: Record<ReceptionTopic, { label: string; text: string }> = {
+const RECEPTION_DIALOG: Record<Exclude<ReceptionTopic, "password">, { label: string; text: string }> = {
   home: {
     label: "案内",
     text: "ようこそ、Gの部屋へにゃ。聞きたいことを選ぶにゃ。",
@@ -53,7 +60,7 @@ const RECEPTION_DIALOG: Record<ReceptionTopic, { label: string; text: string }> 
     text: "スキンは見た目だけ変わるにゃ。強さは変わらないから安心するにゃ。",
   },
 };
-const RECEPTION_CHOICES: ReceptionTopic[] = ["first", "table", "skin"];
+const RECEPTION_CHOICES: ReceptionTopic[] = ["first", "table", "skin", "password"];
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -67,10 +74,27 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
   return Math.hypot(dx, dy) <= threshold;
 }
 
+function readUnlockedSkins(): string[] {
+  try {
+    const raw = window.localStorage.getItem(UNLOCKED_SKINS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveUnlockedSkins(skins: string[]) {
+  window.localStorage.setItem(UNLOCKED_SKINS_STORAGE_KEY, JSON.stringify(skins));
+}
+
 export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 44, y: 68 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
   const [receptionTopic, setReceptionTopic] = useState<ReceptionTopic>("home");
+  const [passphraseInput, setPassphraseInput] = useState("");
+  const [passphraseMessage, setPassphraseMessage] = useState("");
   const [facing, setFacing] = useState<Facing>("right");
   const [isMoving, setIsMoving] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
@@ -89,12 +113,31 @@ export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
   const handleInteract = () => {
     if (interactionTarget === "reception") {
       setReceptionTopic("home");
+      setPassphraseInput("");
+      setPassphraseMessage("");
       setActiveDialog("reception");
     } else if (interactionTarget === "collection") {
       setActiveDialog("collection");
     } else if (interactionTarget === "table") {
       onEnterTcg();
     }
+  };
+
+  const handlePassphraseSubmit = () => {
+    const passphrase = passphraseInput.trim();
+    if (passphrase !== COMIC_PASSPHRASE) {
+      setPassphraseMessage("違うにゃ。……でも、近い気配はしたにゃ。");
+      return;
+    }
+
+    const unlockedSkins = readUnlockedSkins();
+    if (unlockedSkins.includes(COMIC_SKIN_ID)) {
+      setPassphraseMessage("それはもう解放済みにゃ。ちゃんと覚えてるにゃ。");
+      return;
+    }
+
+    saveUnlockedSkins([...unlockedSkins, COMIC_SKIN_ID]);
+    setPassphraseMessage("……合ってるにゃ。サウンドコミック、解放しておくにゃ。");
   };
 
   const moveBy = (dx: number, dy: number) => {
@@ -175,7 +218,7 @@ export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
         : interactionTarget === "table"
           ? "対戦"
           : "移動";
-  const receptionDialog = RECEPTION_DIALOG[receptionTopic];
+  const receptionDialog = receptionTopic === "password" ? PASSWORD_DIALOG : RECEPTION_DIALOG[receptionTopic];
 
   return (
     <div style={sceneStyle}>
@@ -263,6 +306,27 @@ export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
                 <div style={dialogNameStyle}>7171</div>
                 <div style={dialogTopicStyle}>{receptionDialog.label}</div>
                 <div style={dialogTextStyle}>{receptionDialog.text}</div>
+                {receptionTopic === "password" && (
+                  <form
+                    style={passphraseFormStyle}
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      handlePassphraseSubmit();
+                    }}
+                  >
+                    <input
+                      value={passphraseInput}
+                      onChange={(event) => setPassphraseInput(event.target.value)}
+                      placeholder="合言葉"
+                      aria-label="合言葉"
+                      style={passphraseInputStyle}
+                    />
+                    <button type="submit" style={passphraseSubmitButtonStyle}>
+                      伝える
+                    </button>
+                    {passphraseMessage ? <div style={passphraseMessageStyle}>{passphraseMessage}</div> : null}
+                  </form>
+                )}
               </div>
               <button onClick={() => setActiveDialog(null)} style={dialogCloseButtonStyle}>
                 閉じる
@@ -271,10 +335,15 @@ export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
                 {RECEPTION_CHOICES.map((topic) => (
                   <button
                     key={topic}
-                    onClick={() => setReceptionTopic(topic)}
+                    onClick={() => {
+                      setReceptionTopic(topic);
+                      if (topic !== "password") {
+                        setPassphraseMessage("");
+                      }
+                    }}
                     style={dialogChoiceButtonStyle(topic === receptionTopic)}
                   >
-                    {RECEPTION_DIALOG[topic].label}
+                    {topic === "password" ? PASSWORD_DIALOG.label : RECEPTION_DIALOG[topic].label}
                   </button>
                 ))}
                 <button onClick={() => setActiveDialog(null)} style={dialogChoiceButtonStyle(false)}>
@@ -574,6 +643,46 @@ const dialogTextStyle: CSSProperties = {
   color: "#fff6df",
   fontSize: 17,
   lineHeight: 1.75,
+};
+
+const passphraseFormStyle: CSSProperties = {
+  marginTop: 16,
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr) auto",
+  gap: 8,
+  alignItems: "center",
+};
+
+const passphraseInputStyle: CSSProperties = {
+  minWidth: 0,
+  minHeight: 42,
+  padding: "0 12px",
+  borderRadius: 12,
+  border: "1px solid rgba(255,232,180,0.36)",
+  background: "rgba(255,246,223,0.12)",
+  color: "#fff6df",
+  fontSize: 16,
+  fontWeight: 800,
+  outline: "none",
+};
+
+const passphraseSubmitButtonStyle: CSSProperties = {
+  minHeight: 42,
+  padding: "0 14px",
+  borderRadius: 12,
+  border: "1px solid rgba(255,216,102,0.82)",
+  background: "linear-gradient(180deg, #ffd66d, #c5872d)",
+  color: "#2a1a0d",
+  fontSize: 13,
+  fontWeight: 950,
+  touchAction: "manipulation",
+};
+
+const passphraseMessageStyle: CSSProperties = {
+  gridColumn: "1 / -1",
+  color: "#ffe2a3",
+  fontSize: 14,
+  lineHeight: 1.55,
 };
 
 const dialogCloseButtonStyle: CSSProperties = {
