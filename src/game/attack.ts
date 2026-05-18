@@ -1,4 +1,5 @@
 // src/game/attack.ts
+import type { Side } from "./types";
 import { computeFinalDamage } from "./combat/damage";
 
 type Pos = { r: number; c: number };
@@ -12,7 +13,7 @@ export type StateLike = {
   selectedInstanceId?: string | null;
 };
 
-type AttackDirectionMode = "all8" | "orthogonal" | "diagonal";
+type AttackDirectionMode = "all8" | "orthogonal" | "diagonal" | "front3";
 type AttackDir = { dr: number; dc: number };
 
 function chebDist(a: Pos, b: Pos) {
@@ -64,19 +65,25 @@ function isDiagonalLine(a: Pos, b: Pos) {
   return dr !== 0 && Math.abs(dr) === Math.abs(dc);
 }
 
+function isFront3Line(a: Pos, b: Pos, side: Side) {
+  const front = side === "south" ? -1 : 1;
+  return b.r - a.r === front && Math.abs(b.c - a.c) <= 1;
+}
+
 function getAttackDirectionMode(spec: any): AttackDirectionMode {
   const directions = spec?.directions;
-  if (directions === "orthogonal" || directions === "diagonal") return directions;
+  if (directions === "orthogonal" || directions === "diagonal" || directions === "front3") return directions;
   return "all8";
 }
 
-function isInAttackDirection(a: Pos, b: Pos, mode: AttackDirectionMode) {
+function isInAttackDirection(a: Pos, b: Pos, mode: AttackDirectionMode, side: Side) {
   if (mode === "orthogonal") return isOrthogonalLine(a, b);
   if (mode === "diagonal") return isDiagonalLine(a, b);
+  if (mode === "front3") return isFront3Line(a, b, side);
   return isLine8(a, b);
 }
 
-function getAttackDirs(mode: AttackDirectionMode): AttackDir[] {
+function getAttackDirs(mode: AttackDirectionMode, side: Side): AttackDir[] {
   const orthogonal = [
     { dr: -1, dc: 0 },
     { dr: 1, dc: 0 },
@@ -92,6 +99,14 @@ function getAttackDirs(mode: AttackDirectionMode): AttackDir[] {
 
   if (mode === "orthogonal") return orthogonal;
   if (mode === "diagonal") return diagonal;
+  if (mode === "front3") {
+    const front = side === "south" ? -1 : 1;
+    return [
+      { dr: front, dc: -1 },
+      { dr: front, dc: 0 },
+      { dr: front, dc: 1 },
+    ];
+  }
   return [...orthogonal, ...diagonal];
 }
 
@@ -137,7 +152,7 @@ function isRangedLineAttackable(
   losBlocked: boolean,
   directions: AttackDirectionMode
 ) {
-  if (!isInAttackDirection(attacker.pos, target.pos, directions)) return false;
+  if (!isInAttackDirection(attacker.pos, target.pos, directions, attacker.side)) return false;
 
   const dist = chebDist(attacker.pos, target.pos);
   if (dist > range) return false;
@@ -250,7 +265,7 @@ export function getAttackMarks(stateLike: StateLike, attacker: any): AttackMark[
   if (spec?.type === "rangedLine") {
     const range = spec.range ?? 3;
     const blocked = spec.lineOfSightBlockedByUnits ?? true;
-    const dirs = getAttackDirs(getAttackDirectionMode(spec));
+    const dirs = getAttackDirs(getAttackDirectionMode(spec), attacker.side);
 
     for (const d of dirs) {
       for (let step = 1; step <= range; step++) {
