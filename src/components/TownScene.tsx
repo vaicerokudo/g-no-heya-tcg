@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import playerSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import guildLobby from "../assets/town/guild-lobby.png";
 import reception7171 from "../assets/town/reception-7171.png";
-import { COMIC_SKIN_ID, unlockSkin } from "../assets/skinUnlocks";
+import { COMIC_SKIN_ID, TRAVEL_SKIN_ID, unlockSkin } from "../assets/skinUnlocks";
 import type { UnitDef } from "../game/types";
 import { CollectionDialog } from "./Town/CollectionDialog";
 
@@ -19,7 +19,28 @@ type ReceptionTopic = "home" | "first" | "table" | "skin" | "password";
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
 
-const COMIC_PASSPHRASE = "サウンドコミック";
+type PassphraseUnlock = {
+  skinId: typeof COMIC_SKIN_ID | typeof TRAVEL_SKIN_ID;
+  unlockedMessage: string;
+  alreadyUnlockedMessage: string;
+};
+
+const PASSPHRASE_UNLOCKS: Record<string, PassphraseUnlock> = {
+  "\u30b5\u30a6\u30f3\u30c9\u30b3\u30df\u30c3\u30af": {
+    skinId: COMIC_SKIN_ID,
+    unlockedMessage:
+      "\u2026\u2026\u5408\u3063\u3066\u308b\u306b\u3083\u3002\n\u30b5\u30a6\u30f3\u30c9\u30b3\u30df\u30c3\u30af\u3001\u89e3\u653e\u3057\u3066\u304a\u304f\u306b\u3083\u3002\n\u4e0a\u306e\u30b9\u30ad\u30f3\u9078\u629e\u304b\u3089\u4f7f\u3048\u308b\u3088\u3046\u306b\u306a\u3063\u305f\u306b\u3083\u3002",
+    alreadyUnlockedMessage:
+      "\u305d\u308c\u306f\u3082\u3046\u89e3\u653e\u6e08\u307f\u306b\u3083\u3002\n\u4e0a\u306e\u30b9\u30ad\u30f3\u9078\u629e\u304b\u3089\u3001\u3044\u3064\u3067\u3082\u9078\u3079\u308b\u306b\u3083\u3002",
+  },
+  "\u30a2\u30b9\u30c8\u30ea\u30a2": {
+    skinId: TRAVEL_SKIN_ID,
+    unlockedMessage:
+      "\u2026\u2026\u30a2\u30b9\u30c8\u30ea\u30a2\u3002\n\u305d\u306e\u540d\u3092\u77e5\u3063\u3066\u308b\u306a\u3089\u3001\u901a\u3057\u3066\u3082\u3044\u3044\u306b\u3083\u3002\n\u65c5\u88c5\u3001\u89e3\u653e\u3057\u3066\u304a\u304f\u306b\u3083\u3002\n\u4e0a\u306e\u30b9\u30ad\u30f3\u9078\u629e\u304b\u3089\u4f7f\u3048\u308b\u306b\u3083\u3002",
+    alreadyUnlockedMessage:
+      "\u30a2\u30b9\u30c8\u30ea\u30a2\u306e\u8a31\u53ef\u306f\u3001\u3082\u3046\u51fa\u3066\u308b\u306b\u3083\u3002\n\u65c5\u88c5\u306f\u3044\u3064\u3067\u3082\u9078\u3079\u308b\u306b\u3083\u3002",
+  },
+};
 const PASSWORD_DIALOG = {
   label: "合言葉を伝える",
   text: "合言葉を言うにゃ。\n……間違えても怒らないにゃ。",
@@ -109,20 +130,19 @@ export function TownScene({ onEnterTcg, unitsById }: TownSceneProps) {
 
   const handlePassphraseSubmit = () => {
     const passphrase = passphraseInput.trim();
-    if (passphrase !== COMIC_PASSPHRASE) {
-      setPassphraseMessage("違うにゃ。\n……でも、近い気配はしたにゃ。");
+    const unlockConfig = PASSPHRASE_UNLOCKS[passphrase];
+    if (!unlockConfig) {
+      setPassphraseMessage("\u9055\u3046\u306b\u3083\u3002\n\u2026\u2026\u3067\u3082\u3001\u8fd1\u3044\u6c17\u914d\u306f\u3057\u305f\u306b\u3083\u3002");
       return;
     }
 
-    const unlockResult = unlockSkin(COMIC_SKIN_ID);
+    const unlockResult = unlockSkin(unlockConfig.skinId);
     if (unlockResult === "already-unlocked") {
-      setPassphraseMessage("それはもう解放済みにゃ。\n上のスキン選択から、いつでも選べるにゃ。");
+      setPassphraseMessage(unlockConfig.alreadyUnlockedMessage);
       return;
     }
 
-    setPassphraseMessage(
-      "……合ってるにゃ。\nサウンドコミック、解放しておくにゃ。\n上のスキン選択から使えるようになったにゃ。"
-    );
+    setPassphraseMessage(unlockConfig.unlockedMessage);
   };
 
   const moveBy = (dx: number, dy: number) => {

@@ -2,9 +2,10 @@ import type { Skin } from "./imagePaths";
 
 export const UNLOCKED_SKINS_STORAGE_KEY = "gnoheya_tcg_unlocked_skins";
 export const COMIC_SKIN_ID: Skin = "comic";
+export const TRAVEL_SKIN_ID: Skin = "travel";
 
 const KNOWN_SKINS = new Set<Skin>(["default", "dark", "travel", "comic"]);
-const ALWAYS_UNLOCKED_SKINS = new Set<Skin>(["default", "dark", "travel"]);
+const ALWAYS_UNLOCKED_SKINS = new Set<Skin>(["default", "dark"]);
 
 export function readUnlockedSkins(): Skin[] {
   if (typeof window === "undefined") return [];
