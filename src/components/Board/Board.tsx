@@ -2,6 +2,7 @@ import boardBg from "../../assets/boards/board_bg.png";
 import { Cell } from "./Cell";
 
 import { getEffectiveMaxHp } from "../../game/stats";
+import { getGateCols, getNorthGateRow, getSouthGateRow } from "../../game/boardConfig";
 
 type BoardProps = {
   rows: number;
@@ -138,8 +139,10 @@ export function Board(props: BoardProps) {
 
               const isSelected = !!inst && inst.instanceId === selectedId;
 
-              const isGateNorth = r === 0 && (c === 1 || c === 3 || c === 5);
-              const isGateSouth = r === 6 && (c === 1 || c === 3 || c === 5);
+              const gateCols = getGateCols(cols);
+              const isGateCol = gateCols.includes(c);
+              const isGateNorth = r === getNorthGateRow() && isGateCol;
+              const isGateSouth = r === getSouthGateRow(rows) && isGateCol;
 
               const inSkill = !!skillMode;
               const isLegalMove = legalMoveSet.has(k);

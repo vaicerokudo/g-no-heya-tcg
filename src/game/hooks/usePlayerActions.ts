@@ -18,6 +18,7 @@ type BuildMoveInstances = (args: {
   selectedInstanceId: string;
   r: number;
   c: number;
+  rows: number;
   unitsById: GameState["unitsById"];
 }) => UnitInstance[];
 
@@ -42,6 +43,7 @@ type PerformMoveArgs = {
   inst: UnitInstance | null;
   r: number;
   c: number;
+  rows: number;
   instances: UnitInstance[];
   unitsById: GameState["unitsById"];
 };
@@ -67,6 +69,7 @@ type TryMoveArgs = {
   legalMoveSet: Set<string>;
   r: number;
   c: number;
+  rows: number;
   instances: UnitInstance[];
   unitsById: GameState["unitsById"];
 };
@@ -101,7 +104,7 @@ export function usePlayerActions({
     }));
   }
 
-  function performMove({ inst, r, c, instances, unitsById }: PerformMoveArgs) {
+  function performMove({ inst, r, c, rows, instances, unitsById }: PerformMoveArgs) {
     if (!inst) return;
 
     const next = buildMoveInstances({
@@ -109,6 +112,7 @@ export function usePlayerActions({
       selectedInstanceId: inst.instanceId,
       r,
       c,
+      rows,
       unitsById,
     });
 
@@ -187,6 +191,7 @@ export function usePlayerActions({
     legalMoveSet,
     r,
     c,
+    rows,
     instances,
     unitsById,
   }: TryMoveArgs) {
@@ -203,7 +208,7 @@ export function usePlayerActions({
 
     if (!canStartMove({ selected, gameOver, turn, perUnitTurn, legalMoveSet, r, c })) return false;
 
-    performMove({ inst: selected, r, c, instances, unitsById });
+    performMove({ inst: selected, r, c, rows, instances, unitsById });
     return true;
   }
 

@@ -3,6 +3,7 @@ import { getLegalMoves } from "../move";
 import { getAttackableTargets, applyNormalAttack } from "../attack";
 import { getEffectiveMaxHp } from "../stats";
 import type { Side } from "../types";
+import { getEvolveRow } from "../boardConfig";
 
 import { pickBest, type CpuAction, type EvalCtx } from "./eval";
 
@@ -14,8 +15,8 @@ type StateLike = {
   selectedInstanceId?: string | null;
 };
 
-function isEvolveCell(r: number) {
-  return r === 3; // あなたのルール（進化ライン）
+function isEvolveCell(r: number, rows: number) {
+  return r === getEvolveRow(rows);
 }
 
 function simulateMoveAndEvolve(params: {
@@ -26,7 +27,7 @@ function simulateMoveAndEvolve(params: {
   actor: any;
   to: { r: number; c: number };
 }) {
-  const { unitsById, instances, actor, to } = params;
+  const { rows, unitsById, instances, actor, to } = params;
 
   let next = instances.map((u) =>
     u.instanceId === actor.instanceId ? { ...u, pos: { r: to.r, c: to.c } } : u
@@ -34,7 +35,7 @@ function simulateMoveAndEvolve(params: {
 
   let evolved = false;
 
-  if (isEvolveCell(to.r)) {
+  if (isEvolveCell(to.r, rows)) {
     next = next.map((u) => {
       if (u.instanceId !== actor.instanceId) return u;
 

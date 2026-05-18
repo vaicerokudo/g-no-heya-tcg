@@ -26,6 +26,7 @@ import {
   buildTurnStartPerUnitTurn,
 } from "./game/turnFlow";
 import { canSelectUnit } from "./game/playerActionGuards";
+import { getLetters } from "./game/boardConfig";
 import { buildInitialHandsAndDecks } from "./game/handDeck";
 
 import { BottomBar } from "./components/BottomBar";
@@ -635,7 +636,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     return Math.max(min, Math.min(max, size));
   }, [winW, cols]);
 
-  const letters = ["A", "B", "C", "D", "E", "F", "G"];
+  const letters = useMemo(() => getLetters(cols), [cols]);
 
   const selected = instances.find((x: any) => x.instanceId === selectedId) ?? null;
 
@@ -799,6 +800,7 @@ const reinforceSet = useMemo(() => {
       legalMoveSet,
       r,
       c,
+      rows,
       instances: instances as any,
       unitsById,
     });

@@ -4,6 +4,7 @@ import { getAttackableTargets, applyNormalAttack } from "../attack";
 import checkVictory from "../victory";
 import { getEffectiveMaxHp } from "../stats";
 import type { Side } from "../types";
+import { getEvolveRow } from "../boardConfig";
 
 type StateLike = {
   rows: number;
@@ -13,9 +14,8 @@ type StateLike = {
   selectedInstanceId?: string | null;
 };
 
-// 進化マス：あなたの実装に合わせて r===3
-function isEvolveCell(r: number) {
-  return r === 3;
+function isEvolveCell(r: number, rows: number) {
+  return r === getEvolveRow(rows);
 }
 
 
@@ -84,7 +84,7 @@ export function runCpuTurnV1(opts: {
         );
 
         // 進化マスなら進化（あなたの moveTo と同じ処理）
-        if (isEvolveCell(m.r)) {
+        if (isEvolveCell(m.r, rows)) {
           next = next.map((u) => {
             if (u.instanceId !== cur.instanceId) return u;
             const form = u.form ?? "base";
@@ -105,7 +105,7 @@ export function runCpuTurnV1(opts: {
         if (v && v.winner === side) score += 1_000_000;
 
         // 進化マスに乗れたら高得点
-        if (isEvolveCell(m.r)) score += 5000;
+        if (isEvolveCell(m.r, rows)) score += 5000;
 
         // 前に出る（雑）：southは上、northは下 に進めたら少し加点
         const forward = side === "south" ? -1 : 1;
@@ -130,7 +130,7 @@ export function runCpuTurnV1(opts: {
         u.instanceId === cur.instanceId ? { ...u, pos: { r: bestMove.r, c: bestMove.c } } : u
       );
 
-      if (isEvolveCell(bestMove.r)) {
+      if (isEvolveCell(bestMove.r, rows)) {
         next = next.map((u) => {
           if (u.instanceId !== cur.instanceId) return u;
           const form = u.form ?? "base";

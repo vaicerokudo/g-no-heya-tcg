@@ -1,13 +1,12 @@
 // src/game/victory.ts
 import type { Side } from "./types";
+import { getGateCols, getNorthGateRow, getSouthGateRow } from "./boardConfig";
 
 export type Victory = { winner: Side; detail: string };
 
-const GATE_COLS = new Set([1, 3, 5]);
-
 export function checkVictory(
   rows: number,
-  _cols: number,
+  cols: number,
   instances: Array<{ side: Side; pos: { r: number; c: number } }>
 ): Victory | null {
   const southAlive = instances.some((u) => u.side === "south");
@@ -20,8 +19,9 @@ export function checkVictory(
     return { winner: "south", detail: "勝利条件：全滅（NORTHが全滅）→ SOUTHの勝利" };
   }
 
+  const gateCols = new Set(getGateCols(cols));
   const southOnGate = instances.some(
-    (u) => u.side === "south" && u.pos.r === 0 && GATE_COLS.has(u.pos.c)
+    (u) => u.side === "south" && u.pos.r === getNorthGateRow() && gateCols.has(u.pos.c)
   );
   if (southOnGate) {
     return {
@@ -31,7 +31,7 @@ export function checkVictory(
   }
 
   const northOnGate = instances.some(
-    (u) => u.side === "north" && u.pos.r === rows - 1 && GATE_COLS.has(u.pos.c)
+    (u) => u.side === "north" && u.pos.r === getSouthGateRow(rows) && gateCols.has(u.pos.c)
   );
   if (northOnGate) {
     return {

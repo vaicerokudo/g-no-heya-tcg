@@ -1,6 +1,7 @@
 import { shuffle } from "./deck";
 import type { UnitInstance } from "./state";
 import type { Side } from "./types";
+import { getSouthReinforceStartRow } from "./boardConfig";
 
 type SpawnDeployUnit = (opts: {
   unitId: string;
@@ -15,7 +16,7 @@ export function canDeployCellSouth(r: number, rows: number) {
 }
 
 export function canDeployCellSouthReinforce(r: number, rows: number) {
-  return r >= 3 && r <= rows - 1;
+  return r >= getSouthReinforceStartRow(rows) && r <= rows - 1;
 }
 
 export function canStartSouthDeploy({
@@ -160,7 +161,7 @@ export function buildSouthReinforceSet({
   if (!selectedHandKey) return reinforceSet;
   if (battleDeployUsed) return reinforceSet;
 
-  for (let r = 3; r <= rows - 1; r++) {
+  for (let r = getSouthReinforceStartRow(rows); r <= rows - 1; r++) {
     for (let c = 0; c < cols; c++) {
       if (!isOccupied(r, c)) reinforceSet.add(`${r},${c}`);
     }
