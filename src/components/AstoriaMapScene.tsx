@@ -29,7 +29,7 @@ type DialogContent = {
 };
 
 const YOUTUBE_URL = "https://www.youtube.com/@Gnoheya-6910";
-const LINE_STAMP_URL: string | null = null; // TODO: LINEスタンプの正式URLが決まったら設定する。
+const LINE_STAMP_URL = "https://store.line.me/stickershop/product/32711346/ja?from=sticker";
 const SAGG_IMAGE_URL = "/characters/sagg.png";
 
 const HOTSPOTS: Hotspot[] = [
