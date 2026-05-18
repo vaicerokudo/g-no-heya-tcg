@@ -118,6 +118,52 @@ html { overflow-y: scroll; }
   opacity: 0.58;
 }
 
+.normalAttackPreviewRange,
+.normalAttackPreviewTarget {
+  position: absolute;
+  inset: 6px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.normalAttackPreviewRange {
+  border: 2px dashed rgba(255, 236, 154, 0.72);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 208, 82, 0.18), rgba(255, 208, 82, 0.04) 62%, transparent 70%);
+  box-shadow: inset 0 0 12px rgba(255, 199, 64, 0.16);
+}
+
+.normalAttackPreviewTarget {
+  inset: 4px;
+  border: 2px solid rgba(255, 112, 112, 0.95);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 70, 70, 0.34), rgba(255, 180, 88, 0.1) 64%, transparent 72%);
+  box-shadow:
+    inset 0 0 14px rgba(255, 70, 70, 0.32),
+    0 0 12px rgba(255, 110, 80, 0.28);
+}
+
+.normalAttackPreviewBlocker {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.normalAttackPreviewBlocker::after {
+  content: "×";
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+}
+
 @media (max-width: 720px) {
   .bottomBar {
     left: 10px !important;

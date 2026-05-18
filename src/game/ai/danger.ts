@@ -33,9 +33,10 @@ export function buildDangerCells(opts: {
 
     const marks = getAttackMarks(stateLike as any, enemy as any);
 
-    // marks は Set<string>（"r,c"）を想定
-    for (const key of marks) {
-      danger.add(key);
+    // 危険マスは、攻撃範囲として到達できるセルだけを使う。
+    for (const mark of marks) {
+      if (mark.kind !== "range") continue;
+      danger.add(`${mark.r},${mark.c}`);
     }
   }
 

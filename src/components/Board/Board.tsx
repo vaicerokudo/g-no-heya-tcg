@@ -219,6 +219,7 @@ export function Board(props: BoardProps) {
                   cursor={cursor}
                   showRng={showRng}
                   isAttackBlocker={isAttackBlocker}
+                  isAttackableEnemy={isAttackableEnemy}
                   isSelected={isSelected}
                   dmgFx={inst ? dmgByInstanceId.get(inst.instanceId) ?? null : null}
                   skillEventId={inst ? skillEventIdByInstanceId.get(inst.instanceId) ?? null : null}

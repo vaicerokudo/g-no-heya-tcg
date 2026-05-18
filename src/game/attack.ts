@@ -2,6 +2,7 @@
 import { computeFinalDamage } from "./combat/damage";
 
 type Pos = { r: number; c: number };
+export type AttackMark = { kind: "range" | "blocker"; r: number; c: number };
 
 export type StateLike = {
   rows: number;
@@ -184,9 +185,18 @@ export function buildNormalAttackInstances({
 }
 
 // --- danger / UI 用：攻撃可能マスのマーキング ---
-export function getAttackMarks(stateLike: StateLike, attacker: any): Set<string> {
-  const marks = new Set<string>();
+function isInBounds(stateLike: StateLike, r: number, c: number) {
+  return r >= 0 && r < stateLike.rows && c >= 0 && c < stateLike.cols;
+}
+
+export function getAttackMarks(stateLike: StateLike, attacker: any): AttackMark[] {
+  const marks: AttackMark[] = [];
   const spec = stateLike.unitsById?.[attacker.unitId]?.attacks?.normalAttack ?? null;
+  const occ = occMap(stateLike.instances);
+
+  const add = (kind: AttackMark["kind"], r: number, c: number) => {
+    marks.push({ kind, r, c });
+  };
 
   // rangedLine の場合：8方向直線上（射程内）をマーク
   if (spec?.type === "rangedLine") {
@@ -208,16 +218,21 @@ export function getAttackMarks(stateLike: StateLike, attacker: any): Set<string>
       for (let step = 1; step <= range; step++) {
         const r = attacker.pos.r + d.dr * step;
         const c = attacker.pos.c + d.dc * step;
-        if (r < 0 || r >= stateLike.rows || c < 0 || c >= stateLike.cols) break;
+        if (!isInBounds(stateLike, r, c)) break;
 
-        if (blocked) {
-          const from = attacker.pos;
-          const to = { r, c };
-          const ok = isLineOfSightClear(stateLike.instances, from, to);
-          if (!ok) break;
+        const occupant = occ.get(`${r},${c}`);
+        if (!occupant) {
+          add("range", r, c);
+          continue;
         }
 
-        marks.add(`${r},${c}`);
+        if (occupant.side !== attacker.side) {
+          add("range", r, c);
+        } else {
+          add("blocker", r, c);
+        }
+
+        if (blocked) break;
       }
     }
     return marks;
@@ -226,9 +241,10 @@ export function getAttackMarks(stateLike: StateLike, attacker: any): Set<string>
   // default melee（隣接：チェビ1）
   for (let r = attacker.pos.r - 1; r <= attacker.pos.r + 1; r++) {
     for (let c = attacker.pos.c - 1; c <= attacker.pos.c + 1; c++) {
-      if (r < 0 || r >= stateLike.rows || c < 0 || c >= stateLike.cols) continue;
+      if (!isInBounds(stateLike, r, c)) continue;
       if (r === attacker.pos.r && c === attacker.pos.c) continue;
-      marks.add(`${r},${c}`);
+      const occupant = occ.get(`${r},${c}`);
+      add(occupant && occupant.side === attacker.side ? "blocker" : "range", r, c);
     }
   }
   return marks;

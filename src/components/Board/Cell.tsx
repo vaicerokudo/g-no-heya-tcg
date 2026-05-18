@@ -36,6 +36,7 @@ getPortraitCandidates?: (
 
   showRng: boolean;
   isAttackBlocker: boolean;
+  isAttackableEnemy: boolean;
   isSelected: boolean;
 
   isDebugTarget: boolean;
@@ -65,6 +66,7 @@ const {
   cursor,
   showRng,
   isAttackBlocker,
+  isAttackableEnemy,
   isSelected,
   isDebugTarget,
   getPortrait,
@@ -242,30 +244,15 @@ return (
       }}
       title={label}
     >
-      {showRng && !inst && (
+      {showRng && (
         <div
-          style={{
-            position: "absolute",
-            inset: 6,
-            border: "2px dashed rgba(255,255,255,0.35)",
-            borderRadius: 8,
-            pointerEvents: "none",
-          }}
+          className={isAttackableEnemy ? "normalAttackPreviewTarget" : "normalAttackPreviewRange"}
         />
       )}
 
       {isAttackBlocker && (
         <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 26,
-            opacity: 0.7,
-            pointerEvents: "none",
-          }}
+          className="normalAttackPreviewBlocker"
         >
           ×
         </div>
