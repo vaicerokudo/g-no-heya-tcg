@@ -1,5 +1,6 @@
 import type { Skin } from "../assets/imagePaths";
 import { getSkinLabel } from "../assets/skinLabels";
+import { BOARD_SIZE_OPTIONS, type BoardSizeMode } from "../game/boardConfig";
 import type { Side } from "../game/types";
 
 type TopStatusBarProps = {
@@ -8,6 +9,8 @@ type TopStatusBarProps = {
   isSkinUnlocked: (skin: Skin) => boolean;
   onSouthSkinChange: (skin: Skin) => void;
   onNorthSkinChange: (skin: Skin) => void;
+  boardSizeMode: BoardSizeMode;
+  onBoardSizeModeChange: (mode: BoardSizeMode) => void;
   turn: Side;
   cpuEnabled: boolean;
   onToggleCpu: () => void;
@@ -62,6 +65,8 @@ export function TopStatusBar({
   isSkinUnlocked,
   onSouthSkinChange,
   onNorthSkinChange,
+  boardSizeMode,
+  onBoardSizeModeChange,
   turn,
   cpuEnabled,
   onToggleCpu,
@@ -78,6 +83,28 @@ export function TopStatusBar({
       <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
         <SkinSelect label="味方スキン:" value={southSkin} isSkinUnlocked={isSkinUnlocked} onChange={onSouthSkinChange} />
         <SkinSelect label="CPUスキン:" value={northSkin} isSkinUnlocked={isSkinUnlocked} onChange={onNorthSkinChange} />
+
+        <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 12, opacity: 0.9 }}>
+          盤面:
+          <select
+            value={boardSizeMode}
+            onChange={(e) => onBoardSizeModeChange(e.target.value as BoardSizeMode)}
+            style={{
+              padding: "6px 8px",
+              background: "#111",
+              color: "#fff",
+              border: "1px solid #444",
+              borderRadius: 8,
+              fontWeight: 800,
+            }}
+          >
+            {BOARD_SIZE_OPTIONS.map((option) => (
+              <option key={option.mode} value={option.mode}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
 
         <div style={{ fontSize: 12, opacity: 0.7 }}>未作成の画像は default にフォールバック</div>
       </div>

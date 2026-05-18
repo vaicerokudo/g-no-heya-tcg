@@ -26,7 +26,12 @@ import {
   buildTurnStartPerUnitTurn,
 } from "./game/turnFlow";
 import { canSelectUnit } from "./game/playerActionGuards";
-import { getLetters } from "./game/boardConfig";
+import {
+  getBoardSizeConfig,
+  getInitialDeployCandidateCols,
+  getLetters,
+  type BoardSizeMode,
+} from "./game/boardConfig";
 import { buildInitialHandsAndDecks } from "./game/handDeck";
 
 import { BottomBar } from "./components/BottomBar";
@@ -92,10 +97,18 @@ type SkillImpactFxEvent = {
 
 export default function App() {
   // ===== stable base =====
-  const initial = useMemo(() => createDemoState(unitsData as any), []);
+  const [boardSizeMode, setBoardSizeMode] = useState<BoardSizeMode>("starter7");
+  const boardSizeConfig = useMemo(() => getBoardSizeConfig(boardSizeMode), [boardSizeMode]);
+  const initial = useMemo(
+    () => createDemoState(unitsData as any, { rows: boardSizeConfig.rows, cols: boardSizeConfig.cols }),
+    [boardSizeConfig.rows, boardSizeConfig.cols]
+  );
   const rows = initial.rows;
   const cols = initial.cols;
   const unitsById = initial.unitsById;
+  const initialDeployCount = boardSizeConfig.initialDeployCount;
+  const initialHandSize = boardSizeConfig.initialHandSize;
+  const initialDeployCandidateCols = useMemo(() => getInitialDeployCandidateCols(cols), [cols]);
 
   // ===== turn state =====
   const [turnState, setTurnState] = useState<{ side: Side; seq: number }>({
@@ -154,6 +167,7 @@ export default function App() {
   // ===== refs =====
 
   const didInitRef = useRef(false);
+  const prevBoardSizeModeRef = useRef(boardSizeMode);
 
   const gameIdRef = useRef(`${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
@@ -220,6 +234,7 @@ export default function App() {
     setTurnState,
     setBattleDeployUsed,
     setPerUnitTurn,
+    initialDeployCount,
   });
 
   // ===== helpers =====
@@ -477,7 +492,7 @@ export default function App() {
     resetSetupState();
 
     const { allUnitIds, deckSouth, handSouth: initialHandSouth, deckNorth, handNorth: initialHandNorth } =
-      buildInitialHandsAndDecks(unitsById);
+      buildInitialHandsAndDecks(unitsById, initialHandSize);
 
     console.log("[SETUP] ALL", allUnitIds);
     console.log("[SETUP] ALL uniq", new Set(allUnitIds).size, "/", allUnitIds.length);
@@ -492,15 +507,16 @@ export default function App() {
       handNorth: initialHandNorth,
     });
 
-    // north 3 deploy top row
-    const pickedCols = buildInitialNorthDeployCols(cols);
+    // north initial deploy top row
+    const pickedCols = buildInitialNorthDeployCols(cols, initialDeployCount);
     const northUnits = buildInitialNorthInstances({
       handNorth: initialHandNorth,
       pickedCols,
+      count: initialDeployCount,
       spawnUnit,
     });
 
-    finishInitialNorthDeploy(northUnits as any, initialHandNorth.slice(3));
+    finishInitialNorthDeploy(northUnits as any, initialHandNorth.slice(initialDeployCount));
   };
 
   useEffect(() => {
@@ -516,6 +532,14 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (prevBoardSizeModeRef.current === boardSizeMode) return;
+    prevBoardSizeModeRef.current = boardSizeMode;
+    if (!didInitRef.current) return;
+    startSetup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boardSizeMode]);
 
   // ===== reinforcement (north: one unit at turn start) =====
   useEffect(() => {
@@ -541,6 +565,7 @@ export default function App() {
       r,
       c,
       rows,
+      initialDeployCandidateCols,
       spawnUnit,
     });
   };
@@ -1103,6 +1128,8 @@ const reinforceSet = useMemo(() => {
         isSkinUnlocked={(skin) => isSkinUnlocked(skin, unlockedSkins)}
         onSouthSkinChange={handleSouthSkinChange}
         onNorthSkinChange={handleNorthSkinChange}
+        boardSizeMode={boardSizeMode}
+        onBoardSizeModeChange={setBoardSizeMode}
         turn={turn}
         cpuEnabled={cpuEnabled}
         onToggleCpu={toggleCpuEnabled}
@@ -1143,6 +1170,7 @@ const reinforceSet = useMemo(() => {
         setSelectedHandKey={setSelectedHandKey}
         selectedHandUnitId={selectedHandUnitId}
         deployPlaced={deployPlaced}
+        initialDeployCount={initialDeployCount}
         battleDeployUsed={battleDeployUsed}
         unitsById={unitsById}
         southSkin={southSkin}

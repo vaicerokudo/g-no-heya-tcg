@@ -29,9 +29,8 @@ export function buildUnitsById(data: UnitsData) {
   return map;
 }
 
-export function createDemoState(data: UnitsData): GameState {
-  const rows = 7;
-  const cols = 7;
+export function createDemoState(data: UnitsData, boardSize: { rows: number; cols: number } = { rows: 7, cols: 7 }): GameState {
+  const { rows, cols } = boardSize;
   const unitsById = buildUnitsById(data);
 
   const mk = (instanceId: string, unitId: string, side: Side, pos: Pos): UnitInstance => {
@@ -47,15 +46,19 @@ export function createDemoState(data: UnitsData): GameState {
     };
   };
 
+  const southRow = rows - 1;
+  const northRow = 0;
+  const centerCol = Math.floor(cols / 2);
+
   // デモ配置（南=プレイヤー、北=CPU想定）
   const instances: UnitInstance[] = [
-    mk("S1", "MYOUOU", "south", { r: 6, c: 3 }),   // D7
-    mk("S2", "SOCHO", "south", { r: 6, c: 2 }), // C7
-    mk("S3", "TSUTSU", "south", { r: 6, c: 4 }),// E7
+    mk("S1", "MYOUOU", "south", { r: southRow, c: centerCol }),
+    mk("S2", "SOCHO", "south", { r: southRow, c: centerCol - 1 }),
+    mk("S3", "TSUTSU", "south", { r: southRow, c: centerCol + 1 }),
 
-    mk("N1", "MYOUOU", "north", { r: 0, c: 3 }),   // D1
-    mk("N2", "SOCHO", "north", { r: 0, c: 2 }), // C1
-    mk("N3", "TSUTSU", "north", { r: 0, c: 4 }) // E1
+    mk("N1", "MYOUOU", "north", { r: northRow, c: centerCol }),
+    mk("N2", "SOCHO", "north", { r: northRow, c: centerCol - 1 }),
+    mk("N3", "TSUTSU", "north", { r: northRow, c: centerCol + 1 })
   ];
 
   return { rows, cols, unitsById, instances, selectedInstanceId: null };

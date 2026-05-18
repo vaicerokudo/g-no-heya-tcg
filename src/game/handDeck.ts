@@ -18,14 +18,14 @@ export function buildDeckUnitIds(unitsById: Record<string, UnitDefLike>) {
   return [...uniqByName.values()];
 }
 
-export function buildInitialHandsAndDecks(unitsById: Record<string, UnitDefLike>) {
+export function buildInitialHandsAndDecks(unitsById: Record<string, UnitDefLike>, handSize = 5) {
   const allUnitIds = buildDeckUnitIds(unitsById);
 
   const southDeck0 = shuffle(allUnitIds);
-  const { take: handSouth, rest: deckSouth } = drawN(southDeck0, 5);
+  const { take: handSouth, rest: deckSouth } = drawN(southDeck0, handSize);
 
   const northDeck0 = shuffle(allUnitIds);
-  const { take: handNorth, rest: deckNorth } = drawN(northDeck0, 5);
+  const { take: handNorth, rest: deckNorth } = drawN(northDeck0, handSize);
 
   return {
     allUnitIds,

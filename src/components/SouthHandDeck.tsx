@@ -17,6 +17,7 @@ type SouthHandProps = {
   setSelectedHandKey: Dispatch<SetStateAction<string | null>>;
   selectedHandUnitId: string | null;
   deployPlaced: number;
+  initialDeployCount: number;
   battleDeployUsed: boolean;
   unitsById: Record<string, UnitDef>;
   skin: Skin;
@@ -44,7 +45,7 @@ export function SouthDeck({ deckSouth, skin, getDeckBackPath }: SouthDeckProps) 
             padding: "var(--south-card-padding, 6px)",
             cursor: "default",
           }}
-          title="初回は自動で5枚ドロー済み"
+          title="初回は自動ドロー済み"
         >
           <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", position: "relative" }}>
             <img
@@ -84,6 +85,7 @@ export function SouthHand({
   setSelectedHandKey,
   selectedHandUnitId,
   deployPlaced,
+  initialDeployCount,
   battleDeployUsed,
   unitsById,
   skin,
@@ -100,7 +102,7 @@ export function SouthHand({
 
         {phase === "setup_deploy" ? (
           <div className="southHandNote" style={{ fontSize: "var(--south-note-font-size, 12px)", opacity: 0.85, marginBottom: 8 }}>
-            出撃: {deployPlaced}/3（下段クリックで配置）
+            出撃: {deployPlaced}/{initialDeployCount}（下段クリックで配置）
           </div>
         ) : (
           <div className="southHandNote" style={{ fontSize: "var(--south-note-font-size, 12px)", opacity: 0.85, marginBottom: 8 }}>

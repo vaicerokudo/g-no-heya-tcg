@@ -1,7 +1,7 @@
 import { shuffle } from "./deck";
 import type { UnitInstance } from "./state";
 import type { Side } from "./types";
-import { getSouthReinforceStartRow } from "./boardConfig";
+import { getInitialDeployCandidateCols, getSouthReinforceStartRow } from "./boardConfig";
 
 type SpawnDeployUnit = (opts: {
   unitId: string;
@@ -11,8 +11,10 @@ type SpawnDeployUnit = (opts: {
   instanceId: string;
 }) => UnitInstance | null;
 
-export function canDeployCellSouth(r: number, rows: number) {
-  return r === rows - 1;
+export function canDeployCellSouth(r: number, rows: number, c?: number, candidateCols?: readonly number[]) {
+  if (r !== rows - 1) return false;
+  if (c === undefined || !candidateCols) return true;
+  return candidateCols.includes(c);
 }
 
 export function canDeployCellSouthReinforce(r: number, rows: number) {
@@ -23,18 +25,22 @@ export function canStartSouthDeploy({
   phase,
   selectedHandPick,
   r,
+  c,
   rows,
+  candidateCols,
   occupied,
 }: {
   phase: "setup_draw" | "setup_deploy" | "battle";
   selectedHandPick: unknown;
   r: number;
+  c?: number;
   rows: number;
+  candidateCols?: readonly number[];
   occupied: boolean;
 }) {
   if (phase !== "setup_deploy") return false;
   if (!selectedHandPick) return false;
-  if (!canDeployCellSouth(r, rows)) return false;
+  if (!canDeployCellSouth(r, rows, c, candidateCols)) return false;
   if (occupied) return false;
   return true;
 }
@@ -107,22 +113,24 @@ export function getNorthReinforceUnitId({
   return unitId;
 }
 
-export function buildInitialNorthDeployCols(cols: number) {
-  const colsIdx = shuffle([...Array(cols)].map((_, i) => i));
-  return colsIdx.slice(0, 3);
+export function buildInitialNorthDeployCols(cols: number, count = 3) {
+  const colsIdx = shuffle(getInitialDeployCandidateCols(cols));
+  return colsIdx.slice(0, count);
 }
 
 export function buildInitialNorthInstances({
   handNorth,
   pickedCols,
+  count = 3,
   spawnUnit,
 }: {
   handNorth: readonly string[];
   pickedCols: readonly number[];
+  count?: number;
   spawnUnit: SpawnDeployUnit;
 }) {
   return handNorth
-    .slice(0, 3)
+    .slice(0, count)
     .map((unitId, i) =>
       spawnUnit({
         unitId,

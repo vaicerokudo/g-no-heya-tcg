@@ -23,6 +23,7 @@ type UseDeployActionsArgs = {
   setTurnState: Dispatch<SetStateAction<{ side: Side; seq: number }>>;
   setBattleDeployUsed: Dispatch<SetStateAction<boolean>>;
   setPerUnitTurn: Dispatch<SetStateAction<PerUnitTurn>>;
+  initialDeployCount: number;
 };
 
 type FinishSouthDeployArgs = {
@@ -45,6 +46,7 @@ type TrySouthDeployArgs = {
   r: number;
   c: number;
   rows: number;
+  initialDeployCandidateCols?: readonly number[];
   spawnUnit: Parameters<typeof buildDeployInstances>[0]["spawnUnit"];
 };
 
@@ -83,6 +85,7 @@ export function useDeployActions({
   setTurnState,
   setBattleDeployUsed,
   setPerUnitTurn,
+  initialDeployCount,
 }: UseDeployActionsArgs) {
   function finishSouthDeploy({ nextInstances, handIndex }: FinishSouthDeployArgs) {
     setInstancesAndRef(nextInstances);
@@ -92,7 +95,7 @@ export function useDeployActions({
 
     setDeployPlaced((n) => {
       const nn = n + 1;
-      if (nn >= 3) {
+      if (nn >= initialDeployCount) {
         setPhase("battle");
         setTurnState((s) => ({ side: "south", seq: s.seq + 1 }));
       }
@@ -109,10 +112,23 @@ export function useDeployActions({
     r,
     c,
     rows,
+    initialDeployCandidateCols,
     spawnUnit,
   }: TrySouthDeployArgs) {
     const occupied = instances.some((u) => u.pos.r === r && u.pos.c === c);
-    if (!canStartSouthDeploy({ phase, selectedHandPick, r, rows, occupied })) return false;
+    if (
+      !canStartSouthDeploy({
+        phase,
+        selectedHandPick,
+        r,
+        c,
+        rows,
+        candidateCols: initialDeployCandidateCols,
+        occupied,
+      })
+    ) {
+      return false;
+    }
     if (!selectedHandPick) return false;
 
     const unitId = handSouth[selectedHandPick.idx];

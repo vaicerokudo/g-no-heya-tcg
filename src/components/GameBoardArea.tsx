@@ -16,6 +16,7 @@ type GameBoardAreaProps = BoardComponentProps & {
   setSelectedHandKey: Dispatch<SetStateAction<string | null>>;
   selectedHandUnitId: string | null;
   deployPlaced: number;
+  initialDeployCount: number;
   battleDeployUsed: boolean;
   unitsById: Record<string, UnitDef>;
   southSkin: Skin;
@@ -33,6 +34,7 @@ export function GameBoardArea({
   setSelectedHandKey,
   selectedHandUnitId,
   deployPlaced,
+  initialDeployCount,
   battleDeployUsed,
   unitsById,
   southSkin,
@@ -71,6 +73,7 @@ export function GameBoardArea({
             setSelectedHandKey={setSelectedHandKey}
             selectedHandUnitId={selectedHandUnitId}
             deployPlaced={deployPlaced}
+            initialDeployCount={initialDeployCount}
             battleDeployUsed={battleDeployUsed}
             unitsById={unitsById}
             skin={southSkin}
