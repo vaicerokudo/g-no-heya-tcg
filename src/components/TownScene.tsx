@@ -15,8 +15,8 @@ type TownSceneProps = {
 
 type Pos = { x: number; y: number };
 type InteractionArea = { x: number; y: number; w: number; h: number };
-type InteractionTarget = "table" | "reception" | "collection" | null;
-type TownDialog = "reception" | "collection" | null;
+type InteractionTarget = "table" | "reception" | "collection" | "myououRoom" | null;
+type TownDialog = "reception" | "collection" | "myououRoom" | null;
 type ReceptionTopic = "home" | "first" | "table" | "skin" | "password";
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
@@ -53,6 +53,8 @@ const STEP = 18;
 const TABLE = { x: 74, y: 60, w: 20, h: 20 };
 const RECEPTION = { x: 47, y: 50, w: 16, h: 10 };
 const COLLECTION = { x: 11, y: 35, w: 21, h: 27 };
+const MYOUOU_ROOM = { x: 78, y: 19, w: 16, h: 22 };
+const MYOUOU_ROOM_IMAGE = "/characters/myouou-room.png";
 const INTERACTION_THRESHOLD = 4;
 const RECEPTION_INTERACTION_THRESHOLD = 2.5;
 const SPRITE_CELL_WIDTH = 192;
@@ -83,6 +85,10 @@ const RECEPTION_DIALOG: Record<Exclude<ReceptionTopic, "password">, { label: str
   },
 };
 const RECEPTION_CHOICES: ReceptionTopic[] = ["first", "table", "skin", "password"];
+const MYOUOU_ROOM_HINTS = [
+  "ふははは、よく来たのう。\nここは、少し先の道を覗く部屋じゃ。\n\n合言葉を探しておるなら、\n街の外と、物語の記録をよく見ることじゃな。",
+  "アストリアの名を知る者には、旅装が似合う。\n記録を追う者には、サウンドコミックの扉が開くじゃろう。",
+];
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -109,13 +115,16 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
   const nearTable = useMemo(() => isNearArea(pos, TABLE), [pos]);
   const nearReception = useMemo(() => isNearArea(pos, RECEPTION, RECEPTION_INTERACTION_THRESHOLD), [pos]);
   const nearCollection = useMemo(() => isNearArea(pos, COLLECTION), [pos]);
+  const nearMyououRoom = useMemo(() => isNearArea(pos, MYOUOU_ROOM), [pos]);
   const interactionTarget: InteractionTarget = nearReception
     ? "reception"
     : nearCollection
       ? "collection"
-      : nearTable
-        ? "table"
-        : null;
+      : nearMyououRoom
+        ? "myououRoom"
+        : nearTable
+          ? "table"
+          : null;
 
   const handleInteract = () => {
     if (interactionTarget === "reception") {
@@ -125,6 +134,8 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
       setActiveDialog("reception");
     } else if (interactionTarget === "collection") {
       setActiveDialog("collection");
+    } else if (interactionTarget === "myououRoom") {
+      setActiveDialog("myououRoom");
     } else if (interactionTarget === "table") {
       onEnterTcg();
     }
@@ -291,6 +302,27 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
             </div>
           </div>
 
+          <button
+            type="button"
+            onClick={() => setActiveDialog("myououRoom")}
+            style={{
+              ...myououRoomHotspotStyle,
+              left: `${MYOUOU_ROOM.x}%`,
+              top: `${MYOUOU_ROOM.y}%`,
+              width: `${MYOUOU_ROOM.w}%`,
+              height: `${MYOUOU_ROOM.h}%`,
+              border: nearMyououRoom
+                ? "2px solid rgba(255, 221, 128, 0.96)"
+                : "1px solid rgba(255, 232, 180, 0.28)",
+              boxShadow: nearMyououRoom
+                ? "0 0 0 5px rgba(255, 204, 90, 0.18), 0 0 28px rgba(255, 190, 72, 0.28)"
+                : "0 12px 24px rgba(0,0,0,0.24)",
+            }}
+          >
+            <span style={myououRoomLabelStyle}>明王の部屋</span>
+            <span style={myououRoomSubLabelStyle}>奥の部屋へ</span>
+          </button>
+
           {interactionTarget && (
             <div style={promptStyle}>
               {interactionTarget === "reception" ? (
@@ -302,6 +334,11 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
                 <>
                   <strong>カード収集表</strong>
                   <span>Enter または「見る」ボタンで確認</span>
+                </>
+              ) : interactionTarget === "myououRoom" ? (
+                <>
+                  <strong>明王の部屋</strong>
+                  <span>Enter または「入る」ボタンで話を聞く</span>
                 </>
               ) : (
                 <>
@@ -372,6 +409,29 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
             <CollectionDialog unitsById={unitsById} onClose={() => setActiveDialog(null)} />
           )}
 
+          {activeDialog === "myououRoom" && (
+            <div style={dialogOverlayStyle}>
+              <div style={dialogPanelStyle}>
+                <img
+                  src={MYOUOU_ROOM_IMAGE}
+                  alt="明王"
+                  style={dialogPortraitStyle}
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+                <div style={dialogBodyStyle}>
+                  <div style={dialogNameStyle}>明王</div>
+                  <div style={dialogTopicStyle}>明王の部屋</div>
+                  <div style={dialogTextStyle}>{MYOUOU_ROOM_HINTS.join("\n\n")}</div>
+                </div>
+                <button onClick={() => setActiveDialog(null)} style={dialogCloseButtonStyle}>
+                  閉じる
+                </button>
+              </div>
+            </div>
+          )}
+
           <div
             aria-label="ロク"
             role="img"
@@ -410,7 +470,7 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
             disabled={!interactionTarget}
             style={battleButtonStyle(!!interactionTarget)}
           >
-            {interactionButtonLabel}
+            {interactionTarget === "myououRoom" ? "入る" : interactionButtonLabel}
           </button>
           <button aria-label="右へ移動" onClick={() => moveBy(STEP, 0)} style={padButtonStyle}>
             →
@@ -580,6 +640,35 @@ const collectionCardSlotStyle: CSSProperties = {
   background:
     "linear-gradient(180deg, rgba(255,241,204,0.18), rgba(0,0,0,0.18)), radial-gradient(circle at 50% 22%, rgba(255,216,102,0.22), transparent 56%)",
   boxShadow: "inset 0 0 10px rgba(0,0,0,0.22)",
+};
+
+const myououRoomHotspotStyle: CSSProperties = {
+  position: "absolute",
+  borderRadius: 14,
+  padding: "7px 9px",
+  boxSizing: "border-box",
+  background: "linear-gradient(180deg, rgba(74,42,28,0.78), rgba(22,15,14,0.72))",
+  color: "#fff1cc",
+  display: "grid",
+  placeItems: "center",
+  gap: 2,
+  textAlign: "center",
+  zIndex: 5,
+  cursor: "pointer",
+  touchAction: "manipulation",
+};
+
+const myououRoomLabelStyle: CSSProperties = {
+  fontSize: 13,
+  fontWeight: 950,
+  lineHeight: 1.1,
+  textShadow: "0 2px 8px rgba(0,0,0,0.62)",
+};
+
+const myououRoomSubLabelStyle: CSSProperties = {
+  fontSize: 10,
+  color: "rgba(255,244,216,0.74)",
+  lineHeight: 1.1,
 };
 
 const promptStyle: CSSProperties = {
