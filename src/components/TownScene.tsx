@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import playerSpriteSheet from "../assets/pets/roku/spritesheet.webp";
-import guildLobby from "../assets/town/guild-lobby.png";
 import reception7171 from "../assets/town/reception-7171.png";
 import { COMIC_SKIN_ID, TRAVEL_SKIN_ID, unlockSkin } from "../assets/skinUnlocks";
 import type { UnitDef } from "../game/types";
@@ -15,7 +14,7 @@ type TownSceneProps = {
 
 type Pos = { x: number; y: number };
 type InteractionArea = { x: number; y: number; w: number; h: number };
-type InteractionTarget = "table" | "reception" | "collection" | "myououRoom" | null;
+type InteractionTarget = "table" | "reception" | "collection" | "myououRoom" | "exit" | null;
 type TownDialog = "reception" | "collection" | "myououRoom" | null;
 type ReceptionTopic = "home" | "first" | "table" | "skin" | "password";
 type Facing = "left" | "right";
@@ -61,50 +60,62 @@ const PASSWORD_DIALOG = {
 const PLAYER_WIDTH = 68;
 const PLAYER_HEIGHT = 74;
 const STEP = 18;
-const TABLE = { x: 74, y: 60, w: 20, h: 20 };
-const RECEPTION = { x: 47, y: 50, w: 16, h: 10 };
-const COLLECTION = { x: 11, y: 35, w: 21, h: 27 };
-const MYOUOU_ROOM = { x: 78, y: 19, w: 16, h: 22 };
+const LOBBY_BACKGROUND_URL = "/backgrounds/lobby.png";
+const TABLE = { x: 65, y: 47, w: 25, h: 16 };
+const RECEPTION = { x: 33, y: 31, w: 34, h: 17 };
+const COLLECTION = { x: 9, y: 42, w: 27, h: 18 };
+const MYOUOU_ROOM = { x: 58, y: 8, w: 34, h: 18 };
+const EXIT = { x: 34, y: 82, w: 32, h: 14 };
 const TOWN_HOTSPOTS: TownHotspot[] = [
   {
     id: "reception",
     label: "受付",
     subLabel: "7171",
     area: RECEPTION,
-    labelX: 55,
-    labelY: 47,
-    targetX: 55,
-    targetY: 60,
+    labelX: 53,
+    labelY: 48,
+    targetX: 51,
+    targetY: 55,
   },
   {
     id: "table",
     label: "対戦台",
     subLabel: "試練の盤",
     area: TABLE,
-    labelX: 84,
-    labelY: 58,
-    targetX: 81,
-    targetY: 72,
+    labelX: 77,
+    labelY: 45,
+    targetX: 72,
+    targetY: 61,
   },
   {
     id: "collection",
     label: "カード図鑑",
     subLabel: "見る",
     area: COLLECTION,
-    labelX: 21,
-    labelY: 32,
-    targetX: 30,
-    targetY: 54,
+    labelX: 23,
+    labelY: 40,
+    targetX: 27,
+    targetY: 57,
   },
   {
     id: "myououRoom",
     label: "明王の部屋",
     subLabel: "ヒント",
     area: MYOUOU_ROOM,
-    labelX: 86,
-    labelY: 17,
-    targetX: 78,
-    targetY: 36,
+    labelX: 73,
+    labelY: 11,
+    targetX: 67,
+    targetY: 27,
+  },
+  {
+    id: "exit",
+    label: "街へ戻る",
+    subLabel: "入口",
+    area: EXIT,
+    labelX: 50,
+    labelY: 88,
+    targetX: 50,
+    targetY: 87,
   },
 ];
 const MYOUOU_ROOM_IMAGE = "/characters/myouou-room.png";
@@ -157,7 +168,7 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
 }
 
 export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }: TownSceneProps) {
-  const [pos, setPos] = useState<Pos>({ x: 44, y: 68 });
+  const [pos, setPos] = useState<Pos>({ x: 50, y: 78 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
   const [receptionTopic, setReceptionTopic] = useState<ReceptionTopic>("home");
   const [passphraseInput, setPassphraseInput] = useState("");
@@ -173,6 +184,7 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
   const nearReception = useMemo(() => isNearArea(pos, RECEPTION, RECEPTION_INTERACTION_THRESHOLD), [pos]);
   const nearCollection = useMemo(() => isNearArea(pos, COLLECTION), [pos]);
   const nearMyououRoom = useMemo(() => isNearArea(pos, MYOUOU_ROOM), [pos]);
+  const nearExit = useMemo(() => isNearArea(pos, EXIT), [pos]);
   const interactionTarget: InteractionTarget = nearReception
     ? "reception"
     : nearCollection
@@ -181,7 +193,9 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
         ? "myououRoom"
         : nearTable
           ? "table"
-          : null;
+          : nearExit
+            ? "exit"
+            : null;
 
   const performTownAction = (target: TownHotspotId) => {
     if (target === "reception") {
@@ -195,6 +209,8 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
       setActiveDialog("myououRoom");
     } else if (target === "table") {
       onEnterTcg();
+    } else if (target === "exit") {
+      onExitToMap?.();
     }
   };
 
@@ -330,72 +346,24 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
         ? "見る"
         : interactionTarget === "table"
           ? "対戦"
-          : "移動";
+          : interactionTarget === "exit"
+            ? "戻る"
+            : "移動";
   const receptionDialog = receptionTopic === "password" ? PASSWORD_DIALOG : RECEPTION_DIALOG[receptionTopic];
 
   return (
     <div style={sceneStyle}>
-      <div style={{ width: "min(760px, 100%)" }}>
+      <div style={{ width: "min(560px, 100%)" }}>
         <div style={headerStyle}>
           <div>
             <div style={eyebrowStyle}>GUILD LOBBY</div>
             <h2 style={titleStyle}>Gの部屋ロビー</h2>
           </div>
           <div style={hintStyle}>看板をタップすると、ロクがそこまで歩きます。</div>
-          {onExitToMap ? (
-            <button onClick={onExitToMap} style={mapBackButtonStyle}>
-              アストリアMAPへ
-            </button>
-          ) : null}
         </div>
 
         <div style={mapStyle}>
-          <div
-            style={{
-              ...duelTableStyle,
-              left: `${TABLE.x}%`,
-              top: `${TABLE.y}%`,
-              width: `${TABLE.w}%`,
-              height: `${TABLE.h}%`,
-              border: nearTable
-                ? "2px solid rgba(255, 221, 128, 0.98)"
-                : "1px solid rgba(255, 245, 214, 0.24)",
-              boxShadow: nearTable
-                ? "0 0 0 5px rgba(255, 204, 90, 0.2), 0 0 34px rgba(255, 190, 72, 0.34), 0 16px 30px rgba(0,0,0,0.38)"
-                : "0 14px 28px rgba(0,0,0,0.34)",
-            }}
-          >
-            <div style={tableBoardStyle}>
-              <div style={tableRuneStyle}>G</div>
-            </div>
-            <div style={tableLabelStyle}>試練の盤</div>
-            <div style={tableSubLabelStyle}>対戦台</div>
-          </div>
-
-          <div
-            style={{
-              ...collectionBoardStyle,
-              left: `${COLLECTION.x}%`,
-              top: `${COLLECTION.y}%`,
-              width: `${COLLECTION.w}%`,
-              height: `${COLLECTION.h}%`,
-              border: nearCollection
-                ? "2px solid rgba(255, 221, 128, 0.96)"
-                : "1px solid rgba(255, 232, 180, 0.32)",
-              boxShadow: nearCollection
-                ? "0 0 0 5px rgba(255, 204, 90, 0.18), 0 0 28px rgba(255, 190, 72, 0.28), 0 14px 28px rgba(0,0,0,0.34)"
-                : "0 12px 24px rgba(0,0,0,0.32)",
-            }}
-          >
-            <div style={collectionTitleStyle}>カード図鑑</div>
-            <div style={collectionGridStyle}>
-              {Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} style={collectionCardSlotStyle} />
-              ))}
-            </div>
-          </div>
-
-          {TOWN_HOTSPOTS.map((spot) => (
+          {TOWN_HOTSPOTS.filter((spot) => spot.id !== "exit" || onExitToMap).map((spot) => (
             <button
               key={spot.id}
               type="button"
@@ -440,6 +408,11 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
                 <>
                   <strong>明王の部屋</strong>
                   <span>Enter または「入る」ボタンで話を聞く</span>
+                </>
+              ) : interactionTarget === "exit" ? (
+                <>
+                  <strong>街へ戻る</strong>
+                  <span>Enter または「戻る」ボタンでアストリアへ</span>
                 </>
               ) : (
                 <>
@@ -628,119 +601,22 @@ const hintStyle: CSSProperties = {
   lineHeight: 1.5,
 };
 
-const mapBackButtonStyle: CSSProperties = {
-  minHeight: 36,
-  padding: "0 12px",
-  borderRadius: 11,
-  border: "1px solid rgba(255,232,180,0.32)",
-  background: "rgba(255,241,204,0.12)",
-  color: "#fff1cc",
-  fontWeight: 900,
-  touchAction: "manipulation",
-};
-
 const mapStyle: CSSProperties = {
   position: "relative",
-  width: "100%",
-  aspectRatio: "16 / 10",
-  minHeight: 320,
-  maxHeight: "68vh",
+  width: "min(100%, calc(78dvh * 941 / 1672))",
+  minWidth: "min(100%, 320px)",
+  aspectRatio: "941 / 1672",
+  maxHeight: "78dvh",
+  margin: "0 auto",
   overflow: "hidden",
   border: "1px solid rgba(255,229,172,0.25)",
-  borderRadius: 16,
-  backgroundImage: `url(${guildLobby})`,
+  borderRadius: 18,
+  backgroundImage: `linear-gradient(180deg, rgba(10,8,6,0.08), rgba(20,14,10,0.14)), url(${LOBBY_BACKGROUND_URL})`,
   backgroundSize: "cover",
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
   backgroundColor: "#211913",
-  boxShadow: "0 22px 56px rgba(0,0,0,0.46), inset 0 0 48px rgba(0,0,0,0.28)",
-};
-
-const duelTableStyle: CSSProperties = {
-  position: "absolute",
-  borderRadius: 16,
-  background: "linear-gradient(135deg, #7b5734, #3f2a1c 55%, #241912)",
-  display: "grid",
-  placeItems: "center",
-  textAlign: "center",
-  zIndex: 4,
-};
-
-const tableBoardStyle: CSSProperties = {
-  position: "absolute",
-  inset: "16% 18% 32%",
-  borderRadius: 10,
-  background:
-    "radial-gradient(circle at 50% 50%, rgba(255,222,123,0.68), rgba(115,68,35,0.34) 48%, rgba(35,23,18,0.8) 72%)",
-  border: "1px solid rgba(255,226,151,0.38)",
-  boxShadow: "0 0 22px rgba(255,196,89,0.22)",
-};
-
-const tableRuneStyle: CSSProperties = {
-  position: "absolute",
-  left: "50%",
-  top: "50%",
-  transform: "translate(-50%, -50%)",
-  fontSize: 18,
-  fontWeight: 950,
-  color: "#fff1ba",
-  textShadow: "0 0 12px rgba(255,213,115,0.9)",
-};
-
-const tableLabelStyle: CSSProperties = {
-  position: "absolute",
-  left: 6,
-  right: 6,
-  bottom: 17,
-  fontSize: 13,
-  fontWeight: 950,
-  color: "#fff3cf",
-  textShadow: "0 2px 8px rgba(0,0,0,0.55)",
-};
-
-const tableSubLabelStyle: CSSProperties = {
-  position: "absolute",
-  left: 6,
-  right: 6,
-  bottom: 5,
-  fontSize: 10,
-  color: "rgba(255,244,216,0.76)",
-};
-
-const collectionBoardStyle: CSSProperties = {
-  position: "absolute",
-  borderRadius: 14,
-  padding: "8px 9px",
-  boxSizing: "border-box",
-  background: "linear-gradient(180deg, rgba(97,61,34,0.92), rgba(38,25,17,0.92))",
-  display: "grid",
-  gridTemplateRows: "auto 1fr",
-  gap: 6,
-  zIndex: 4,
-};
-
-const collectionTitleStyle: CSSProperties = {
-  color: "#fff1cc",
-  fontSize: 12,
-  fontWeight: 950,
-  textAlign: "center",
-  textShadow: "0 2px 8px rgba(0,0,0,0.55)",
-};
-
-const collectionGridStyle: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(4, 1fr)",
-  gap: 4,
-  minHeight: 0,
-};
-
-const collectionCardSlotStyle: CSSProperties = {
-  minHeight: 18,
-  borderRadius: 4,
-  border: "1px solid rgba(255, 232, 180, 0.38)",
-  background:
-    "linear-gradient(180deg, rgba(255,241,204,0.18), rgba(0,0,0,0.18)), radial-gradient(circle at 50% 22%, rgba(255,216,102,0.22), transparent 56%)",
-  boxShadow: "inset 0 0 10px rgba(0,0,0,0.22)",
+  boxShadow: "0 22px 56px rgba(0,0,0,0.46), inset 0 0 48px rgba(0,0,0,0.24)",
 };
 
 const townHotspotStyle: CSSProperties = {
@@ -963,23 +839,24 @@ function dialogChoiceButtonStyle(active: boolean): CSSProperties {
 }
 
 const controlsWrapStyle: CSSProperties = {
-  marginTop: 12,
+  marginTop: 8,
   display: "grid",
-  gridTemplateColumns: "64px 76px 64px",
-  gap: 9,
+  gridTemplateColumns: "44px 62px 44px",
+  gap: 7,
   justifyContent: "center",
   alignItems: "center",
+  opacity: 0.72,
 };
 
 const padButtonStyle: CSSProperties = {
-  minHeight: 50,
-  borderRadius: 12,
+  minHeight: 38,
+  borderRadius: 10,
   border: "1px solid rgba(255,232,180,0.24)",
   background: "linear-gradient(180deg, rgba(68,45,31,0.92), rgba(26,20,18,0.9))",
   color: "#fff1cc",
   boxShadow: "0 6px 14px rgba(0,0,0,0.26)",
   fontWeight: 950,
-  fontSize: 18,
+  fontSize: 15,
   touchAction: "manipulation",
 };
 
