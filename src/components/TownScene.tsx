@@ -20,6 +20,17 @@ type TownDialog = "reception" | "collection" | "myououRoom" | null;
 type ReceptionTopic = "home" | "first" | "table" | "skin" | "password";
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
+type TownHotspotId = Exclude<InteractionTarget, null>;
+type TownHotspot = {
+  id: TownHotspotId;
+  label: string;
+  subLabel: string;
+  area: InteractionArea;
+  labelX: number;
+  labelY: number;
+  targetX: number;
+  targetY: number;
+};
 
 type PassphraseUnlock = {
   skinId: typeof COMIC_SKIN_ID | typeof TRAVEL_SKIN_ID;
@@ -54,6 +65,48 @@ const TABLE = { x: 74, y: 60, w: 20, h: 20 };
 const RECEPTION = { x: 47, y: 50, w: 16, h: 10 };
 const COLLECTION = { x: 11, y: 35, w: 21, h: 27 };
 const MYOUOU_ROOM = { x: 78, y: 19, w: 16, h: 22 };
+const TOWN_HOTSPOTS: TownHotspot[] = [
+  {
+    id: "reception",
+    label: "受付",
+    subLabel: "7171",
+    area: RECEPTION,
+    labelX: 55,
+    labelY: 47,
+    targetX: 55,
+    targetY: 60,
+  },
+  {
+    id: "table",
+    label: "対戦台",
+    subLabel: "試練の盤",
+    area: TABLE,
+    labelX: 84,
+    labelY: 58,
+    targetX: 81,
+    targetY: 72,
+  },
+  {
+    id: "collection",
+    label: "カード図鑑",
+    subLabel: "見る",
+    area: COLLECTION,
+    labelX: 21,
+    labelY: 32,
+    targetX: 30,
+    targetY: 54,
+  },
+  {
+    id: "myououRoom",
+    label: "明王の部屋",
+    subLabel: "ヒント",
+    area: MYOUOU_ROOM,
+    labelX: 86,
+    labelY: 17,
+    targetX: 78,
+    targetY: 36,
+  },
+];
 const MYOUOU_ROOM_IMAGE = "/characters/myouou-room.png";
 const INTERACTION_THRESHOLD = 4;
 const RECEPTION_INTERACTION_THRESHOLD = 2.5;
@@ -61,6 +114,7 @@ const SPRITE_CELL_WIDTH = 192;
 const SPRITE_CELL_HEIGHT = 208;
 const PLAYER_SCALE = PLAYER_WIDTH / SPRITE_CELL_WIDTH;
 const MOVE_ANIMATION_MS = 180;
+const HOTSPOT_MOVE_MS = 680;
 const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalMs: number }> = {
   idle: { row: 0, frames: 6, intervalMs: 190 },
   "running-right": { row: 1, frames: 8, intervalMs: 105 },
@@ -110,8 +164,11 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
   const [passphraseMessage, setPassphraseMessage] = useState("");
   const [facing, setFacing] = useState<Facing>("right");
   const [isMoving, setIsMoving] = useState(false);
+  const [isHotspotMoving, setIsHotspotMoving] = useState(false);
+  const [moveTransitionMs, setMoveTransitionMs] = useState(140);
   const [frameIndex, setFrameIndex] = useState(0);
   const moveStopTimerRef = useRef<number | null>(null);
+  const hotspotMoveTimerRef = useRef<number | null>(null);
   const nearTable = useMemo(() => isNearArea(pos, TABLE), [pos]);
   const nearReception = useMemo(() => isNearArea(pos, RECEPTION, RECEPTION_INTERACTION_THRESHOLD), [pos]);
   const nearCollection = useMemo(() => isNearArea(pos, COLLECTION), [pos]);
@@ -126,19 +183,50 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
           ? "table"
           : null;
 
-  const handleInteract = () => {
-    if (interactionTarget === "reception") {
+  const performTownAction = (target: TownHotspotId) => {
+    if (target === "reception") {
       setReceptionTopic("home");
       setPassphraseInput("");
       setPassphraseMessage("");
       setActiveDialog("reception");
-    } else if (interactionTarget === "collection") {
+    } else if (target === "collection") {
       setActiveDialog("collection");
-    } else if (interactionTarget === "myououRoom") {
+    } else if (target === "myououRoom") {
       setActiveDialog("myououRoom");
-    } else if (interactionTarget === "table") {
+    } else if (target === "table") {
       onEnterTcg();
     }
+  };
+
+  const handleInteract = () => {
+    if (!interactionTarget || isHotspotMoving) return;
+    performTownAction(interactionTarget);
+  };
+
+  const handleHotspotClick = (spot: TownHotspot) => {
+    if (isHotspotMoving) return;
+
+    setActiveDialog(null);
+    setFacing(spot.targetX < pos.x ? "left" : "right");
+    setMoveTransitionMs(HOTSPOT_MOVE_MS);
+    setIsMoving(true);
+    setIsHotspotMoving(true);
+    setPos({ x: spot.targetX, y: spot.targetY });
+
+    if (moveStopTimerRef.current !== null) {
+      window.clearTimeout(moveStopTimerRef.current);
+      moveStopTimerRef.current = null;
+    }
+    if (hotspotMoveTimerRef.current !== null) {
+      window.clearTimeout(hotspotMoveTimerRef.current);
+    }
+    hotspotMoveTimerRef.current = window.setTimeout(() => {
+      setIsMoving(false);
+      setIsHotspotMoving(false);
+      setMoveTransitionMs(140);
+      hotspotMoveTimerRef.current = null;
+      performTownAction(spot.id);
+    }, HOTSPOT_MOVE_MS);
   };
 
   const handlePassphraseSubmit = () => {
@@ -161,8 +249,10 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
   };
 
   const moveBy = (dx: number, dy: number) => {
+    if (isHotspotMoving) return;
     if (dx < 0) setFacing("left");
     if (dx > 0) setFacing("right");
+    setMoveTransitionMs(140);
     setIsMoving(true);
     if (moveStopTimerRef.current !== null) {
       window.clearTimeout(moveStopTimerRef.current);
@@ -203,12 +293,15 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [interactionTarget, onEnterTcg]);
+  }, [interactionTarget, isHotspotMoving, onEnterTcg]);
 
   useEffect(() => {
     return () => {
       if (moveStopTimerRef.current !== null) {
         window.clearTimeout(moveStopTimerRef.current);
+      }
+      if (hotspotMoveTimerRef.current !== null) {
+        window.clearTimeout(hotspotMoveTimerRef.current);
       }
     };
   }, []);
@@ -248,7 +341,7 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
             <div style={eyebrowStyle}>GUILD LOBBY</div>
             <h2 style={titleStyle}>Gの部屋ロビー</h2>
           </div>
-          <div style={hintStyle}>ロクを動かして、光る対戦台に近づいてください。</div>
+          <div style={hintStyle}>看板をタップすると、ロクがそこまで歩きます。</div>
           {onExitToMap ? (
             <button onClick={onExitToMap} style={mapBackButtonStyle}>
               アストリアMAPへ
@@ -302,26 +395,34 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setActiveDialog("myououRoom")}
-            style={{
-              ...myououRoomHotspotStyle,
-              left: `${MYOUOU_ROOM.x}%`,
-              top: `${MYOUOU_ROOM.y}%`,
-              width: `${MYOUOU_ROOM.w}%`,
-              height: `${MYOUOU_ROOM.h}%`,
-              border: nearMyououRoom
-                ? "2px solid rgba(255, 221, 128, 0.96)"
-                : "1px solid rgba(255, 232, 180, 0.28)",
-              boxShadow: nearMyououRoom
-                ? "0 0 0 5px rgba(255, 204, 90, 0.18), 0 0 28px rgba(255, 190, 72, 0.28)"
-                : "0 12px 24px rgba(0,0,0,0.24)",
-            }}
-          >
-            <span style={myououRoomLabelStyle}>明王の部屋</span>
-            <span style={myououRoomSubLabelStyle}>奥の部屋へ</span>
-          </button>
+          {TOWN_HOTSPOTS.map((spot) => (
+            <button
+              key={spot.id}
+              type="button"
+              onClick={() => handleHotspotClick(spot)}
+              disabled={isHotspotMoving}
+              title={`${spot.label}: ${spot.subLabel}`}
+              style={{
+                ...townHotspotStyle,
+                ...(isHotspotMoving ? townHotspotDisabledStyle : null),
+                left: `${spot.area.x}%`,
+                top: `${spot.area.y}%`,
+                width: `${spot.area.w}%`,
+                height: `${spot.area.h}%`,
+              }}
+            >
+              <span
+                style={{
+                  ...townHotspotLabelStyle,
+                  left: `${((spot.labelX - spot.area.x) / spot.area.w) * 100}%`,
+                  top: `${((spot.labelY - spot.area.y) / spot.area.h) * 100}%`,
+                }}
+              >
+                {spot.label}
+              </span>
+              <span style={townHotspotSubLabelStyle}>{spot.subLabel}</span>
+            </button>
+          ))}
 
           {interactionTarget && (
             <div style={promptStyle}>
@@ -448,7 +549,7 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
                 spriteAnim.row * SPRITE_CELL_HEIGHT
               }px`,
               transform: `translate(-50%, -50%) scale(${PLAYER_SCALE})`,
-              transition: "left 140ms ease, top 140ms ease",
+              transition: `left ${moveTransitionMs}ms ease, top ${moveTransitionMs}ms ease`,
               filter: "drop-shadow(0 10px 12px rgba(0,0,0,0.48))",
               userSelect: "none",
               zIndex: 8,
@@ -458,25 +559,25 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
 
         <div style={controlsWrapStyle}>
           <div />
-          <button aria-label="上へ移動" onClick={() => moveBy(0, -STEP)} style={padButtonStyle}>
+          <button aria-label="上へ移動" disabled={isHotspotMoving} onClick={() => moveBy(0, -STEP)} style={padButtonStyle}>
             ↑
           </button>
           <div />
-          <button aria-label="左へ移動" onClick={() => moveBy(-STEP, 0)} style={padButtonStyle}>
+          <button aria-label="左へ移動" disabled={isHotspotMoving} onClick={() => moveBy(-STEP, 0)} style={padButtonStyle}>
             ←
           </button>
           <button
             onClick={handleInteract}
-            disabled={!interactionTarget}
-            style={battleButtonStyle(!!interactionTarget)}
+            disabled={!interactionTarget || isHotspotMoving}
+            style={battleButtonStyle(!!interactionTarget && !isHotspotMoving)}
           >
             {interactionTarget === "myououRoom" ? "入る" : interactionButtonLabel}
           </button>
-          <button aria-label="右へ移動" onClick={() => moveBy(STEP, 0)} style={padButtonStyle}>
+          <button aria-label="右へ移動" disabled={isHotspotMoving} onClick={() => moveBy(STEP, 0)} style={padButtonStyle}>
             →
           </button>
           <div />
-          <button aria-label="下へ移動" onClick={() => moveBy(0, STEP)} style={padButtonStyle}>
+          <button aria-label="下へ移動" disabled={isHotspotMoving} onClick={() => moveBy(0, STEP)} style={padButtonStyle}>
             ↓
           </button>
           <div />
@@ -642,33 +743,54 @@ const collectionCardSlotStyle: CSSProperties = {
   boxShadow: "inset 0 0 10px rgba(0,0,0,0.22)",
 };
 
-const myououRoomHotspotStyle: CSSProperties = {
+const townHotspotStyle: CSSProperties = {
   position: "absolute",
-  borderRadius: 14,
-  padding: "7px 9px",
-  boxSizing: "border-box",
-  background: "linear-gradient(180deg, rgba(74,42,28,0.78), rgba(22,15,14,0.72))",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 0,
+  border: 0,
+  background: "transparent",
   color: "#fff1cc",
-  display: "grid",
-  placeItems: "center",
-  gap: 2,
-  textAlign: "center",
   zIndex: 5,
   cursor: "pointer",
   touchAction: "manipulation",
 };
 
-const myououRoomLabelStyle: CSSProperties = {
+const townHotspotDisabledStyle: CSSProperties = {
+  opacity: 0.64,
+  cursor: "default",
+};
+
+const townHotspotLabelStyle: CSSProperties = {
+  position: "absolute",
+  transform: "translate(-50%, -50%)",
+  minWidth: 72,
+  minHeight: 34,
+  maxWidth: 118,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "6px 10px",
+  boxSizing: "border-box",
+  borderRadius: 999,
+  border: "1px solid rgba(255,225,149,0.78)",
+  background: "linear-gradient(180deg, rgba(58,39,25,0.82), rgba(23,17,14,0.72))",
+  boxShadow: "0 8px 18px rgba(0,0,0,0.26), 0 0 12px rgba(255,214,109,0.18)",
   fontSize: 13,
   fontWeight: 950,
   lineHeight: 1.1,
+  textAlign: "center",
   textShadow: "0 2px 8px rgba(0,0,0,0.62)",
 };
 
-const myououRoomSubLabelStyle: CSSProperties = {
-  fontSize: 10,
-  color: "rgba(255,244,216,0.74)",
-  lineHeight: 1.1,
+const townHotspotSubLabelStyle: CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  whiteSpace: "nowrap",
 };
 
 const promptStyle: CSSProperties = {
