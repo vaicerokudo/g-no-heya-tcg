@@ -31,6 +31,7 @@ function getAssetForm(unitId: string, form: Form): Form {
 
 function collectionCardCandidates(unitId: string, skin: Skin, form: Form) {
   const assetForm = getAssetForm(unitId, form);
+  const id = unitId.trim().toLowerCase();
   const fullCardCandidates = cardCandidates(unitId, "south", assetForm, skin);
   if (assetForm !== "base") return fullCardCandidates;
 
@@ -38,6 +39,7 @@ function collectionCardCandidates(unitId: string, skin: Skin, form: Form) {
   return Array.from(
     new Set([
       `/cards/hand/${skin}/south/${handId}.webp`,
+      `/cards/south/${skin}/${assetForm}/${id}.png`,
       `/cards/hand/default/south/${handId}.webp`,
       ...fullCardCandidates,
     ])
