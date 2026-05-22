@@ -171,24 +171,6 @@ export function SouthHand({
                       e.currentTarget.src = getHandFallbackSrc(uid, "south", skin);
                     }}
                   />
-
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: 8,
-                      right: 8,
-                      bottom: 8,
-                      padding: "5px 8px",
-                      borderRadius: 10,
-                      background: "rgba(0,0,0,0.55)",
-                      border: "1px solid rgba(255,215,0,0.35)",
-                      fontSize: 12,
-                      lineHeight: 1.2,
-                      textShadow: "0 1px 0 rgba(0,0,0,0.6)",
-                    }}
-                  >
-                    {name}
-                  </div>
                 </div>
               </button>
             );
