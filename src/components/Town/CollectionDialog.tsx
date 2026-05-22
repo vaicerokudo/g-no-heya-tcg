@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { cardCandidates, portraitThumbCandidates, type Skin } from "../../assets/imagePaths";
+import { cardCandidates, portraitThumbCandidates, type Form, type Skin } from "../../assets/imagePaths";
 import { getSkinLabel } from "../../assets/skinLabels";
 import type { UnitDef } from "../../game/types";
 import { getAvailableSkillsForUnit, SKILLS } from "../../game/skills/registry";
@@ -12,13 +12,28 @@ type CollectionDialogProps = {
 
 const SKINS: Skin[] = ["default", "dark", "travel", "comic"];
 
-function collectionCardCandidates(unitId: string, skin: Skin) {
+function getCollectionForms(unit: UnitDef | null): Form[] {
+  if (!unit) return ["base"];
+  if (unit.id === "YABUKO_FM") return ["fm"];
+  return ["base", "g"];
+}
+
+function getFormLabel(form: Form) {
+  if (form === "g") return "G";
+  if (form === "fm") return "FM";
+  return "Base";
+}
+
+function collectionCardCandidates(unitId: string, skin: Skin, form: Form) {
+  const fullCardCandidates = cardCandidates(unitId, "south", form, skin);
+  if (form !== "base") return fullCardCandidates;
+
   const handId = unitId.trim().toUpperCase();
   return Array.from(
     new Set([
       `/cards/hand/${skin}/south/${handId}.webp`,
       `/cards/hand/default/south/${handId}.webp`,
-      ...cardCandidates(unitId, "south", "base", skin),
+      ...fullCardCandidates,
     ])
   );
 }
@@ -43,7 +58,7 @@ function CardThumb({
   onClick: () => void;
 }) {
   const imageCandidates = useMemo(
-    () => collectionCardCandidates(unit.id, skin),
+    () => collectionCardCandidates(unit.id, skin, "base"),
     [skin, unit.id]
   );
   const fb = useImgFallback(imageCandidates, { placeholder: "" });
@@ -81,20 +96,29 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
   );
   const [skin, setSkin] = useState<Skin>("default");
   const [selectedUnitId, setSelectedUnitId] = useState<string>(() => units[0]?.id ?? "");
+  const [selectedForm, setSelectedForm] = useState<Form>("base");
 
   useEffect(() => {
     if (!selectedUnitId && units[0]) setSelectedUnitId(units[0].id);
   }, [selectedUnitId, units]);
 
   const selectedUnit = unitsById[selectedUnitId] ?? units[0] ?? null;
+  const availableForms = useMemo(() => getCollectionForms(selectedUnit), [selectedUnit]);
+
+  useEffect(() => {
+    if (!availableForms.includes(selectedForm)) {
+      setSelectedForm(availableForms[0] ?? "base");
+    }
+  }, [availableForms, selectedForm]);
+
   const detailImageCandidates = useMemo(
-    () => (selectedUnit ? cardCandidates(selectedUnit.id, "south", "base", skin) : []),
-    [selectedUnit, skin]
+    () => (selectedUnit ? cardCandidates(selectedUnit.id, "south", selectedForm, skin) : []),
+    [selectedUnit, selectedForm, skin]
   );
   const detailImage = useImgFallback(detailImageCandidates, { placeholder: "" });
   const detailPortraitCandidates = useMemo(
-    () => (selectedUnit ? portraitThumbCandidates(selectedUnit.id, "south", "base", skin) : []),
-    [selectedUnit, skin]
+    () => (selectedUnit ? portraitThumbCandidates(selectedUnit.id, "south", selectedForm, skin) : []),
+    [selectedUnit, selectedForm, skin]
   );
   const detailPortrait = useImgFallback(detailPortraitCandidates, { placeholder: "" });
   const skills = selectedUnit ? getAvailableSkillsForUnit(selectedUnit.id) : [];
@@ -133,7 +157,10 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
                 unit={unit}
                 skin={skin}
                 selected={unit.id === selectedUnit?.id}
-                onClick={() => setSelectedUnitId(unit.id)}
+                onClick={() => {
+                  setSelectedUnitId(unit.id);
+                  setSelectedForm(getCollectionForms(unit)[0] ?? "base");
+                }}
               />
             ))}
           </div>
@@ -171,6 +198,17 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
 
                 <div style={detailTextStyle}>
                   <div style={detailNameStyle}>{selectedUnit.name}</div>
+                  <div style={formTabsStyle} aria-label="カードform選択">
+                    {availableForms.map((form) => (
+                      <button
+                        key={form}
+                        onClick={() => setSelectedForm(form)}
+                        style={formButtonStyle(form === selectedForm)}
+                      >
+                        {getFormLabel(form)}
+                      </button>
+                    ))}
+                  </div>
                   <div style={statsStyle}>
                     <span>ATK {selectedUnit.base.atk}</span>
                     <span>HP {selectedUnit.base.hp}</span>
@@ -398,6 +436,26 @@ const detailNameStyle: CSSProperties = {
   fontWeight: 950,
   color: "#ffd66d",
 };
+
+const formTabsStyle: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 8,
+};
+
+function formButtonStyle(active: boolean): CSSProperties {
+  return {
+    minHeight: 32,
+    padding: "0 12px",
+    borderRadius: 999,
+    border: active ? "1px solid rgba(142,230,255,0.82)" : "1px solid rgba(255,232,180,0.22)",
+    background: active ? "rgba(105,213,255,0.2)" : "rgba(255,241,204,0.08)",
+    color: "#fff1cc",
+    fontSize: 12,
+    fontWeight: 950,
+    touchAction: "manipulation",
+  };
+}
 
 const statsStyle: CSSProperties = {
   display: "flex",

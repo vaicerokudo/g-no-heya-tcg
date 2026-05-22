@@ -1,6 +1,6 @@
 // src/assets/imagePaths.ts
 export type Side = "north" | "south";
-export type Form = "base" | "g";
+export type Form = "base" | "g" | "fm";
 export type Skin = "default" | "dark" | "travel" | "comic"; // add new skin names here
 
 function normId(unitId: string) {
