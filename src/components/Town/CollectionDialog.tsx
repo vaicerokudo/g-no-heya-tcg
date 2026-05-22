@@ -24,9 +24,15 @@ function getFormLabel(form: Form) {
   return "Base";
 }
 
+function getAssetForm(unitId: string, form: Form): Form {
+  if (unitId === "YABUKO_FM") return "base";
+  return form;
+}
+
 function collectionCardCandidates(unitId: string, skin: Skin, form: Form) {
-  const fullCardCandidates = cardCandidates(unitId, "south", form, skin);
-  if (form !== "base") return fullCardCandidates;
+  const assetForm = getAssetForm(unitId, form);
+  const fullCardCandidates = cardCandidates(unitId, "south", assetForm, skin);
+  if (assetForm !== "base") return fullCardCandidates;
 
   const handId = unitId.trim().toUpperCase();
   return Array.from(
@@ -112,12 +118,23 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
   }, [availableForms, selectedForm]);
 
   const detailImageCandidates = useMemo(
-    () => (selectedUnit ? cardCandidates(selectedUnit.id, "south", selectedForm, skin) : []),
+    () =>
+      selectedUnit
+        ? cardCandidates(selectedUnit.id, "south", getAssetForm(selectedUnit.id, selectedForm), skin)
+        : [],
     [selectedUnit, selectedForm, skin]
   );
   const detailImage = useImgFallback(detailImageCandidates, { placeholder: "" });
   const detailPortraitCandidates = useMemo(
-    () => (selectedUnit ? portraitThumbCandidates(selectedUnit.id, "south", selectedForm, skin) : []),
+    () =>
+      selectedUnit
+        ? portraitThumbCandidates(
+            selectedUnit.id,
+            "south",
+            getAssetForm(selectedUnit.id, selectedForm),
+            skin
+          )
+        : [],
     [selectedUnit, selectedForm, skin]
   );
   const detailPortrait = useImgFallback(detailPortraitCandidates, { placeholder: "" });
