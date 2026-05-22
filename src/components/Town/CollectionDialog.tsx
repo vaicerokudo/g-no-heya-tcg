@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { cardCandidates, type Skin } from "../../assets/imagePaths";
+import { cardCandidates, portraitThumbCandidates, type Skin } from "../../assets/imagePaths";
 import { getSkinLabel } from "../../assets/skinLabels";
 import type { UnitDef } from "../../game/types";
 import { getAvailableSkillsForUnit, SKILLS } from "../../game/skills/registry";
@@ -11,6 +11,17 @@ type CollectionDialogProps = {
 };
 
 const SKINS: Skin[] = ["default", "dark", "travel", "comic"];
+
+function collectionCardCandidates(unitId: string, skin: Skin) {
+  const handId = unitId.trim().toUpperCase();
+  return Array.from(
+    new Set([
+      `/cards/hand/${skin}/south/${handId}.webp`,
+      `/cards/hand/default/south/${handId}.webp`,
+      ...cardCandidates(unitId, "south", "base", skin),
+    ])
+  );
+}
 
 function describeMove(unit: UnitDef) {
   const pattern = unit.base.movePattern;
@@ -32,7 +43,7 @@ function CardThumb({
   onClick: () => void;
 }) {
   const imageCandidates = useMemo(
-    () => cardCandidates(unit.id, "south", "base", skin),
+    () => collectionCardCandidates(unit.id, skin),
     [skin, unit.id]
   );
   const fb = useImgFallback(imageCandidates, { placeholder: "" });
@@ -81,6 +92,11 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
     [selectedUnit, skin]
   );
   const detailImage = useImgFallback(detailImageCandidates, { placeholder: "" });
+  const detailPortraitCandidates = useMemo(
+    () => (selectedUnit ? portraitThumbCandidates(selectedUnit.id, "south", "base", skin) : []),
+    [selectedUnit, skin]
+  );
+  const detailPortrait = useImgFallback(detailPortraitCandidates, { placeholder: "" });
   const skills = selectedUnit ? getAvailableSkillsForUnit(selectedUnit.id) : [];
 
   return (
@@ -92,8 +108,8 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
 
         <div style={headerStyle}>
           <div>
-            <div style={eyebrowStyle}>CARD COLLECTION</div>
-            <h2 style={titleStyle}>カード収集表</h2>
+            <div style={eyebrowStyle}>CARD CATALOG</div>
+            <h2 style={titleStyle}>カード図鑑</h2>
           </div>
 
           <div style={tabsStyle}>
@@ -125,15 +141,32 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
           <div style={detailStyle}>
             {selectedUnit ? (
               <>
-                <div style={detailImageWrapStyle}>
-                  {detailImage.src ? (
-                    <img
-                      src={detailImage.src}
-                      onError={detailImage.onError}
-                      alt={selectedUnit.name}
-                      style={detailImageStyle}
-                    />
-                  ) : null}
+                <div style={detailVisualsStyle}>
+                  <div style={detailImageWrapStyle}>
+                    {detailImage.src ? (
+                      <img
+                        src={detailImage.src}
+                        onError={detailImage.onError}
+                        alt={selectedUnit.name}
+                        loading="lazy"
+                        decoding="async"
+                        style={detailImageStyle}
+                      />
+                    ) : null}
+                  </div>
+
+                  <div style={detailPortraitPanelStyle} aria-label={`${selectedUnit.name} 盤面ユニット`}>
+                    {detailPortrait.src ? (
+                      <img
+                        src={detailPortrait.src}
+                        onError={detailPortrait.onError}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        style={detailPortraitStyle}
+                      />
+                    ) : null}
+                  </div>
                 </div>
 
                 <div style={detailTextStyle}>
@@ -308,6 +341,14 @@ const detailStyle: CSSProperties = {
   minWidth: 0,
 };
 
+const detailVisualsStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 14,
+  flexWrap: "wrap",
+};
+
 const detailImageWrapStyle: CSSProperties = {
   width: "min(300px, 100%)",
   justifySelf: "center",
@@ -324,6 +365,27 @@ const detailImageStyle: CSSProperties = {
   height: "100%",
   objectFit: "contain",
   display: "block",
+};
+
+const detailPortraitPanelStyle: CSSProperties = {
+  width: "min(180px, 42vw)",
+  aspectRatio: "1 / 1",
+  borderRadius: 18,
+  border: "1px solid rgba(142, 230, 255, 0.28)",
+  background:
+    "radial-gradient(circle at 50% 54%, rgba(105,213,255,0.24), rgba(105,213,255,0.08) 46%, rgba(0,0,0,0.28) 72%), linear-gradient(180deg, rgba(255,241,204,0.08), rgba(0,0,0,0.2))",
+  boxShadow: "0 14px 30px rgba(0,0,0,0.32), inset 0 0 22px rgba(107,213,255,0.1)",
+  display: "grid",
+  placeItems: "center",
+  overflow: "hidden",
+};
+
+const detailPortraitStyle: CSSProperties = {
+  width: "86%",
+  height: "86%",
+  objectFit: "contain",
+  display: "block",
+  filter: "drop-shadow(0 10px 12px rgba(0,0,0,0.46))",
 };
 
 const detailTextStyle: CSSProperties = {

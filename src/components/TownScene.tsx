@@ -294,7 +294,7 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
                 : "0 12px 24px rgba(0,0,0,0.32)",
             }}
           >
-            <div style={collectionTitleStyle}>カード収集</div>
+            <div style={collectionTitleStyle}>カード図鑑</div>
             <div style={collectionGridStyle}>
               {Array.from({ length: 8 }).map((_, index) => (
                 <div key={index} style={collectionCardSlotStyle} />
@@ -332,7 +332,7 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
                 </>
               ) : interactionTarget === "collection" ? (
                 <>
-                  <strong>カード収集表</strong>
+                  <strong>カード図鑑</strong>
                   <span>Enter または「見る」ボタンで確認</span>
                 </>
               ) : interactionTarget === "myououRoom" ? (
