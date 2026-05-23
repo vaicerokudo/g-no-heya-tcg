@@ -36,7 +36,6 @@ export function cardCandidates(
     `/cards/${side}/${skin}/${form}/${id}.png`,
     `/cards/${side}/default/${form}/${id}.png`,
     `/cards/${side}/default/base/${id}.png`,
-    `/cards/unknown.png`,
   ];
   return Array.from(new Set(list));
 }
@@ -52,7 +51,6 @@ export function portraitCandidates(
     `/portraits/${side}/${skin}/${form}/${id}.png`,
     `/portraits/${side}/default/${form}/${id}.png`,
     `/portraits/${side}/default/base/${id}.png`,
-    `/portraits/unknown.png`,
   ];
   return Array.from(new Set(list));
 }
@@ -72,7 +70,6 @@ export function portraitThumbCandidates(
     `/portraits/thumb/${side}/default/base/${id}.webp`,
     `/portraits/${side}/default/${form}/${id}.png`,
     `/portraits/${side}/default/base/${id}.png`,
-    `/portraits/unknown.png`,
   ];
   return Array.from(new Set(list));
 }
