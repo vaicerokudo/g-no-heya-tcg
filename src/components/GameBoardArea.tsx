@@ -44,6 +44,7 @@ export function GameBoardArea({
   ...boardProps
 }: GameBoardAreaProps) {
   const showSouthHandDeck = phase !== "setup_draw";
+  const isWideBoard = boardProps.cols >= 9;
   const areaStyle = {
     display: "flex",
     gap: "var(--game-board-area-gap, 12px)",
@@ -55,7 +56,7 @@ export function GameBoardArea({
 
   return (
     <div
-      className="gameBoardArea"
+      className={`gameBoardArea${isWideBoard ? " gameBoardArea--wideBoard" : ""}`}
       style={areaStyle}
     >
       {showSouthHandDeck && <SouthDeck deckSouth={deckSouth} skin={southSkin} getDeckBackPath={getDeckBackPath} />}

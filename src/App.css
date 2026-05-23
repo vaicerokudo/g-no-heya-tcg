@@ -196,6 +196,18 @@ html { overflow-y: scroll; }
     padding-bottom: calc(var(--bottom-bar-space) + 36px);
   }
 
+  .gameBoardArea--wideBoard {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  .gameBoardArea--wideBoard .gameBoardBoard {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
   .southDeckPanel {
     order: 1;
   }

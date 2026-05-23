@@ -659,11 +659,12 @@ const deploySouthReinforceAt = (r: number, c: number) => {
 
   const cell = useMemo(() => {
     const pad = 24;
-    const max = 64;
+    const isWideBoard = cols >= 9;
+    const max = isWideBoard ? 60 : 64;
     const isMobile = winW <= 720;
-    const min = isMobile ? 52 : 44;
+    const min = isMobile ? (isWideBoard ? 36 : 52) : 44;
     const baseSize = Math.floor((winW - pad) / cols);
-    const size = isMobile ? Math.floor(baseSize * 1.1) : baseSize;
+    const size = isMobile && !isWideBoard ? Math.floor(baseSize * 1.1) : baseSize;
     return Math.max(min, Math.min(max, size));
   }, [winW, cols]);
 
