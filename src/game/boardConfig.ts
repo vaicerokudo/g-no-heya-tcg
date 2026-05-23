@@ -26,7 +26,7 @@ export const BOARD_SIZE_OPTIONS: BoardSizeConfig[] = [
     rows: 9,
     cols: 9,
     initialDeployCount: 4,
-    initialHandSize: 4,
+    initialHandSize: 5,
   },
 ];
 
