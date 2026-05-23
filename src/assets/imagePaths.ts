@@ -7,6 +7,10 @@ function normId(unitId: string) {
   return unitId.trim().toLowerCase();
 }
 
+function shouldPreferComicBase(form: Form, skin: Skin) {
+  return skin === "comic" && form === "g";
+}
+
 export function getCardImage(
   unitId: string,
   side: Side,
@@ -34,6 +38,7 @@ export function cardCandidates(
   const id = normId(unitId);
   const list = [
     `/cards/${side}/${skin}/${form}/${id}.png`,
+    ...(shouldPreferComicBase(form, skin) ? [`/cards/${side}/${skin}/base/${id}.png`] : []),
     `/cards/${side}/default/${form}/${id}.png`,
     `/cards/${side}/default/base/${id}.png`,
   ];
@@ -49,6 +54,7 @@ export function portraitCandidates(
   const id = normId(unitId);
   const list = [
     `/portraits/${side}/${skin}/${form}/${id}.png`,
+    ...(shouldPreferComicBase(form, skin) ? [`/portraits/${side}/${skin}/base/${id}.png`] : []),
     `/portraits/${side}/default/${form}/${id}.png`,
     `/portraits/${side}/default/base/${id}.png`,
   ];
@@ -64,6 +70,9 @@ export function portraitThumbCandidates(
   const id = normId(unitId);
   const list = [
     `/portraits/thumb/${side}/${skin}/${form}/${id}.webp`,
+    ...(shouldPreferComicBase(form, skin)
+      ? [`/portraits/thumb/${side}/${skin}/base/${id}.webp`]
+      : []),
     `/portraits/${side}/${skin}/${form}/${id}.png`,
     `/portraits/${side}/${skin}/base/${id}.png`,
     `/portraits/thumb/${side}/default/${form}/${id}.webp`,
