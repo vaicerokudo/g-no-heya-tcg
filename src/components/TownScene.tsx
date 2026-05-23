@@ -61,8 +61,8 @@ const PLAYER_WIDTH = 68;
 const PLAYER_HEIGHT = 74;
 const STEP = 18;
 const LOBBY_BACKGROUND_URL = "/backgrounds/lobby.png";
-const TABLE = { x: 65, y: 47, w: 25, h: 16 };
-const RECEPTION = { x: 33, y: 31, w: 34, h: 17 };
+const TABLE = { x: 62, y: 55, w: 31, h: 20 };
+const RECEPTION = { x: 31, y: 33, w: 38, h: 18 };
 const COLLECTION = { x: 9, y: 42, w: 27, h: 18 };
 const MYOUOU_ROOM = { x: 58, y: 8, w: 34, h: 18 };
 const EXIT = { x: 34, y: 82, w: 32, h: 14 };
@@ -73,19 +73,19 @@ const TOWN_HOTSPOTS: TownHotspot[] = [
     subLabel: "7171",
     area: RECEPTION,
     labelX: 53,
-    labelY: 48,
+    labelY: 51,
     targetX: 51,
-    targetY: 55,
+    targetY: 58,
   },
   {
     id: "table",
     label: "対戦台",
     subLabel: "試練の盤",
     area: TABLE,
-    labelX: 77,
-    labelY: 45,
-    targetX: 72,
-    targetY: 61,
+    labelX: 78,
+    labelY: 63,
+    targetX: 76,
+    targetY: 72,
   },
   {
     id: "collection",
@@ -392,37 +392,6 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
             </button>
           ))}
 
-          {interactionTarget && (
-            <div style={promptStyle}>
-              {interactionTarget === "reception" ? (
-                <>
-                  <strong>受付：7171に話しかける</strong>
-                  <span>Enter または「話す」ボタン</span>
-                </>
-              ) : interactionTarget === "collection" ? (
-                <>
-                  <strong>カード図鑑</strong>
-                  <span>Enter または「見る」ボタンで確認</span>
-                </>
-              ) : interactionTarget === "myououRoom" ? (
-                <>
-                  <strong>明王の部屋</strong>
-                  <span>Enter または「入る」ボタンで話を聞く</span>
-                </>
-              ) : interactionTarget === "exit" ? (
-                <>
-                  <strong>街へ戻る</strong>
-                  <span>Enter または「戻る」ボタンでアストリアへ</span>
-                </>
-              ) : (
-                <>
-                  <strong>対戦台：試練の盤</strong>
-                  <span>Enter または「対戦」ボタンでTCG開始</span>
-                </>
-              )}
-            </div>
-          )}
-
           {activeDialog === "reception" && (
             <div style={dialogOverlayStyle}>
               <div style={dialogPanelStyle}>
@@ -667,24 +636,6 @@ const townHotspotSubLabelStyle: CSSProperties = {
   overflow: "hidden",
   clip: "rect(0 0 0 0)",
   whiteSpace: "nowrap",
-};
-
-const promptStyle: CSSProperties = {
-  position: "absolute",
-  left: "50%",
-  top: "17%",
-  transform: "translateX(-50%)",
-  padding: "8px 12px",
-  borderRadius: 12,
-  background: "rgba(27,18,13,0.78)",
-  border: "1px solid rgba(255,216,102,0.64)",
-  boxShadow: "0 10px 24px rgba(0,0,0,0.32)",
-  display: "grid",
-  gap: 2,
-  textAlign: "center",
-  fontSize: 12,
-  pointerEvents: "none",
-  zIndex: 10,
 };
 
 const dialogOverlayStyle: CSSProperties = {
