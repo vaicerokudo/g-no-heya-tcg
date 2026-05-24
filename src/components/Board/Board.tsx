@@ -8,6 +8,7 @@ type BoardProps = {
   rows: number;
   cols: number;
   cellSize: number;
+  boardBackgroundUrl?: string;
 
   letters: string[];
   occ: Map<string, any>;
@@ -62,6 +63,7 @@ export function Board(props: BoardProps) {
     rows,
     cols,
     cellSize,
+    boardBackgroundUrl,
     letters,
     occ,
     selectedId,
@@ -111,7 +113,7 @@ export function Board(props: BoardProps) {
             height: rows * cellSize,
             borderRadius: 12,
             overflow: "hidden",
-            backgroundImage: `url(${boardBg})`,
+            backgroundImage: boardBackgroundUrl ? `url(${boardBackgroundUrl}), url(${boardBg})` : `url(${boardBg})`,
             backgroundSize: "100% 100%",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",

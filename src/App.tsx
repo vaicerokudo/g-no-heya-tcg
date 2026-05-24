@@ -150,6 +150,7 @@ export default function App() {
   const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId | null>(null);
   const [scenarioDialog, setScenarioDialog] = useState<null | { kind: ScenarioDialogKind; index: number }>(null);
   const [scenarioResultDialogShown, setScenarioResultDialogShown] = useState(false);
+  const activeScenario = gameMode === "scenario" && activeScenarioId ? getScenarioConfig(activeScenarioId) : null;
   const [cpuEnabled, setCpuEnabled] = useState(true);
 
   const [deployPlaced, setDeployPlaced] = useState(0);
@@ -1349,6 +1350,7 @@ const reinforceSet = useMemo(() => {
         getHandFallbackSrc={getHandFallbackSrc}
         compactWideBoard={isCompactWideBoard}
         showHandDeck={gameMode === "versus"}
+        boardBackgroundUrl={activeScenario?.backgroundUrl}
         rows={rows}
         cols={cols}
         cellSize={cell}

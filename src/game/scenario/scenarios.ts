@@ -24,6 +24,7 @@ export type ScenarioConfig = {
   title: string;
   stageName: string;
   boardSizeMode: BoardSizeMode;
+  backgroundUrl?: string;
   placements: ScenarioUnitPlacement[];
   dialogs: Record<ScenarioDialogKind, ScenarioLine[]>;
 };
@@ -36,6 +37,7 @@ export const SCENARIOS: Record<ScenarioId, ScenarioConfig> = {
     title: "シナリオ1：初めてのボア戦",
     stageName: "街の門前",
     boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-gate.png",
     placements: [
       { unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC1-SOCHO" },
       { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC1-USHIMARU" },
