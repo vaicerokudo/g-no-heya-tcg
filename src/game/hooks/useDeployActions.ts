@@ -73,6 +73,7 @@ type TryNorthReinforceArgs = {
   unitsById: GameState["unitsById"];
   instances: UnitInstance[];
   cols: number;
+  initialDeployCandidateCols?: readonly number[];
   spawnUnit: Parameters<typeof buildDeployInstances>[0]["spawnUnit"];
 };
 
@@ -244,11 +245,12 @@ export function useDeployActions({
     unitsById,
     instances,
     cols,
+    initialDeployCandidateCols,
     spawnUnit,
   }: TryNorthReinforceArgs) {
     if (!canStartNorthReinforce({ phase, turn, handNorth })) return false;
 
-    const empties = getTopRowEmptyCols(instances, cols);
+    const empties = getTopRowEmptyCols(instances, cols, initialDeployCandidateCols);
     if (empties.length === 0) return false;
 
     const unitId = getNorthReinforceUnitId({ handNorth, unitsById });

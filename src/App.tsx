@@ -556,9 +556,10 @@ export default function App() {
       unitsById,
       instances: instancesRef.current,
       cols,
+      initialDeployCandidateCols,
       spawnUnit,
     });
-  }, [turnSeq, cols]);
+  }, [turnSeq, cols, initialDeployCandidateCols]);
 
   const deploySouthAt = (r: number, c: number) => {
     trySouthDeploy({

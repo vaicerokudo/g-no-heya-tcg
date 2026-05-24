@@ -137,14 +137,16 @@ export function canStartNorthReinforce({
   return true;
 }
 
-export function getTopRowEmptyCols(instances: UnitInstance[], cols: number) {
+export function getTopRowEmptyCols(instances: UnitInstance[], cols: number, candidateCols?: readonly number[]) {
   const used = new Set<number>();
   for (const u of instances) {
     if (u.pos?.r === 0) used.add(u.pos.c);
   }
 
   const empties: number[] = [];
-  for (let c = 0; c < cols; c++) {
+  const colsToCheck = candidateCols ?? Array.from({ length: cols }, (_, index) => index);
+  for (const c of colsToCheck) {
+    if (c < 0 || c >= cols) continue;
     if (!used.has(c)) empties.push(c);
   }
 
