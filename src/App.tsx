@@ -44,6 +44,7 @@ import { AstoriaMapScene } from "./components/AstoriaMapScene";
 import { TownScene } from "./components/TownScene";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
+import { ScenarioDialog, type ScenarioLine } from "./components/Scenario/ScenarioDialog";
 
 import {
   buildInitialNorthDeployCols,
@@ -82,6 +83,7 @@ function getHandCardSrc(unitId: string, side: Side, skin: Skin) {
 type PerUnitTurn = Record<string, { moved: boolean; attacked: boolean; done: boolean }>;
 type Phase = "setup_draw" | "setup_deploy" | "battle";
 type GameMode = "versus" | "scenario";
+type ScenarioDialogKind = "intro" | "victory" | "defeat";
 type SkillMotionEvent = { id: string; instanceId: string };
 type AttackMotionEvent = { id: string; instanceId: string; dr: number; dc: number };
 type MoveMotionEvent = { id: string; instanceId: string };
@@ -110,6 +112,32 @@ const BOAR_UNIT_DEF: UnitDef = {
 };
 
 const SCENARIO1_ID: ScenarioId = "scenario1";
+
+const SCENARIO1_DIALOGS: Record<ScenarioDialogKind, ScenarioLine[]> = {
+  intro: [
+    { speaker: "総長", text: "……ここが、はじまりの道です。" },
+    { speaker: "うしまる", text: "なんか出そうっすねぇ。こういう場所、だいたい出るっす。" },
+    { speaker: "hibiki", text: "ふん、何が来ても俺の盾があれば問題ない。" },
+    { speaker: "総長", text: "来ます。構えてください。" },
+    { speaker: "ボア", text: "ブオオオオッ！" },
+  ],
+  victory: [
+    { speaker: "うしまる", text: "やったっす！初戦にしては上出来っすね！" },
+    { speaker: "hibiki", text: "当然だ。俺が前に立ったからな。" },
+    { speaker: "総長", text: "二人とも、よくやりました。……では、先へ進みましょう。" },
+  ],
+  defeat: [
+    { speaker: "hibiki", text: "くっ……こんなはずでは……！" },
+    { speaker: "うしまる", text: "総長！一度立て直すっす！" },
+    { speaker: "総長", text: "大丈夫です。もう一度、行きましょう。" },
+  ],
+};
+
+function getScenarioDialogTitle(kind: ScenarioDialogKind) {
+  if (kind === "intro") return "シナリオ1：初めてのボア戦";
+  if (kind === "victory") return "シナリオ1：勝利";
+  return "シナリオ1：敗北";
+}
 
 export default function App() {
   // ===== stable base =====
@@ -141,6 +169,8 @@ export default function App() {
   const [phase, setPhase] = useState<Phase>("setup_draw");
   const [gameMode, setGameMode] = useState<GameMode>("versus");
   const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId | null>(null);
+  const [scenarioDialog, setScenarioDialog] = useState<null | { kind: ScenarioDialogKind; index: number }>(null);
+  const [scenarioResultDialogShown, setScenarioResultDialogShown] = useState(false);
   const [cpuEnabled, setCpuEnabled] = useState(true);
 
   const [deployPlaced, setDeployPlaced] = useState(0);
@@ -159,6 +189,7 @@ export default function App() {
 
   const [victory, setVictory] = useState<null | { winner: Side; detail: string }>(null);
   const gameOver = victory !== null;
+  const scenarioDialogOpen = scenarioDialog !== null;
 
   const [southSkin, setSouthSkin] = useState<Skin>("default");
   const [northSkin, setNorthSkin] = useState<Skin>("default");
@@ -335,6 +366,8 @@ export default function App() {
   function resetSetupState() {
     setGameMode("versus");
     setActiveScenarioId(null);
+    setScenarioDialog(null);
+    setScenarioResultDialogShown(false);
     setVictory(null);
     setSkillMode(null);
     setUsedSkills({});
@@ -359,6 +392,8 @@ export default function App() {
   function resetBattleStateForScenario(scenarioId: ScenarioId) {
     setGameMode("scenario");
     setActiveScenarioId(scenarioId);
+    setScenarioDialog({ kind: "intro", index: 0 });
+    setScenarioResultDialogShown(false);
     setVictory(null);
     setSkillMode(null);
     setUsedSkills({});
@@ -523,6 +558,15 @@ export default function App() {
     return checkVictory(rows, cols, nextInstances as any);
   }
 
+  function advanceScenarioDialog() {
+    setScenarioDialog((current) => {
+      if (!current) return null;
+      const lines = SCENARIO1_DIALOGS[current.kind];
+      if (current.index >= lines.length - 1) return null;
+      return { ...current, index: current.index + 1 };
+    });
+  }
+
   // ===== setup =====
   const setupCountRef = useRef(0);
 
@@ -623,6 +667,17 @@ export default function App() {
     startSetup();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boardSizeMode, gameMode]);
+
+  useEffect(() => {
+    if (gameMode !== "scenario") return;
+    if (!activeScenarioId) return;
+    if (!victory) return;
+    if (scenarioDialog) return;
+    if (scenarioResultDialogShown) return;
+
+    setScenarioResultDialogShown(true);
+    setScenarioDialog({ kind: victory.winner === "south" ? "victory" : "defeat", index: 0 });
+  }, [activeScenarioId, gameMode, scenarioDialog, scenarioResultDialogShown, victory]);
 
   // ===== reinforcement (north: one unit at turn start) =====
   useEffect(() => {
@@ -978,6 +1033,7 @@ const reinforceSet = useMemo(() => {
   }
 
   function handleSkillButtonClick(skill: (typeof selectedSkills)[number]) {
+    if (scenarioDialogOpen) return;
     if (gameOver) return;
     if (!selected) return;
 
@@ -993,6 +1049,7 @@ const reinforceSet = useMemo(() => {
   }
 
   function waitSelectedUnit() {
+    if (scenarioDialogOpen) return;
     if (gameOver) return;
     if (!selected) return;
 
@@ -1009,6 +1066,7 @@ const reinforceSet = useMemo(() => {
   }
 
   function handleBoardLongPressUnit(inst: any) {
+    if (scenarioDialogOpen) return;
     if (gameOver) return;
 
     setSelectedId(inst.instanceId);
@@ -1018,6 +1076,7 @@ const reinforceSet = useMemo(() => {
   }
 
   function handleBoardCellClick(r: number, c: number, inst: any | null) {
+    if (scenarioDialogOpen) return;
     if (gameOver) return;
 
     if (phase === "setup_deploy") {
@@ -1060,6 +1119,7 @@ const reinforceSet = useMemo(() => {
   }
 
   const endTurn = () => {
+    if (scenarioDialogOpen) return;
     if (!beginEndTurnOnce()) return;
 
     prepareEndTurnRun();
@@ -1069,7 +1129,7 @@ const reinforceSet = useMemo(() => {
   };
 
   const { stopCpuLoopNorth } = useCpuTurn({
-    cpuEnabled,
+    cpuEnabled: cpuEnabled && !scenarioDialogOpen,
     phase,
     gameOver,
     turn,
@@ -1186,7 +1246,8 @@ const reinforceSet = useMemo(() => {
     setCpuEnabled((v) => !v);
   }
 
-  const canSelect = (inst: any) => canSelectUnit({ inst, gameOver, turn, perUnitTurn });
+  const canSelect = (inst: any) =>
+    !scenarioDialogOpen && canSelectUnit({ inst, gameOver, turn, perUnitTurn });
 
   if (scene === "astoria") {
     return <AstoriaMapScene onEnterLobby={() => setScene("town")} />;
@@ -1229,7 +1290,16 @@ const reinforceSet = useMemo(() => {
         disabledTitle={skillMode ? "スキル選択中はターン終了できません。ESCで解除" : ""}
       />
 
-      <VictoryModal victory={victory} onRestart={resetGame} />
+      <VictoryModal victory={scenarioDialogOpen ? null : victory} onRestart={resetGame} />
+
+      {scenarioDialog && (
+        <ScenarioDialog
+          title={getScenarioDialogTitle(scenarioDialog.kind)}
+          lines={SCENARIO1_DIALOGS[scenarioDialog.kind]}
+          index={scenarioDialog.index}
+          onNext={advanceScenarioDialog}
+        />
+      )}
 
       <SkillModeBanner
         skillMode={skillMode}
