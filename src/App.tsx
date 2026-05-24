@@ -12,13 +12,12 @@ import { getSkillImpactVariant, type SkillImpactVariant } from "./game/skills/im
 import checkVictory, { checkScenarioVictory } from "./game/victory";
 import {
   getScenarioConfig,
-  SCENARIO1_ID,
   type ScenarioDialogKind,
   type ScenarioId,
 } from "./game/scenario/scenarios";
 import { scenarioEnemyUnits } from "./game/scenario/enemyUnits";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSkillTargeting } from "./game/hooks/useSkillTargeting";
 import { useSkillExecution } from "./game/hooks/useSkillExecution";
 import { usePlayerActions } from "./game/hooks/usePlayerActions";
@@ -52,6 +51,7 @@ import { TownScene } from "./components/TownScene";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
 import { ScenarioDialog } from "./components/Scenario/ScenarioDialog";
+import { ScenarioSelectDialog } from "./components/Scenario/ScenarioSelectDialog";
 
 import {
   buildInitialNorthDeployCols,
@@ -67,6 +67,7 @@ import {
   type Skin,
 } from "./assets/imagePaths";
 import { isSkinUnlocked, readUnlockedSkins } from "./assets/skinUnlocks";
+import { readClearedScenarios, writeClearedScenarios } from "./game/scenario/progress";
 
 function posKey(r: number, c: number) {
   return `${r},${c}`;
@@ -151,6 +152,8 @@ export default function App() {
   const [scenarioDialog, setScenarioDialog] = useState<null | { kind: ScenarioDialogKind; index: number }>(null);
   const [scenarioResultDialogShown, setScenarioResultDialogShown] = useState(false);
   const activeScenario = gameMode === "scenario" && activeScenarioId ? getScenarioConfig(activeScenarioId) : null;
+  const [scenarioSelectOpen, setScenarioSelectOpen] = useState(false);
+  const [clearedScenarioIds, setClearedScenarioIds] = useState<ScenarioId[]>(() => readClearedScenarios());
   const [cpuEnabled, setCpuEnabled] = useState(true);
 
   const [deployPlaced, setDeployPlaced] = useState(0);
@@ -538,6 +541,15 @@ export default function App() {
     return checkVictory(rows, cols, nextInstances as any);
   }
 
+  const markScenarioCleared = useCallback((scenarioId: ScenarioId) => {
+    setClearedScenarioIds((prev) => {
+      if (prev.includes(scenarioId)) return prev;
+      const next = [...prev, scenarioId];
+      writeClearedScenarios(next);
+      return next;
+    });
+  }, []);
+
   function advanceScenarioDialog() {
     setScenarioDialog((current) => {
       if (!current) return null;
@@ -605,6 +617,7 @@ export default function App() {
     const scenario = getScenarioConfig(scenarioId);
     if (!scenario) return;
 
+    setScenarioSelectOpen(false);
     prepareSetupRun();
     if (boardSizeMode !== scenario.boardSizeMode) setBoardSizeMode(scenario.boardSizeMode);
 
@@ -654,9 +667,13 @@ export default function App() {
     if (scenarioDialog) return;
     if (scenarioResultDialogShown) return;
 
+    if (victory.winner === "south") {
+      markScenarioCleared(activeScenarioId);
+    }
+
     setScenarioResultDialogShown(true);
     setScenarioDialog({ kind: victory.winner === "south" ? "victory" : "defeat", index: 0 });
-  }, [activeScenarioId, gameMode, scenarioDialog, scenarioResultDialogShown, victory]);
+  }, [activeScenarioId, gameMode, markScenarioCleared, scenarioDialog, scenarioResultDialogShown, victory]);
 
   // ===== reinforcement (north: one unit at turn start) =====
   useEffect(() => {
@@ -711,9 +728,14 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     startSetup();
   }
 
-  function startScenarioFromTown() {
+  function openScenarioSelectFromTown() {
+    setClearedScenarioIds(readClearedScenarios());
+    setScenarioSelectOpen(true);
+  }
+
+  function handleScenarioSelectStart(scenarioId: ScenarioId) {
     setScene("tcg");
-    startScenario(SCENARIO1_ID);
+    startScenario(scenarioId);
   }
 
   useEffect(() => {
@@ -1239,13 +1261,21 @@ const reinforceSet = useMemo(() => {
 
   if (scene === "town") {
     return (
-      <TownScene
-        onExitToMap={() => setScene("astoria")}
-        onEnterTcg={() => setScene("tcg")}
-        onStartScenario1={startScenarioFromTown}
-        onSkinUnlocked={refreshUnlockedSkins}
-        unitsById={unitsById}
-      />
+      <>
+        <TownScene
+          onExitToMap={() => setScene("astoria")}
+          onEnterTcg={() => setScene("tcg")}
+          onOpenScenarioSelect={openScenarioSelectFromTown}
+          onSkinUnlocked={refreshUnlockedSkins}
+          unitsById={unitsById}
+        />
+        <ScenarioSelectDialog
+          open={scenarioSelectOpen}
+          clearedScenarioIds={clearedScenarioIds}
+          onClose={() => setScenarioSelectOpen(false)}
+          onStartScenario={handleScenarioSelectStart}
+        />
+      </>
     );
   }
 

@@ -1,7 +1,7 @@
 import type { BoardSizeMode } from "../boardConfig";
 import type { Form, Side } from "../types";
 
-export type ScenarioId = "scenario1";
+export type ScenarioId = "scenario1" | "scenario2" | "scenario3";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
 
 export type ScenarioLine = {
@@ -31,7 +31,7 @@ export type ScenarioConfig = {
 
 export const SCENARIO1_ID: ScenarioId = "scenario1";
 
-export const SCENARIOS: Record<ScenarioId, ScenarioConfig> = {
+export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
   scenario1: {
     id: SCENARIO1_ID,
     title: "シナリオ1：初めてのボア戦",

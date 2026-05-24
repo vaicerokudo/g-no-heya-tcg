@@ -7,7 +7,7 @@ import { CollectionDialog } from "./Town/CollectionDialog";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
-  onStartScenario1: () => void;
+  onOpenScenarioSelect: () => void;
   onExitToMap?: () => void;
   onSkinUnlocked?: () => void;
   unitsById: Record<string, UnitDef>;
@@ -179,7 +179,7 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
   return Math.hypot(dx, dy) <= threshold;
 }
 
-export function TownScene({ onEnterTcg, onStartScenario1, onExitToMap, onSkinUnlocked, unitsById }: TownSceneProps) {
+export function TownScene({ onEnterTcg, onOpenScenarioSelect, onExitToMap, onSkinUnlocked, unitsById }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 50, y: 78 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
   const [receptionTopic, setReceptionTopic] = useState<ReceptionTopic>("home");
@@ -223,7 +223,7 @@ export function TownScene({ onEnterTcg, onStartScenario1, onExitToMap, onSkinUnl
     } else if (target === "myououRoom") {
       setActiveDialog("myououRoom");
     } else if (target === "story") {
-      onStartScenario1();
+      onOpenScenarioSelect();
     } else if (target === "table") {
       onEnterTcg();
     } else if (target === "exit") {
@@ -326,7 +326,7 @@ export function TownScene({ onEnterTcg, onStartScenario1, onExitToMap, onSkinUnl
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [interactionTarget, isHotspotMoving, onEnterTcg, onStartScenario1]);
+  }, [interactionTarget, isHotspotMoving, onEnterTcg, onOpenScenarioSelect]);
 
   useEffect(() => {
     return () => {
