@@ -7,6 +7,7 @@ import { CollectionDialog } from "./Town/CollectionDialog";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
+  onStartScenario1: () => void;
   onExitToMap?: () => void;
   onSkinUnlocked?: () => void;
   unitsById: Record<string, UnitDef>;
@@ -14,7 +15,7 @@ type TownSceneProps = {
 
 type Pos = { x: number; y: number };
 type InteractionArea = { x: number; y: number; w: number; h: number };
-type InteractionTarget = "table" | "reception" | "collection" | "myououRoom" | "exit" | null;
+type InteractionTarget = "table" | "story" | "reception" | "collection" | "myououRoom" | "exit" | null;
 type TownDialog = "reception" | "collection" | "myououRoom" | null;
 type ReceptionTopic = "home" | "first" | "table" | "skin" | "password";
 type Facing = "left" | "right";
@@ -62,6 +63,7 @@ const PLAYER_HEIGHT = 74;
 const STEP = 18;
 const LOBBY_BACKGROUND_URL = "/backgrounds/lobby.png";
 const TABLE = { x: 62, y: 55, w: 31, h: 20 };
+const STORY = { x: 9, y: 62, w: 27, h: 16 };
 const RECEPTION = { x: 31, y: 33, w: 38, h: 18 };
 const COLLECTION = { x: 9, y: 42, w: 27, h: 18 };
 const MYOUOU_ROOM = { x: 58, y: 8, w: 34, h: 18 };
@@ -96,6 +98,16 @@ const TOWN_HOTSPOTS: TownHotspot[] = [
     labelY: 40,
     targetX: 27,
     targetY: 57,
+  },
+  {
+    id: "story",
+    label: "物語",
+    subLabel: "はじまりの記録",
+    area: STORY,
+    labelX: 23,
+    labelY: 66,
+    targetX: 25,
+    targetY: 74,
   },
   {
     id: "myououRoom",
@@ -167,7 +179,7 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
   return Math.hypot(dx, dy) <= threshold;
 }
 
-export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }: TownSceneProps) {
+export function TownScene({ onEnterTcg, onStartScenario1, onExitToMap, onSkinUnlocked, unitsById }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 50, y: 78 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
   const [receptionTopic, setReceptionTopic] = useState<ReceptionTopic>("home");
@@ -183,19 +195,22 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
   const nearTable = useMemo(() => isNearArea(pos, TABLE), [pos]);
   const nearReception = useMemo(() => isNearArea(pos, RECEPTION, RECEPTION_INTERACTION_THRESHOLD), [pos]);
   const nearCollection = useMemo(() => isNearArea(pos, COLLECTION), [pos]);
+  const nearStory = useMemo(() => isNearArea(pos, STORY), [pos]);
   const nearMyououRoom = useMemo(() => isNearArea(pos, MYOUOU_ROOM), [pos]);
   const nearExit = useMemo(() => isNearArea(pos, EXIT), [pos]);
   const interactionTarget: InteractionTarget = nearReception
     ? "reception"
     : nearCollection
       ? "collection"
-      : nearMyououRoom
-        ? "myououRoom"
-        : nearTable
-          ? "table"
-          : nearExit
-            ? "exit"
-            : null;
+      : nearStory
+        ? "story"
+        : nearMyououRoom
+          ? "myououRoom"
+          : nearTable
+            ? "table"
+            : nearExit
+              ? "exit"
+              : null;
 
   const performTownAction = (target: TownHotspotId) => {
     if (target === "reception") {
@@ -207,6 +222,8 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
       setActiveDialog("collection");
     } else if (target === "myououRoom") {
       setActiveDialog("myououRoom");
+    } else if (target === "story") {
+      onStartScenario1();
     } else if (target === "table") {
       onEnterTcg();
     } else if (target === "exit") {
@@ -309,7 +326,7 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [interactionTarget, isHotspotMoving, onEnterTcg]);
+  }, [interactionTarget, isHotspotMoving, onEnterTcg, onStartScenario1]);
 
   useEffect(() => {
     return () => {
@@ -346,9 +363,11 @@ export function TownScene({ onEnterTcg, onExitToMap, onSkinUnlocked, unitsById }
         ? "見る"
         : interactionTarget === "table"
           ? "対戦"
-          : interactionTarget === "exit"
-            ? "戻る"
-            : "移動";
+          : interactionTarget === "story"
+            ? "読む"
+            : interactionTarget === "exit"
+              ? "戻る"
+              : "移動";
   const receptionDialog = receptionTopic === "password" ? PASSWORD_DIALOG : RECEPTION_DIALOG[receptionTopic];
 
   return (

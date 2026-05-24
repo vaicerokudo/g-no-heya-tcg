@@ -732,6 +732,11 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     startSetup();
   }
 
+  function startScenarioFromTown() {
+    setScene("tcg");
+    startScenario(SCENARIO1_ID);
+  }
+
   useEffect(() => {
     setLastMove(null);
   }, [turn]);
@@ -1258,6 +1263,7 @@ const reinforceSet = useMemo(() => {
       <TownScene
         onExitToMap={() => setScene("astoria")}
         onEnterTcg={() => setScene("tcg")}
+        onStartScenario1={startScenarioFromTown}
         onSkinUnlocked={refreshUnlockedSkins}
         unitsById={unitsById}
       />
@@ -1317,11 +1323,9 @@ const reinforceSet = useMemo(() => {
         boardSizeMode={boardSizeMode}
         onBoardSizeModeChange={setBoardSizeMode}
         turn={turn}
-        gameMode={gameMode}
         cpuEnabled={cpuEnabled}
         onToggleCpu={toggleCpuEnabled}
         onResetGame={resetGame}
-        onStartScenario1={() => startScenario(SCENARIO1_ID)}
         deckSouthCount={deckSouth.length}
         handSouthCount={handSouth.length}
         deckNorthCount={deckNorth.length}
