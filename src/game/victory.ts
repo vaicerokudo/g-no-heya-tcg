@@ -1,9 +1,9 @@
 // src/game/victory.ts
 import type { Side } from "./types";
 import { getGateCols, getNorthGateRow, getSouthGateRow } from "./boardConfig";
+import type { ScenarioId } from "./scenario/scenarios";
 
 export type Victory = { winner: Side; detail: string };
-export type ScenarioId = "scenario1";
 
 export function checkVictory(
   rows: number,

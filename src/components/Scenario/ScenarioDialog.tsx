@@ -1,9 +1,5 @@
 import { createPortal } from "react-dom";
-
-export type ScenarioLine = {
-  speaker: string;
-  text: string;
-};
+import type { ScenarioLine } from "../../game/scenario/scenarios";
 
 type ScenarioDialogProps = {
   title: string;

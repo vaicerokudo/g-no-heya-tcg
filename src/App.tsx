@@ -9,7 +9,13 @@ import { getAttackableTargets, getAttackMarks } from "./game/attack";
 import { type SkillId } from "./game/skills/registry";
 import { getSkillImpactVariant, type SkillImpactVariant } from "./game/skills/impactVariant";
 
-import checkVictory, { checkScenarioVictory, type ScenarioId } from "./game/victory";
+import checkVictory, { checkScenarioVictory } from "./game/victory";
+import {
+  getScenarioConfig,
+  SCENARIO1_ID,
+  type ScenarioDialogKind,
+  type ScenarioId,
+} from "./game/scenario/scenarios";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSkillTargeting } from "./game/hooks/useSkillTargeting";
@@ -44,7 +50,7 @@ import { AstoriaMapScene } from "./components/AstoriaMapScene";
 import { TownScene } from "./components/TownScene";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
-import { ScenarioDialog, type ScenarioLine } from "./components/Scenario/ScenarioDialog";
+import { ScenarioDialog } from "./components/Scenario/ScenarioDialog";
 
 import {
   buildInitialNorthDeployCols,
@@ -83,7 +89,6 @@ function getHandCardSrc(unitId: string, side: Side, skin: Skin) {
 type PerUnitTurn = Record<string, { moved: boolean; attacked: boolean; done: boolean }>;
 type Phase = "setup_draw" | "setup_deploy" | "battle";
 type GameMode = "versus" | "scenario";
-type ScenarioDialogKind = "intro" | "victory" | "defeat";
 type SkillMotionEvent = { id: string; instanceId: string };
 type AttackMotionEvent = { id: string; instanceId: string; dr: number; dc: number };
 type MoveMotionEvent = { id: string; instanceId: string };
@@ -111,32 +116,12 @@ const BOAR_UNIT_DEF: UnitDef = {
   },
 };
 
-const SCENARIO1_ID: ScenarioId = "scenario1";
-
-const SCENARIO1_DIALOGS: Record<ScenarioDialogKind, ScenarioLine[]> = {
-  intro: [
-    { speaker: "総長", text: "……ここが、はじまりの道です。" },
-    { speaker: "うしまる", text: "なんか出そうっすねぇ。こういう場所、だいたい出るっす。" },
-    { speaker: "hibiki", text: "ふん、何が来ても俺の盾があれば問題ない。" },
-    { speaker: "総長", text: "来ます。構えてください。" },
-    { speaker: "ボア", text: "ブオオオオッ！" },
-  ],
-  victory: [
-    { speaker: "うしまる", text: "やったっす！初戦にしては上出来っすね！" },
-    { speaker: "hibiki", text: "当然だ。俺が前に立ったからな。" },
-    { speaker: "総長", text: "二人とも、よくやりました。……では、先へ進みましょう。" },
-  ],
-  defeat: [
-    { speaker: "hibiki", text: "くっ……こんなはずでは……！" },
-    { speaker: "うしまる", text: "総長！一度立て直すっす！" },
-    { speaker: "総長", text: "大丈夫です。もう一度、行きましょう。" },
-  ],
-};
-
-function getScenarioDialogTitle(kind: ScenarioDialogKind) {
-  if (kind === "intro") return "シナリオ1：初めてのボア戦";
-  if (kind === "victory") return "シナリオ1：勝利";
-  return "シナリオ1：敗北";
+function getScenarioDialogTitle(scenarioId: ScenarioId, kind: ScenarioDialogKind) {
+  const scenario = getScenarioConfig(scenarioId);
+  if (!scenario) return "";
+  if (kind === "intro") return scenario.title;
+  if (kind === "victory") return `${scenario.title}：勝利`;
+  return `${scenario.title}：敗北`;
 }
 
 export default function App() {
@@ -561,7 +546,8 @@ export default function App() {
   function advanceScenarioDialog() {
     setScenarioDialog((current) => {
       if (!current) return null;
-      const lines = SCENARIO1_DIALOGS[current.kind];
+      const scenario = activeScenarioId ? getScenarioConfig(activeScenarioId) : null;
+      const lines = scenario?.dialogs[current.kind] ?? [];
       if (current.index >= lines.length - 1) return null;
       return { ...current, index: current.index + 1 };
     });
@@ -621,10 +607,11 @@ export default function App() {
   };
 
   const startScenario = (scenarioId: ScenarioId) => {
-    if (scenarioId !== SCENARIO1_ID) return;
+    const scenario = getScenarioConfig(scenarioId);
+    if (!scenario) return;
 
     prepareSetupRun();
-    if (boardSizeMode !== "starter7") setBoardSizeMode("starter7");
+    if (boardSizeMode !== scenario.boardSizeMode) setBoardSizeMode(scenario.boardSizeMode);
 
     resetBattleStateForScenario(scenarioId);
     applyInitialHandsAndDecks({
@@ -634,15 +621,12 @@ export default function App() {
       handNorth: [],
     });
 
-    const scenarioInstances = [
-      spawnUnit({ unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC1-SOCHO" }),
-      spawnUnit({ unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC1-USHIMARU" }),
-      spawnUnit({ unitId: "HIBIKI", side: "south", r: 5, c: 4, instanceId: "SC1-HIBIKI" }),
-      spawnUnit({ unitId: "BOAR", side: "north", r: 2, c: 3, instanceId: "SC1-BOAR", hp: 8 }),
-    ].filter((unit): unit is NonNullable<typeof unit> => unit !== null);
+    const scenarioInstances = scenario.placements
+      .map((placement) => spawnUnit(placement))
+      .filter((unit): unit is NonNullable<typeof unit> => unit !== null);
 
     setInstancesAndRef(scenarioInstances as any);
-    console.log("Scenario 1: first BOAR battle");
+    console.log(`${scenario.id}: ${scenario.title}`);
   };
 
   useEffect(() => {
@@ -1300,8 +1284,8 @@ const reinforceSet = useMemo(() => {
 
       {scenarioDialog && (
         <ScenarioDialog
-          title={getScenarioDialogTitle(scenarioDialog.kind)}
-          lines={SCENARIO1_DIALOGS[scenarioDialog.kind]}
+          title={activeScenarioId ? getScenarioDialogTitle(activeScenarioId, scenarioDialog.kind) : ""}
+          lines={activeScenarioId ? (getScenarioConfig(activeScenarioId)?.dialogs[scenarioDialog.kind] ?? []) : []}
           index={scenarioDialog.index}
           onNext={advanceScenarioDialog}
         />
