@@ -1124,8 +1124,10 @@ const reinforceSet = useMemo(() => {
     );
   }
 
+  const isCompactWideBoard = winW <= 720 && cols >= 9;
+
   return (
-    <div className="tcgScene">
+    <div className={`tcgScene${cols >= 9 ? " tcgScene--wideBoard" : ""}${isCompactWideBoard ? " tcgScene--compactWideBoard" : ""}`}>
       <UnitPopup
         open={popupOpen}
         unit={popupUnit}
@@ -1212,6 +1214,7 @@ const reinforceSet = useMemo(() => {
         getDeckBackPath={getDeckBackPath}
         getHandCardSrc={getHandCardSrc}
         getHandFallbackSrc={getHandFallbackSrc}
+        compactWideBoard={isCompactWideBoard}
         rows={rows}
         cols={cols}
         cellSize={cell}

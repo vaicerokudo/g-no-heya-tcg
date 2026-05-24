@@ -80,7 +80,7 @@ export function TopStatusBar({
     <>
       <h2>Gの部屋 TCG</h2>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
+      <div className="topStatusControls" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
         <SkinSelect label="味方スキン:" value={southSkin} isSkinUnlocked={isSkinUnlocked} onChange={onSouthSkinChange} />
         <SkinSelect label="CPUスキン:" value={northSkin} isSkinUnlocked={isSkinUnlocked} onChange={onNorthSkinChange} />
 
@@ -110,6 +110,7 @@ export function TopStatusBar({
       </div>
 
       <div
+        className="topTurnControls"
         style={{
           display: "flex",
           gap: 12,

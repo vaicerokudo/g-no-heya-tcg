@@ -88,6 +88,70 @@ html { overflow-y: scroll; }
   padding-bottom: var(--bottom-bar-space);
 }
 
+#root:has(.tcgScene--compactWideBoard) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.tcgScene--compactWideBoard {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.tcgScene--compactWideBoard select {
+  max-width: 180px;
+}
+
+.tcgScene--compactWideBoard .topStatusControls,
+.tcgScene--compactWideBoard .topTurnControls {
+  justify-content: center;
+  max-width: 100%;
+}
+
+.tcgScene--compactWideBoard .topTurnControls {
+  flex-wrap: wrap !important;
+  overflow-x: visible !important;
+  white-space: normal !important;
+  gap: 6px !important;
+}
+
+.gameBoardArea--compactWideBoard {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  width: 100%;
+  --game-board-area-gap: 4px;
+}
+
+.gameBoardArea--compactWideBoard .gameBoardBoard {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.gameBoardArea--compactWideBoard .gameBoardBoard > div {
+  width: 100%;
+}
+
+.gameBoardArea--compactWideBoard .southHandDeckRail {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.gameBoardArea--compactWideBoard .southDeckPanel {
+  --south-deck-width: 88px;
+  --south-panel-padding: 4px;
+  --south-card-padding: 3px;
+}
+
+.gameBoardArea--compactWideBoard .southHandPanel {
+  --south-hand-width: min(260px, 100vw);
+}
+
 .southHandDeckRail {
   display: contents;
 }
@@ -179,6 +243,11 @@ html { overflow-y: scroll; }
 }
 
 @media (max-width: 720px) {
+  #root:has(.tcgScene--wideBoard) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   .bottomBar {
     left: 10px !important;
     right: 10px !important;
@@ -200,12 +269,17 @@ html { overflow-y: scroll; }
     flex-direction: column;
     flex-wrap: nowrap;
     width: 100%;
+    --game-board-area-gap: 4px;
   }
 
   .gameBoardArea--wideBoard .gameBoardBoard {
     width: 100%;
     display: flex;
     justify-content: center;
+  }
+
+  .gameBoardArea--wideBoard .gameBoardBoard > div {
+    width: 100%;
   }
 
   .southDeckPanel {
@@ -228,11 +302,22 @@ html { overflow-y: scroll; }
     padding: 0 4px 4px;
   }
 
+  .gameBoardArea--wideBoard .southHandDeckRail {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   .southDeckPanel {
     --south-deck-width: 96px;
     --south-deck-flex: 0 0 auto;
     --south-panel-padding: 6px;
     --south-card-padding: 4px;
+  }
+
+  .gameBoardArea--wideBoard .southDeckPanel {
+    --south-deck-width: 88px;
+    --south-panel-padding: 4px;
+    --south-card-padding: 3px;
   }
 
   .southHandPanel {
@@ -253,6 +338,10 @@ html { overflow-y: scroll; }
     --south-hand-card-flex: 0 0 auto;
     --south-hand-card-width: 104px;
     --south-note-font-size: 10px;
+  }
+
+  .gameBoardArea--wideBoard .southHandPanel {
+    --south-hand-width: min(260px, 100vw);
   }
 
   .southHandNote {

@@ -23,6 +23,7 @@ type GameBoardAreaProps = BoardComponentProps & {
   getDeckBackPath: (skin: Skin) => string;
   getHandCardSrc: (unitId: string, side: Side, skin: Skin) => string;
   getHandFallbackSrc: (unitId: string, side: Side, skin: Skin) => string;
+  compactWideBoard?: boolean;
 };
 
 export function GameBoardArea({
@@ -41,6 +42,7 @@ export function GameBoardArea({
   getDeckBackPath,
   getHandCardSrc,
   getHandFallbackSrc,
+  compactWideBoard = false,
   ...boardProps
 }: GameBoardAreaProps) {
   const showSouthHandDeck = phase !== "setup_draw";
@@ -48,20 +50,32 @@ export function GameBoardArea({
   const areaStyle = {
     display: "flex",
     gap: "var(--game-board-area-gap, 12px)",
-    alignItems: "flex-start",
+    flexDirection: compactWideBoard ? "column" : undefined,
+    flexWrap: compactWideBoard ? "nowrap" : undefined,
+    alignItems: compactWideBoard ? "center" : "flex-start",
     justifyContent: "center",
+    width: compactWideBoard ? "100%" : undefined,
     maxWidth: "100%",
+    "--game-board-area-gap": compactWideBoard ? "4px" : undefined,
     "--bottom-bar-space": `${bottomBarH + 12}px`,
   } as CSSProperties;
 
   return (
     <div
-      className={`gameBoardArea${isWideBoard ? " gameBoardArea--wideBoard" : ""}`}
+      className={`gameBoardArea${isWideBoard ? " gameBoardArea--wideBoard" : ""}${compactWideBoard ? " gameBoardArea--compactWideBoard" : ""}`}
       style={areaStyle}
     >
       {showSouthHandDeck && <SouthDeck deckSouth={deckSouth} skin={southSkin} getDeckBackPath={getDeckBackPath} />}
 
-      <div className="gameBoardBoard" style={{ flex: "0 0 auto" }}>
+      <div
+        className="gameBoardBoard"
+        style={{
+          flex: "0 0 auto",
+          width: compactWideBoard ? "100%" : undefined,
+          display: compactWideBoard ? "flex" : undefined,
+          justifyContent: compactWideBoard ? "center" : undefined,
+        }}
+      >
         <Board {...boardProps} unitsById={unitsById} />
       </div>
 
