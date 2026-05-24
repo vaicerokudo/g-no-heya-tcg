@@ -89,6 +89,7 @@ export type Skill = {
 export type UnitDef = {
   id: string;
   name: string;
+  enemyOnly?: boolean;
   base: { atk: number; hp: number; movePattern: MovePattern };
   evolve?: { grantsSkill2?: boolean };
   passives?: Passive[];

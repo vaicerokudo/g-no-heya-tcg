@@ -2,12 +2,13 @@ import { drawN, shuffle } from "./deck";
 
 type UnitDefLike = {
   name?: string;
+  enemyOnly?: boolean;
 };
 
 export type HandPick = { uid: string; idx: number };
 
 export function buildDeckUnitIds(unitsById: Record<string, UnitDefLike>) {
-  const allUnitIdsRaw = Object.keys(unitsById).filter((id) => id !== "YABUKO_FM");
+  const allUnitIdsRaw = Object.keys(unitsById).filter((id) => id !== "YABUKO_FM" && !unitsById[id]?.enemyOnly);
 
   const uniqByName = new Map<string, string>();
   for (const id of allUnitIdsRaw) {

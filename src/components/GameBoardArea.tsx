@@ -24,6 +24,7 @@ type GameBoardAreaProps = BoardComponentProps & {
   getHandCardSrc: (unitId: string, side: Side, skin: Skin) => string;
   getHandFallbackSrc: (unitId: string, side: Side, skin: Skin) => string;
   compactWideBoard?: boolean;
+  showHandDeck?: boolean;
 };
 
 export function GameBoardArea({
@@ -43,9 +44,10 @@ export function GameBoardArea({
   getHandCardSrc,
   getHandFallbackSrc,
   compactWideBoard = false,
+  showHandDeck = true,
   ...boardProps
 }: GameBoardAreaProps) {
-  const showSouthHandDeck = phase !== "setup_draw";
+  const showSouthHandDeck = showHandDeck && phase !== "setup_draw";
   const isWideBoard = boardProps.cols >= 9;
   const areaStyle = {
     display: "flex",

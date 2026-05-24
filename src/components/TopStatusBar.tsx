@@ -3,6 +3,8 @@ import { getSkinLabel } from "../assets/skinLabels";
 import { BOARD_SIZE_OPTIONS, type BoardSizeMode } from "../game/boardConfig";
 import type { Side } from "../game/types";
 
+type GameMode = "versus" | "scenario";
+
 type TopStatusBarProps = {
   southSkin: Skin;
   northSkin: Skin;
@@ -12,9 +14,11 @@ type TopStatusBarProps = {
   boardSizeMode: BoardSizeMode;
   onBoardSizeModeChange: (mode: BoardSizeMode) => void;
   turn: Side;
+  gameMode: GameMode;
   cpuEnabled: boolean;
   onToggleCpu: () => void;
   onResetGame: () => void;
+  onStartScenario1: () => void;
   deckSouthCount: number;
   handSouthCount: number;
   deckNorthCount: number;
@@ -68,9 +72,11 @@ export function TopStatusBar({
   boardSizeMode,
   onBoardSizeModeChange,
   turn,
+  gameMode,
   cpuEnabled,
   onToggleCpu,
   onResetGame,
+  onStartScenario1,
   deckSouthCount,
   handSouthCount,
   deckNorthCount,
@@ -133,6 +139,12 @@ export function TopStatusBar({
         <button onClick={onResetGame} style={{ padding: "6px 10px", cursor: "pointer" }}>
           ゲームリセット
         </button>
+
+        <button onClick={onStartScenario1} style={{ padding: "6px 10px", cursor: "pointer" }}>
+          シナリオ1開始
+        </button>
+
+        <div style={{ fontSize: 12, opacity: 0.85 }}>Mode: {gameMode}</div>
 
         <div style={{ fontSize: 12, opacity: 0.85 }}>
           South: deck {deckSouthCount} / hand {handSouthCount} North: deck {deckNorthCount} / hand {handNorthCount}

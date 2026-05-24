@@ -3,6 +3,7 @@ import type { Side } from "./types";
 import { getGateCols, getNorthGateRow, getSouthGateRow } from "./boardConfig";
 
 export type Victory = { winner: Side; detail: string };
+export type ScenarioId = "scenario1";
 
 export function checkVictory(
   rows: number,
@@ -38,6 +39,29 @@ export function checkVictory(
       winner: "north",
       detail: "勝利条件：ゲート制圧（NORTHがSOUTH側ゲートに到達）→ NORTHの勝利",
     };
+  }
+
+  return null;
+}
+
+export function checkScenarioVictory(
+  scenarioId: ScenarioId,
+  instances: Array<{ unitId: string; side: Side }>
+): Victory | null {
+  if (scenarioId !== "scenario1") return null;
+
+  const boarAlive = instances.some((u) => u.unitId === "BOAR" && u.side === "north");
+  const sochoAlive = instances.some((u) => u.unitId === "SOCHO" && u.side === "south");
+  const southAlive = instances.some((u) => u.side === "south");
+
+  if (!boarAlive) {
+    return { winner: "south", detail: "Scenario 1 clear: BOAR defeated." };
+  }
+  if (!sochoAlive) {
+    return { winner: "north", detail: "Scenario 1 failed: SOCHO was defeated." };
+  }
+  if (!southAlive) {
+    return { winner: "north", detail: "Scenario 1 failed: all allies were defeated." };
   }
 
   return null;

@@ -3,13 +3,13 @@ import unitsData from "./data/units.v1.2.json";
 import { createDemoState } from "./game/state";
 import { buildMoveInstances, getLegalMoves } from "./game/move";
 import { otherSide } from "./game/turn";
-import type { Side } from "./game/types";
+import type { Side, UnitDef } from "./game/types";
 import { getAttackableTargets, getAttackMarks } from "./game/attack";
 
 import { type SkillId } from "./game/skills/registry";
 import { getSkillImpactVariant, type SkillImpactVariant } from "./game/skills/impactVariant";
 
-import checkVictory from "./game/victory";
+import checkVictory, { checkScenarioVictory, type ScenarioId } from "./game/victory";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSkillTargeting } from "./game/hooks/useSkillTargeting";
@@ -81,6 +81,7 @@ function getHandCardSrc(unitId: string, side: Side, skin: Skin) {
 
 type PerUnitTurn = Record<string, { moved: boolean; attacked: boolean; done: boolean }>;
 type Phase = "setup_draw" | "setup_deploy" | "battle";
+type GameMode = "versus" | "scenario";
 type SkillMotionEvent = { id: string; instanceId: string };
 type AttackMotionEvent = { id: string; instanceId: string; dr: number; dc: number };
 type MoveMotionEvent = { id: string; instanceId: string };
@@ -97,6 +98,19 @@ type SkillImpactFxEvent = {
   c: number;
 };
 
+const BOAR_UNIT_DEF: UnitDef = {
+  id: "BOAR",
+  name: "ボア",
+  enemyOnly: true,
+  base: {
+    atk: 2,
+    hp: 8,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
+const SCENARIO1_ID: ScenarioId = "scenario1";
+
 export default function App() {
   // ===== stable base =====
   const [boardSizeMode, setBoardSizeMode] = useState<BoardSizeMode>("starter7");
@@ -107,7 +121,10 @@ export default function App() {
   );
   const rows = initial.rows;
   const cols = initial.cols;
-  const unitsById = initial.unitsById;
+  const unitsById = useMemo(
+    () => ({ ...initial.unitsById, [BOAR_UNIT_DEF.id]: BOAR_UNIT_DEF }),
+    [initial.unitsById]
+  );
   const initialDeployCount = boardSizeConfig.initialDeployCount;
   const initialHandSize = boardSizeConfig.initialHandSize;
   const initialDeployCandidateCols = useMemo(() => getInitialDeployCandidateCols(cols), [cols]);
@@ -122,6 +139,8 @@ export default function App() {
 
   // ===== state =====
   const [phase, setPhase] = useState<Phase>("setup_draw");
+  const [gameMode, setGameMode] = useState<GameMode>("versus");
+  const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId | null>(null);
   const [cpuEnabled, setCpuEnabled] = useState(true);
 
   const [deployPlaced, setDeployPlaced] = useState(0);
@@ -314,6 +333,8 @@ export default function App() {
   }
 
   function resetSetupState() {
+    setGameMode("versus");
+    setActiveScenarioId(null);
     setVictory(null);
     setSkillMode(null);
     setUsedSkills({});
@@ -329,6 +350,30 @@ export default function App() {
 
     setPhase("setup_deploy");
     setTurnState({ side: "south", seq: 0 });
+
+    setSelectedId(null);
+    setSelectedHandKey(null);
+    setBoardPreviewMode("move");
+  }
+
+  function resetBattleStateForScenario(scenarioId: ScenarioId) {
+    setGameMode("scenario");
+    setActiveScenarioId(scenarioId);
+    setVictory(null);
+    setSkillMode(null);
+    setUsedSkills({});
+    setPerUnitTurn({});
+    setSkillMotionEvents([]);
+    setAttackMotionEvents([]);
+    setMoveMotionEvents([]);
+    setImpactFxEvents([]);
+    setSkillImpactFxEvents([]);
+    setShowEndTurnConfirm(false);
+    setBattleDeployUsed(true);
+    setDeployPlaced(0);
+
+    setPhase("battle");
+    setTurnState({ side: "south", seq: 1 });
 
     setSelectedId(null);
     setSelectedHandKey(null);
@@ -378,7 +423,7 @@ export default function App() {
         applyInstancesTransform: (list) => applyYabukoTransform(list as any, unitsById) as any,
       });
 
-      const v = checkVictory(rows, cols, afterStart as any);
+      const v = checkActiveVictory(afterStart as any);
       if (v) setVictory(v);
 
       return afterStart as any;
@@ -460,7 +505,7 @@ export default function App() {
     instancesRef.current = nextInstances;
     setInstances(nextInstances);
 
-    const v = checkVictory(rows, cols, nextInstances as any);
+    const v = checkActiveVictory(nextInstances as any);
     if (v) setVictory(v);
   }
 
@@ -469,6 +514,13 @@ export default function App() {
     if (skin === "travel") return "/cards/back_travel.png";
     if (skin === "comic") return "/cards/back_comic.png";
     return "/cards/back_default.png";
+  }
+
+  function checkActiveVictory(nextInstances: typeof instances) {
+    if (gameMode === "scenario" && activeScenarioId) {
+      return checkScenarioVictory(activeScenarioId, nextInstances as any);
+    }
+    return checkVictory(rows, cols, nextInstances as any);
   }
 
   // ===== setup =====
@@ -524,6 +576,31 @@ export default function App() {
     finishInitialNorthDeploy(northUnits as any, initialHandNorth.slice(initialDeployCount));
   };
 
+  const startScenario = (scenarioId: ScenarioId) => {
+    if (scenarioId !== SCENARIO1_ID) return;
+
+    prepareSetupRun();
+    if (boardSizeMode !== "starter7") setBoardSizeMode("starter7");
+
+    resetBattleStateForScenario(scenarioId);
+    applyInitialHandsAndDecks({
+      deckSouth: [],
+      handSouth: [],
+      deckNorth: [],
+      handNorth: [],
+    });
+
+    const scenarioInstances = [
+      spawnUnit({ unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC1-SOCHO" }),
+      spawnUnit({ unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC1-USHIMARU" }),
+      spawnUnit({ unitId: "HIBIKI", side: "south", r: 5, c: 4, instanceId: "SC1-HIBIKI" }),
+      spawnUnit({ unitId: "BOAR", side: "north", r: 2, c: 3, instanceId: "SC1-BOAR", hp: 8 }),
+    ].filter((unit): unit is NonNullable<typeof unit> => unit !== null);
+
+    setInstancesAndRef(scenarioInstances as any);
+    console.log("Scenario 1: first BOAR battle");
+  };
+
   useEffect(() => {
     if (didInitRef.current) return;
     didInitRef.current = true;
@@ -542,9 +619,10 @@ export default function App() {
     if (prevBoardSizeModeRef.current === boardSizeMode) return;
     prevBoardSizeModeRef.current = boardSizeMode;
     if (!didInitRef.current) return;
+    if (gameMode === "scenario") return;
     startSetup();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boardSizeMode]);
+  }, [boardSizeMode, gameMode]);
 
   // ===== reinforcement (north: one unit at turn start) =====
   useEffect(() => {
@@ -1169,9 +1247,11 @@ const reinforceSet = useMemo(() => {
         boardSizeMode={boardSizeMode}
         onBoardSizeModeChange={setBoardSizeMode}
         turn={turn}
+        gameMode={gameMode}
         cpuEnabled={cpuEnabled}
         onToggleCpu={toggleCpuEnabled}
         onResetGame={resetGame}
+        onStartScenario1={() => startScenario(SCENARIO1_ID)}
         deckSouthCount={deckSouth.length}
         handSouthCount={handSouth.length}
         deckNorthCount={deckNorth.length}
@@ -1216,6 +1296,7 @@ const reinforceSet = useMemo(() => {
         getHandCardSrc={getHandCardSrc}
         getHandFallbackSrc={getHandFallbackSrc}
         compactWideBoard={isCompactWideBoard}
+        showHandDeck={gameMode === "versus"}
         rows={rows}
         cols={cols}
         cellSize={cell}
