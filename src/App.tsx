@@ -3,7 +3,7 @@ import unitsData from "./data/units.v1.2.json";
 import { createDemoState } from "./game/state";
 import { buildMoveInstances, getLegalMoves } from "./game/move";
 import { otherSide } from "./game/turn";
-import type { Side, UnitDef } from "./game/types";
+import type { Side } from "./game/types";
 import { getAttackableTargets, getAttackMarks } from "./game/attack";
 
 import { type SkillId } from "./game/skills/registry";
@@ -16,6 +16,7 @@ import {
   type ScenarioDialogKind,
   type ScenarioId,
 } from "./game/scenario/scenarios";
+import { scenarioEnemyUnits } from "./game/scenario/enemyUnits";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSkillTargeting } from "./game/hooks/useSkillTargeting";
@@ -105,17 +106,6 @@ type SkillImpactFxEvent = {
   c: number;
 };
 
-const BOAR_UNIT_DEF: UnitDef = {
-  id: "BOAR",
-  name: "ボア",
-  enemyOnly: true,
-  base: {
-    atk: 2,
-    hp: 8,
-    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
-  },
-};
-
 function getScenarioDialogTitle(scenarioId: ScenarioId, kind: ScenarioDialogKind) {
   const scenario = getScenarioConfig(scenarioId);
   if (!scenario) return "";
@@ -135,7 +125,11 @@ export default function App() {
   const rows = initial.rows;
   const cols = initial.cols;
   const unitsById = useMemo(
-    () => ({ ...initial.unitsById, [BOAR_UNIT_DEF.id]: BOAR_UNIT_DEF }),
+    () =>
+      Object.fromEntries([
+        ...Object.entries(initial.unitsById),
+        ...scenarioEnemyUnits.map((unit) => [unit.id, unit]),
+      ]),
     [initial.unitsById]
   );
   const initialDeployCount = boardSizeConfig.initialDeployCount;
