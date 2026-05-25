@@ -1255,6 +1255,18 @@ const reinforceSet = useMemo(() => {
   const canSelect = (inst: any) =>
     !scenarioDialogOpen && canSelectUnit({ inst, gameOver, turn, perUnitTurn });
 
+  const readySouthUnitIds = useMemo(() => {
+    if (phase !== "battle") return new Set<string>();
+    if (turn !== "south") return new Set<string>();
+    if (gameOver || scenarioDialogOpen) return new Set<string>();
+
+    return new Set(
+      instances
+        .filter((inst: any) => inst.side === "south" && !(perUnitTurn[inst.instanceId]?.done ?? false))
+        .map((inst: any) => inst.instanceId)
+    );
+  }, [gameOver, instances, perUnitTurn, phase, scenarioDialogOpen, turn]);
+
   if (scene === "astoria") {
     return <AstoriaMapScene onEnterLobby={() => setScene("town")} />;
   }
@@ -1387,6 +1399,7 @@ const reinforceSet = useMemo(() => {
         letters={letters}
         occ={occ}
         selectedId={selectedId}
+        readySouthUnitIds={readySouthUnitIds}
         turn={turn}
         gameOver={gameOver}
         legalMoveSet={legalMoveSet}

@@ -39,6 +39,7 @@ getPortraitCandidates?: (
   isAttackBlocker: boolean;
   isAttackableEnemy: boolean;
   isSelected: boolean;
+  isReadySouthUnit: boolean;
 
   isDebugTarget: boolean;
 
@@ -70,6 +71,7 @@ const {
   isAttackBlocker,
   isAttackableEnemy,
   isSelected,
+  isReadySouthUnit,
   isDebugTarget,
   getPortrait,
   getPortraitCandidates,
@@ -247,6 +249,8 @@ return (
       title={label}
     >
       {showInitialDeploy && <div className="initialDeployPreview" />}
+
+      {isReadySouthUnit && !isSelected && <div className="readyUnitRing" />}
 
       {showRng && (
         <div

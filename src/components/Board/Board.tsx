@@ -14,6 +14,7 @@ type BoardProps = {
   occ: Map<string, any>;
 
   selectedId: string | null;
+  readySouthUnitIds: Set<string>;
   turn: "south" | "north";
   gameOver: boolean;
 
@@ -67,6 +68,7 @@ export function Board(props: BoardProps) {
     letters,
     occ,
     selectedId,
+    readySouthUnitIds,
     turn,
     gameOver,
     legalMoveSet,
@@ -142,6 +144,7 @@ export function Board(props: BoardProps) {
                   : undefined;
 
               const isSelected = !!inst && inst.instanceId === selectedId;
+              const isReadySouthUnit = !!inst && readySouthUnitIds.has(inst.instanceId);
 
               const gateCols = getGateCols(cols);
               const isGateCol = gateCols.includes(c);
@@ -231,6 +234,7 @@ export function Board(props: BoardProps) {
                   isAttackBlocker={isAttackBlocker}
                   isAttackableEnemy={isAttackableEnemy}
                   isSelected={isSelected}
+                  isReadySouthUnit={isReadySouthUnit}
                   dmgFx={inst ? dmgByInstanceId.get(inst.instanceId) ?? null : null}
                   skillEventId={inst ? skillEventIdByInstanceId.get(inst.instanceId) ?? null : null}
                   attackMotion={inst ? attackMotionByInstanceId.get(inst.instanceId) ?? null : null}

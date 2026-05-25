@@ -196,6 +196,24 @@ html { overflow-y: scroll; }
   z-index: 3;
 }
 
+.readyUnitRing {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 9%;
+  height: 22%;
+  border-radius: 999px;
+  border: 2px solid rgba(118, 218, 255, 0.72);
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(255, 236, 154, 0.22), rgba(118, 218, 255, 0.12) 48%, transparent 72%);
+  box-shadow:
+    0 0 10px rgba(118, 218, 255, 0.34),
+    inset 0 0 8px rgba(255, 236, 154, 0.18);
+  pointer-events: none;
+  z-index: 2;
+  animation: readyUnitRingPulse 1500ms ease-in-out infinite;
+}
+
 .normalAttackPreviewRange,
 .normalAttackPreviewTarget {
   position: absolute;
@@ -511,6 +529,17 @@ html { overflow-y: scroll; }
   box-shadow:
     0 0 18px rgba(255, 242, 160, 0.56),
     0 0 28px rgba(255, 255, 255, 0.24);
+}
+
+@keyframes readyUnitRingPulse {
+  0%, 100% {
+    opacity: 0.54;
+    transform: scaleX(0.96);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scaleX(1.04);
+  }
 }
 
 @keyframes evolvePulse {
