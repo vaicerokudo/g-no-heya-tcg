@@ -1063,7 +1063,7 @@ const reinforceSet = useMemo(() => {
       const cur = m[selected.instanceId] ?? { moved: false, attacked: false, done: false };
       return {
         ...m,
-        [selected.instanceId]: { ...cur, moved: false, attacked: false, done: false },
+        [selected.instanceId]: { ...cur, done: true },
       };
     });
 
