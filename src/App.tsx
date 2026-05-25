@@ -728,7 +728,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     startSetup();
   }
 
-  function openScenarioSelectFromTown() {
+  function openScenarioSelect() {
     setClearedScenarioIds(readClearedScenarios());
     setScenarioSelectOpen(true);
   }
@@ -1268,7 +1268,17 @@ const reinforceSet = useMemo(() => {
   }, [gameOver, instances, perUnitTurn, phase, scenarioDialogOpen, turn]);
 
   if (scene === "astoria") {
-    return <AstoriaMapScene onEnterLobby={() => setScene("town")} />;
+    return (
+      <>
+        <AstoriaMapScene onEnterLobby={() => setScene("town")} onOpenScenarioSelect={openScenarioSelect} />
+        <ScenarioSelectDialog
+          open={scenarioSelectOpen}
+          clearedScenarioIds={clearedScenarioIds}
+          onClose={() => setScenarioSelectOpen(false)}
+          onStartScenario={handleScenarioSelectStart}
+        />
+      </>
+    );
   }
 
   if (scene === "town") {
@@ -1277,7 +1287,6 @@ const reinforceSet = useMemo(() => {
         <TownScene
           onExitToMap={() => setScene("astoria")}
           onEnterTcg={() => setScene("tcg")}
-          onOpenScenarioSelect={openScenarioSelectFromTown}
           onSkinUnlocked={refreshUnlockedSkins}
           unitsById={unitsById}
         />

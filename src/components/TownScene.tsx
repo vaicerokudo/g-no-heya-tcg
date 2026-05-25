@@ -7,7 +7,7 @@ import { CollectionDialog } from "./Town/CollectionDialog";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
-  onOpenScenarioSelect: () => void;
+  onOpenScenarioSelect?: () => void;
   onExitToMap?: () => void;
   onSkinUnlocked?: () => void;
   unitsById: Record<string, UnitDef>;
@@ -195,16 +195,13 @@ export function TownScene({ onEnterTcg, onOpenScenarioSelect, onExitToMap, onSki
   const nearTable = useMemo(() => isNearArea(pos, TABLE), [pos]);
   const nearReception = useMemo(() => isNearArea(pos, RECEPTION, RECEPTION_INTERACTION_THRESHOLD), [pos]);
   const nearCollection = useMemo(() => isNearArea(pos, COLLECTION), [pos]);
-  const nearStory = useMemo(() => isNearArea(pos, STORY), [pos]);
   const nearMyououRoom = useMemo(() => isNearArea(pos, MYOUOU_ROOM), [pos]);
   const nearExit = useMemo(() => isNearArea(pos, EXIT), [pos]);
   const interactionTarget: InteractionTarget = nearReception
     ? "reception"
     : nearCollection
       ? "collection"
-      : nearStory
-        ? "story"
-        : nearMyououRoom
+      : nearMyououRoom
           ? "myououRoom"
           : nearTable
             ? "table"
@@ -223,7 +220,7 @@ export function TownScene({ onEnterTcg, onOpenScenarioSelect, onExitToMap, onSki
     } else if (target === "myououRoom") {
       setActiveDialog("myououRoom");
     } else if (target === "story") {
-      onOpenScenarioSelect();
+      onOpenScenarioSelect?.();
     } else if (target === "table") {
       onEnterTcg();
     } else if (target === "exit") {
@@ -363,9 +360,7 @@ export function TownScene({ onEnterTcg, onOpenScenarioSelect, onExitToMap, onSki
         ? "見る"
         : interactionTarget === "table"
           ? "対戦"
-          : interactionTarget === "story"
-            ? "読む"
-            : interactionTarget === "exit"
+          : interactionTarget === "exit"
               ? "戻る"
               : "移動";
   const receptionDialog = receptionTopic === "password" ? PASSWORD_DIALOG : RECEPTION_DIALOG[receptionTopic];
@@ -382,7 +377,9 @@ export function TownScene({ onEnterTcg, onOpenScenarioSelect, onExitToMap, onSki
         </div>
 
         <div style={mapStyle}>
-          {TOWN_HOTSPOTS.filter((spot) => spot.id !== "exit" || onExitToMap).map((spot) => (
+          {TOWN_HOTSPOTS.filter((spot) => spot.id !== "story")
+            .filter((spot) => spot.id !== "exit" || onExitToMap)
+            .map((spot) => (
             <button
               key={spot.id}
               type="button"
