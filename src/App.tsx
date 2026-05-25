@@ -728,6 +728,18 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     startSetup();
   }
 
+  function returnToAstoriaFromScenario() {
+    setScenarioSelectOpen(false);
+    setScenarioDialog(null);
+    setScenarioResultDialogShown(false);
+    setActiveScenarioId(null);
+    setGameMode("versus");
+    setVictory(null);
+    setSelectedId(null);
+    setSkillMode(null);
+    setScene("astoria");
+  }
+
   function openScenarioSelect() {
     setClearedScenarioIds(readClearedScenarios());
     setScenarioSelectOpen(true);
@@ -1333,7 +1345,8 @@ const reinforceSet = useMemo(() => {
 
       <VictoryModal
         victory={scenarioDialogOpen ? null : victory}
-        onRestart={resetGame}
+        onRestart={gameMode === "scenario" && activeScenarioId ? returnToAstoriaFromScenario : resetGame}
+        restartLabel={gameMode === "scenario" && activeScenarioId ? "街へ戻る" : undefined}
         onScenarioSelect={gameMode === "scenario" && activeScenarioId ? openScenarioSelect : undefined}
         onRetryScenario={gameMode === "scenario" && activeScenarioId ? retryActiveScenario : undefined}
       />

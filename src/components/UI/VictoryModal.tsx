@@ -3,11 +3,18 @@ import { createPortal } from "react-dom";
 type Props = {
   victory: { winner: "south" | "north"; detail: string } | null;
   onRestart: () => void;
+  restartLabel?: string;
   onScenarioSelect?: () => void;
   onRetryScenario?: () => void;
 };
 
-export function VictoryModal({ victory, onRestart, onScenarioSelect, onRetryScenario }: Props) {
+export function VictoryModal({
+  victory,
+  onRestart,
+  restartLabel = "RESTART",
+  onScenarioSelect,
+  onRetryScenario,
+}: Props) {
   if (!victory || typeof document === "undefined") return null;
 
   return createPortal(
@@ -51,7 +58,7 @@ export function VictoryModal({ victory, onRestart, onScenarioSelect, onRetryScen
             </button>
           ) : null}
           <button onClick={onRestart} style={{ padding: "8px 12px", fontWeight: 900 }}>
-            RESTART
+            {restartLabel}
           </button>
         </div>
       </div>
