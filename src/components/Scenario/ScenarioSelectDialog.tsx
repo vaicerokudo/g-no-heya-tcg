@@ -31,7 +31,7 @@ const SCENARIO_SELECT_ITEMS: ScenarioSelectItem[] = [
     description: "明王の依頼で、森へ向かう。レッサーワイバーンの卵を手に入れよう。",
     unlockText: "第1話クリアで解放",
     unlockRequires: "scenario1",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "scenario3",

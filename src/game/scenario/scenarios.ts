@@ -64,6 +64,38 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       ],
     },
   },
+  scenario2: {
+    id: "scenario2",
+    title: "第2話 森の卵",
+    stageName: "森",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-forest.png",
+    placements: [
+      { unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC2-SOCHO" },
+      { unitId: "YABUKO_NORMAL", side: "south", r: 5, c: 2, instanceId: "SC2-YABUKO" },
+      { unitId: "DELI", side: "south", r: 5, c: 4, instanceId: "SC2-DELI" },
+      { unitId: "LESSER_WYVERN", side: "north", r: 2, c: 3, instanceId: "SC2-LESSER-WYVERN", hp: 10 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "明王", text: "森に、少々厄介な気配があるのじゃ。" },
+        { speaker: "総長", text: "卵の回収ですね。承知しました。" },
+        { speaker: "やぶこ", text: "卵って、食べるやつなの？" },
+        { speaker: "Deli", text: "いや、たぶんそういう依頼じゃないと思う……。" },
+        { speaker: "レッサーワイバーン", text: "ギャアアッ！" },
+      ],
+      victory: [
+        { speaker: "やぶこ", text: "卵、割れなくてよかったの。" },
+        { speaker: "Deli", text: "ふぅ……持って帰るまでが依頼だよ。" },
+        { speaker: "総長", text: "戻りましょう。明王様に報告します。" },
+      ],
+      defeat: [
+        { speaker: "Deli", text: "まずい……一度下がろう。" },
+        { speaker: "やぶこ", text: "卵どころじゃないの……！" },
+        { speaker: "総長", text: "立て直します。撤退です。" },
+      ],
+    },
+  },
 };
 
 export function getScenarioConfig(scenarioId: ScenarioId) {

@@ -11,7 +11,18 @@ export const BOAR_UNIT_DEF: UnitDef = {
   },
 };
 
-export const scenarioEnemyUnits: UnitDef[] = [BOAR_UNIT_DEF];
+export const LESSER_WYVERN_UNIT_DEF: UnitDef = {
+  id: "LESSER_WYVERN",
+  name: "レッサーワイバーン",
+  enemyOnly: true,
+  base: {
+    atk: 3,
+    hp: 10,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
+export const scenarioEnemyUnits: UnitDef[] = [BOAR_UNIT_DEF, LESSER_WYVERN_UNIT_DEF];
 
 export function getScenarioEnemyUnit(unitId: string) {
   return scenarioEnemyUnits.find((unit) => unit.id === unitId) ?? null;

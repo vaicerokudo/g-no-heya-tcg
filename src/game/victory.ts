@@ -48,6 +48,24 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side }>
 ): Victory | null {
+  if (scenarioId === "scenario2") {
+    const wyvernAlive = instances.some((u) => u.unitId === "LESSER_WYVERN" && u.side === "north");
+    const sochoAlive = instances.some((u) => u.unitId === "SOCHO" && u.side === "south");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!wyvernAlive) {
+      return { winner: "south", detail: "Scenario 2 clear: LESSER_WYVERN defeated." };
+    }
+    if (!sochoAlive) {
+      return { winner: "north", detail: "Scenario 2 failed: SOCHO was defeated." };
+    }
+    if (!southAlive) {
+      return { winner: "north", detail: "Scenario 2 failed: all allies were defeated." };
+    }
+
+    return null;
+  }
+
   if (scenarioId !== "scenario1") return null;
 
   const boarAlive = instances.some((u) => u.unitId === "BOAR" && u.side === "north");
