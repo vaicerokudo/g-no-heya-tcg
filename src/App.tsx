@@ -733,6 +733,11 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     setScenarioSelectOpen(true);
   }
 
+  function retryActiveScenario() {
+    if (!activeScenarioId) return;
+    startScenario(activeScenarioId);
+  }
+
   function handleScenarioSelectStart(scenarioId: ScenarioId) {
     setScene("tcg");
     startScenario(scenarioId);
@@ -1326,7 +1331,19 @@ const reinforceSet = useMemo(() => {
         disabledTitle={skillMode ? "スキル選択中はターン終了できません。ESCで解除" : ""}
       />
 
-      <VictoryModal victory={scenarioDialogOpen ? null : victory} onRestart={resetGame} />
+      <VictoryModal
+        victory={scenarioDialogOpen ? null : victory}
+        onRestart={resetGame}
+        onScenarioSelect={gameMode === "scenario" && activeScenarioId ? openScenarioSelect : undefined}
+        onRetryScenario={gameMode === "scenario" && activeScenarioId ? retryActiveScenario : undefined}
+      />
+
+      <ScenarioSelectDialog
+        open={scenarioSelectOpen}
+        clearedScenarioIds={clearedScenarioIds}
+        onClose={() => setScenarioSelectOpen(false)}
+        onStartScenario={handleScenarioSelectStart}
+      />
 
       {scenarioDialog && (
         <ScenarioDialog
