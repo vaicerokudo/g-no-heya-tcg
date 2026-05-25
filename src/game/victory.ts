@@ -48,6 +48,24 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side }>
 ): Victory | null {
+  if (scenarioId === "scenario3") {
+    const goblinAlive = instances.some((u) => u.unitId === "GOBLIN" && u.side === "north");
+    const sochoAlive = instances.some((u) => u.unitId === "SOCHO" && u.side === "south");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!goblinAlive) {
+      return { winner: "south", detail: "Scenario 3 clear: all GOBLIN units defeated." };
+    }
+    if (!sochoAlive) {
+      return { winner: "north", detail: "Scenario 3 failed: SOCHO was defeated." };
+    }
+    if (!southAlive) {
+      return { winner: "north", detail: "Scenario 3 failed: all allies were defeated." };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario2") {
     const wyvernAlive = instances.some((u) => u.unitId === "LESSER_WYVERN" && u.side === "north");
     const sochoAlive = instances.some((u) => u.unitId === "SOCHO" && u.side === "south");

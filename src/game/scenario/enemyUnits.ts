@@ -22,7 +22,18 @@ export const LESSER_WYVERN_UNIT_DEF: UnitDef = {
   },
 };
 
-export const scenarioEnemyUnits: UnitDef[] = [BOAR_UNIT_DEF, LESSER_WYVERN_UNIT_DEF];
+export const GOBLIN_UNIT_DEF: UnitDef = {
+  id: "GOBLIN",
+  name: "ゴブリン",
+  enemyOnly: true,
+  base: {
+    atk: 2,
+    hp: 4,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
+export const scenarioEnemyUnits: UnitDef[] = [BOAR_UNIT_DEF, LESSER_WYVERN_UNIT_DEF, GOBLIN_UNIT_DEF];
 
 export function getScenarioEnemyUnit(unitId: string) {
   return scenarioEnemyUnits.find((unit) => unit.id === unitId) ?? null;

@@ -39,7 +39,7 @@ const SCENARIO_SELECT_ITEMS: ScenarioSelectItem[] = [
     description: "森に現れたゴブリンたちを討伐しよう。",
     unlockText: "第2話クリアで解放",
     unlockRequires: "scenario2",
-    implemented: false,
+    implemented: true,
   },
 ];
 

@@ -96,6 +96,39 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       ],
     },
   },
+  scenario3: {
+    id: "scenario3",
+    title: "第3話 ゴブリン討伐",
+    stageName: "森",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-forest.png",
+    placements: [
+      { unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC3-SOCHO" },
+      { unitId: "TSUTSU", side: "south", r: 5, c: 2, instanceId: "SC3-TSUTSU" },
+      { unitId: "DELI", side: "south", r: 5, c: 4, instanceId: "SC3-DELI" },
+      { unitId: "GOBLIN", side: "north", r: 2, c: 2, instanceId: "SC3-GOBLIN-1", hp: 4 },
+      { unitId: "GOBLIN", side: "north", r: 2, c: 3, instanceId: "SC3-GOBLIN-2", hp: 4 },
+      { unitId: "GOBLIN", side: "north", r: 2, c: 4, instanceId: "SC3-GOBLIN-3", hp: 4 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "総長", text: "森の奥に、ゴブリンの群れが出たようです。" },
+        { speaker: "つつ", text: "しょうがねぇなぁ。近づかせねぇよ。" },
+        { speaker: "Deli", text: "数は三体。油断しないでいこう。" },
+        { speaker: "ゴブリン", text: "ギギッ！" },
+      ],
+      victory: [
+        { speaker: "つつ", text: "見えてんだよ。あの程度の動きはな。" },
+        { speaker: "Deli", text: "周囲の反応も消えた。討伐完了だね。" },
+        { speaker: "総長", text: "よくやりました。これで森もしばらく落ち着くでしょう。" },
+      ],
+      defeat: [
+        { speaker: "Deli", text: "囲まれた……！一度下がろう！" },
+        { speaker: "つつ", text: "くそっ、数で押してきやがる。" },
+        { speaker: "総長", text: "立て直します。撤退です。" },
+      ],
+    },
+  },
 };
 
 export function getScenarioConfig(scenarioId: ScenarioId) {
