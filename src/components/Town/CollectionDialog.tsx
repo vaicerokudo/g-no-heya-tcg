@@ -197,6 +197,11 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
     [selectedUnit, selectedForm, skin]
   );
   const detailPortrait = useImgFallback(detailPortraitCandidates, { placeholder: "" });
+  const enemyDetailImageCandidates = useMemo(
+    () => (selectedUnit && catalogTab === "enemies" ? enemyUnitImageCandidates(selectedUnit.id) : []),
+    [catalogTab, selectedUnit]
+  );
+  const enemyDetailImage = useImgFallback(enemyDetailImageCandidates, { placeholder: "" });
   const skills = selectedUnit ? getAvailableSkillsForUnit(selectedUnit.id) : [];
 
   return (
@@ -268,47 +273,64 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
           <div style={detailStyle}>
             {selectedUnit ? (
               <>
-                <div style={detailVisualsStyle}>
-                  <div style={detailImageWrapStyle}>
-                    {detailImage.src ? (
+                {catalogTab === "enemies" ? (
+                  <div style={enemyDetailVisualStyle}>
+                    {enemyDetailImage.src ? (
                       <img
-                        src={detailImage.src}
-                        onError={detailImage.onError}
+                        src={enemyDetailImage.src}
+                        onError={enemyDetailImage.onError}
                         alt={selectedUnit.name}
                         loading="lazy"
                         decoding="async"
-                        style={detailImageStyle}
+                        style={enemyDetailImageStyle}
                       />
                     ) : null}
                   </div>
+                ) : (
+                  <div style={detailVisualsStyle}>
+                    <div style={detailImageWrapStyle}>
+                      {detailImage.src ? (
+                        <img
+                          src={detailImage.src}
+                          onError={detailImage.onError}
+                          alt={selectedUnit.name}
+                          loading="lazy"
+                          decoding="async"
+                          style={detailImageStyle}
+                        />
+                      ) : null}
+                    </div>
 
-                  <div style={detailPortraitPanelStyle} aria-label={`${selectedUnit.name} 盤面ユニット`}>
-                    {detailPortrait.src ? (
-                      <img
-                        src={detailPortrait.src}
-                        onError={detailPortrait.onError}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        style={detailPortraitStyle}
-                      />
-                    ) : null}
+                    <div style={detailPortraitPanelStyle} aria-label={`${selectedUnit.name} 盤面ユニット`}>
+                      {detailPortrait.src ? (
+                        <img
+                          src={detailPortrait.src}
+                          onError={detailPortrait.onError}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          style={detailPortraitStyle}
+                        />
+                      ) : null}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div style={detailTextStyle}>
                   <div style={detailNameStyle}>{selectedUnit.name}</div>
-                  <div style={formTabsStyle} aria-label="カードform選択">
-                    {availableForms.map((form) => (
-                      <button
-                        key={form}
-                        onClick={() => setSelectedForm(form)}
-                        style={formButtonStyle(form === selectedForm)}
-                      >
-                        {getFormLabel(form)}
-                      </button>
-                    ))}
-                  </div>
+                  {catalogTab === "members" ? (
+                    <div style={formTabsStyle} aria-label="カードform選択">
+                      {availableForms.map((form) => (
+                        <button
+                          key={form}
+                          onClick={() => setSelectedForm(form)}
+                          style={formButtonStyle(form === selectedForm)}
+                        >
+                          {getFormLabel(form)}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                   <div style={statsStyle}>
                     <span>ATK {selectedUnit.base.atk}</span>
                     <span>HP {selectedUnit.base.hp}</span>
@@ -561,6 +583,28 @@ const detailPortraitStyle: CSSProperties = {
   objectFit: "contain",
   display: "block",
   filter: "drop-shadow(0 10px 12px rgba(0,0,0,0.46))",
+};
+
+const enemyDetailVisualStyle: CSSProperties = {
+  width: "min(360px, 100%)",
+  justifySelf: "center",
+  aspectRatio: "1 / 1",
+  borderRadius: 18,
+  border: "1px solid rgba(255,138,92,0.34)",
+  background:
+    "radial-gradient(circle at 50% 55%, rgba(255,138,92,0.24), rgba(255,138,92,0.08) 46%, rgba(0,0,0,0.34) 74%), linear-gradient(180deg, rgba(255,232,180,0.08), rgba(0,0,0,0.24))",
+  boxShadow: "0 16px 34px rgba(0,0,0,0.36), inset 0 0 28px rgba(255,138,92,0.12)",
+  display: "grid",
+  placeItems: "center",
+  overflow: "hidden",
+};
+
+const enemyDetailImageStyle: CSSProperties = {
+  width: "88%",
+  height: "88%",
+  objectFit: "contain",
+  display: "block",
+  filter: "drop-shadow(0 14px 16px rgba(0,0,0,0.58))",
 };
 
 const detailTextStyle: CSSProperties = {
