@@ -11,6 +11,7 @@ type CollectionDialogProps = {
 };
 
 const SKINS: Skin[] = ["default", "dark", "travel", "comic"];
+type CatalogTab = "members" | "enemies";
 
 function getCollectionForms(unit: UnitDef | null): Form[] {
   if (!unit) return ["base"];
@@ -44,6 +45,11 @@ function collectionCardCandidates(unitId: string, skin: Skin, form: Form) {
       ...fullCardCandidates,
     ])
   );
+}
+
+function enemyUnitImageCandidates(unitId: string) {
+  const id = unitId.trim().toLowerCase();
+  return [`/portraits/thumb/north/default/base/${id}.webp`, `/portraits/north/default/base/${id}.png`];
 }
 
 function describeMove(unit: UnitDef) {
@@ -97,20 +103,71 @@ function CardThumb({
   );
 }
 
+function EnemyThumb({
+  unit,
+  selected,
+  onClick,
+}: {
+  unit: UnitDef;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  const imageCandidates = useMemo(() => enemyUnitImageCandidates(unit.id), [unit.id]);
+  const fb = useImgFallback(imageCandidates, { placeholder: "" });
+
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        ...enemyButtonStyle,
+        border: selected ? "2px solid rgba(255, 120, 72, 0.96)" : enemyButtonStyle.border,
+        boxShadow: selected ? "0 0 0 3px rgba(255, 120, 72, 0.16)" : enemyButtonStyle.boxShadow,
+      }}
+    >
+      <div style={enemyImageWrapStyle}>
+        {fb.src ? (
+          <img
+            src={fb.src}
+            onError={fb.onError}
+            alt={unit.name}
+            loading="lazy"
+            decoding="async"
+            style={enemyImageStyle}
+          />
+        ) : null}
+      </div>
+      <div style={cardNameStyle}>{unit.name}</div>
+      <div style={enemyStatsStyle}>
+        <span>ATK {unit.base.atk}</span>
+        <span>HP {unit.base.hp}</span>
+      </div>
+    </button>
+  );
+}
+
 export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) {
   const units = useMemo(
     () => Object.values(unitsById).filter((unit) => !unit.enemyOnly).sort((a, b) => a.name.localeCompare(b.name, "ja")),
     [unitsById]
   );
+  const enemyUnits = useMemo(
+    () => Object.values(unitsById).filter((unit) => unit.enemyOnly).sort((a, b) => a.name.localeCompare(b.name, "ja")),
+    [unitsById]
+  );
+  const [catalogTab, setCatalogTab] = useState<CatalogTab>("members");
   const [skin, setSkin] = useState<Skin>("default");
-  const [selectedUnitId, setSelectedUnitId] = useState<string>(() => units[0]?.id ?? "");
+  const displayUnits = catalogTab === "enemies" ? enemyUnits : units;
+  const [selectedUnitId, setSelectedUnitId] = useState<string>(() => displayUnits[0]?.id ?? "");
   const [selectedForm, setSelectedForm] = useState<Form>("base");
 
   useEffect(() => {
-    if (!selectedUnitId && units[0]) setSelectedUnitId(units[0].id);
-  }, [selectedUnitId, units]);
+    if (!displayUnits.some((unit) => unit.id === selectedUnitId)) {
+      setSelectedUnitId(displayUnits[0]?.id ?? "");
+      setSelectedForm("base");
+    }
+  }, [displayUnits, selectedUnitId]);
 
-  const selectedUnit = unitsById[selectedUnitId] ?? units[0] ?? null;
+  const selectedUnit = unitsById[selectedUnitId] ?? displayUnits[0] ?? null;
   const availableForms = useMemo(() => getCollectionForms(selectedUnit), [selectedUnit]);
 
   useEffect(() => {
@@ -156,7 +213,19 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
           </div>
 
           <div style={tabsStyle}>
-            {SKINS.map((nextSkin) => (
+            <button
+              onClick={() => setCatalogTab("members")}
+              style={tabButtonStyle(catalogTab === "members")}
+            >
+              MEMBERS
+            </button>
+            <button
+              onClick={() => setCatalogTab("enemies")}
+              style={tabButtonStyle(catalogTab === "enemies")}
+            >
+              エネミー
+            </button>
+            {catalogTab === "members" ? SKINS.map((nextSkin) => (
               <button
                 key={nextSkin}
                 onClick={() => setSkin(nextSkin)}
@@ -164,13 +233,24 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
               >
                 {getSkinLabel(nextSkin)}
               </button>
-            ))}
+            )) : null}
           </div>
         </div>
 
         <div style={contentStyle}>
           <div style={listStyle}>
-            {units.map((unit) => (
+            {displayUnits.map((unit) => (
+              catalogTab === "enemies" ? (
+                <EnemyThumb
+                  key={unit.id}
+                  unit={unit}
+                  selected={unit.id === selectedUnit?.id}
+                  onClick={() => {
+                    setSelectedUnitId(unit.id);
+                    setSelectedForm("base");
+                  }}
+                />
+              ) : (
               <CardThumb
                 key={unit.id}
                 unit={unit}
@@ -181,6 +261,7 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
                   setSelectedForm(getCollectionForms(unit)[0] ?? "base");
                 }}
               />
+              )
             ))}
           </div>
 
@@ -384,6 +465,43 @@ const cardImageStyle: CSSProperties = {
   height: "100%",
   objectFit: "contain",
   display: "block",
+};
+
+const enemyButtonStyle: CSSProperties = {
+  ...cardButtonStyle,
+  border: "1px solid rgba(255,138,92,0.28)",
+  background: "linear-gradient(180deg, rgba(74,28,20,0.55), rgba(0,0,0,0.24))",
+};
+
+const enemyImageWrapStyle: CSSProperties = {
+  width: "100%",
+  aspectRatio: "1 / 1",
+  borderRadius: 10,
+  overflow: "hidden",
+  border: "1px solid rgba(255,138,92,0.24)",
+  background:
+    "radial-gradient(circle at 50% 56%, rgba(255,138,92,0.18), rgba(0,0,0,0.2) 62%), rgba(0,0,0,0.28)",
+  display: "grid",
+  placeItems: "center",
+};
+
+const enemyImageStyle: CSSProperties = {
+  width: "86%",
+  height: "86%",
+  objectFit: "contain",
+  display: "block",
+  filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.52))",
+};
+
+const enemyStatsStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  gap: 6,
+  flexWrap: "wrap",
+  marginTop: 5,
+  color: "rgba(255,232,180,0.82)",
+  fontSize: 11,
+  fontWeight: 950,
 };
 
 const cardNameStyle: CSSProperties = {
