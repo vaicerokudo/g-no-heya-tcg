@@ -1,7 +1,7 @@
 import type { BoardSizeMode } from "../boardConfig";
 import type { Form, Side } from "../types";
 
-export type ScenarioId = "scenario1" | "scenario2" | "scenario3";
+export type ScenarioId = "scenario1" | "scenario2" | "scenario3" | "scenario_hidden_myouou";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
 
 export type ScenarioLine = {
@@ -126,6 +126,37 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "Deli", text: "囲まれた……！一度下がろう！" },
         { speaker: "つつ", text: "くそっ、数で押してきやがる。" },
         { speaker: "総長", text: "立て直します。撤退です。" },
+      ],
+    },
+  },
+  scenario_hidden_myouou: {
+    id: "scenario_hidden_myouou",
+    title: "隠し試練 明王",
+    stageName: "明王の隠し部屋",
+    boardSizeMode: "starter7",
+    placements: [
+      { unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SCH-SOCHO" },
+      { unitId: "ROKUDO", side: "south", r: 5, c: 2, instanceId: "SCH-ROKUDO" },
+      { unitId: "7171", side: "south", r: 5, c: 4, instanceId: "SCH-7171" },
+      { unitId: "HIDDEN_MYOUOU", side: "north", r: 2, c: 3, instanceId: "SCH-HIDDEN-MYOUOU", hp: 18 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "明王", text: "……よくぞ、この場所を見つけたのじゃ。" },
+        { speaker: "ROKUDO", text: "明王様……これは、試練ですか？" },
+        { speaker: "7171", text: "嫌な予感しかしないにゃ。" },
+        { speaker: "総長", text: "行きましょう。ここまで来たなら、退けません。" },
+      ],
+      victory: [
+        { speaker: "明王", text: "見事じゃ。少しは、未来を託せそうじゃな。" },
+        { speaker: "ROKUDO", text: "……ありがとうございます。" },
+        { speaker: "7171", text: "もう二度とやりたくないにゃ。" },
+        { speaker: "総長", text: "まだまだ、先へ進めそうです。" },
+      ],
+      defeat: [
+        { speaker: "明王", text: "まだ早い。出直すのじゃ。" },
+        { speaker: "総長", text: "……修行が足りませんでした。" },
+        { speaker: "ROKUDO", text: "次こそは……。" },
       ],
     },
   },

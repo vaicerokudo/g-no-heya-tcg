@@ -1304,6 +1304,7 @@ const reinforceSet = useMemo(() => {
         <TownScene
           onExitToMap={() => setScene("astoria")}
           onEnterTcg={() => setScene("tcg")}
+          onStartHiddenScenario={() => handleScenarioSelectStart("scenario_hidden_myouou")}
           onSkinUnlocked={refreshUnlockedSkins}
           unitsById={unitsById}
         />

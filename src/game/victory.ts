@@ -48,6 +48,20 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side }>
 ): Victory | null {
+  if (scenarioId === "scenario_hidden_myouou") {
+    const myououAlive = instances.some((u) => u.unitId === "HIDDEN_MYOUOU" && u.side === "north");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!myououAlive) {
+      return { winner: "south", detail: "Hidden trial clear: HIDDEN_MYOUOU defeated." };
+    }
+    if (!southAlive) {
+      return { winner: "north", detail: "Hidden trial failed: all allies were defeated." };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario3") {
     const goblinAlive = instances.some((u) => u.unitId === "GOBLIN" && u.side === "north");
     const sochoAlive = instances.some((u) => u.unitId === "SOCHO" && u.side === "south");
