@@ -182,7 +182,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       { unitId: "YABUKO_NORMAL", side: "south", r: 8, c: 3, instanceId: "SCA-YABUKO" },
       { unitId: "ROCKEL", side: "south", r: 8, c: 4, instanceId: "SCA-ROCKEL" },
       { unitId: "PLAYER", side: "south", r: 8, c: 5, instanceId: "SCA-PLAYER" },
-      { unitId: "ROKUDO_AUTHOR", side: "north", r: 2, c: 4, instanceId: "SCA-ROKUDO-AUTHOR", hp: 88 },
+      { unitId: "ROKUDO_AUTHOR", side: "north", r: 2, c: 4, instanceId: "SCA-ROKUDO-AUTHOR", hp: 69 },
     ],
     dialogs: {
       intro: [
