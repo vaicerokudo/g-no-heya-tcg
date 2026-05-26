@@ -2,6 +2,7 @@
 import { tryKnockback } from "../knockback";
 import { getEffectiveMaxHp } from "../stats";
 import type { UnitDef } from "../types";
+import { applyUnitDamage } from "../combat/unitDamage";
 
 type Inst = any;
 
@@ -10,18 +11,11 @@ export function clampHp(u: Inst) {
 }
 
 /** dmgReduction を考慮してダメージを与える */
-export function dealDamage(instances: Inst[], targetId: string, amount: number) {
+export function dealDamage(instances: Inst[], targetId: string, amount: number, sourceId?: string) {
   const dmg = Math.max(0, amount ?? 0);
   if (dmg <= 0) return instances;
 
-  return instances.map((u) => {
-    if (!u || u.instanceId !== targetId) return u;
-
-    const red = Math.max(0, u.dmgReduction ?? 0);
-    const actual = Math.max(0, dmg - red);
-
-    return clampHp({ ...u, hp: (u.hp ?? 0) - actual });
-  });
+  return applyUnitDamage(instances, targetId, dmg, sourceId, { applyDmgReduction: true });
 }
 
 export function healUnit(

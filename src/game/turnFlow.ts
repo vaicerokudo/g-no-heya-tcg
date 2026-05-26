@@ -99,5 +99,14 @@ export function buildEndTurnInstances({
     .filter((u) => u.hp > 0);
 
   const afterEndTransform = applyInstancesTransform(afterEnd);
-  return tickStartOfSide({ instances: afterEndTransform }, nextSide);
+  const afterAuthorCapReset =
+    nextSide === "south"
+      ? afterEndTransform.map((unit) =>
+          unit.unitId === "ROKUDO_AUTHOR"
+            ? { ...unit, authorDamageTakenThisTurn: 0 }
+            : unit
+        )
+      : afterEndTransform;
+
+  return tickStartOfSide({ instances: afterAuthorCapReset }, nextSide);
 }

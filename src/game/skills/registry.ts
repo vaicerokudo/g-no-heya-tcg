@@ -277,7 +277,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
       if (!caster || !first) return next;
       if (first.side === caster.side) return next;
 
-      next = dealDamage(next, first.instanceId, damage ?? 0);
+      next = dealDamage(next, first.instanceId, damage ?? 0, casterId);
       next = addStun(next, first.instanceId, stunTurns ?? 0);
       next = removeDead(next);
       return next;
@@ -317,7 +317,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
         const raw = damage ?? 0;
         const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
 
-        next = dealDamage(next, t.instanceId, finalDmg);
+        next = dealDamage(next, t.instanceId, finalDmg, casterId);
         next = addStun(next, t.instanceId, stunTurns ?? 0);
 
         if ((knockback ?? 0) > 0) {
@@ -350,7 +350,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
       const raw = 4;
       const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
 
-      next = dealDamage(next, targetId, finalDmg);
+      next = dealDamage(next, targetId, finalDmg, casterId);
       next = removeDead(next);
       return next;
     },
@@ -387,7 +387,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
 
         const raw = damage ?? 0;
         const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
-        next = dealDamage(next, t.instanceId, finalDmg);
+        next = dealDamage(next, t.instanceId, finalDmg, casterId);
       }
 
       next = removeDead(next);
@@ -431,7 +431,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
         const raw = damage ?? 0;
         const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
 
-        next = dealDamage(next, t.instanceId, finalDmg);
+        next = dealDamage(next, t.instanceId, finalDmg, casterId);
 
         if ((knockback ?? 0) > 0) {
           next = knockback1({ ...stateLike, instances: next }, t.instanceId, dirR, dirC);
@@ -479,7 +479,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
         const raw = damage ?? 0;
         const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
 
-        next = dealDamage(next, t.instanceId, finalDmg);
+        next = dealDamage(next, t.instanceId, finalDmg, casterId);
 
         if ((knockback ?? 0) > 0) {
           next = knockback1({ ...stateLike, instances: next }, t.instanceId, dirR, dirC);
@@ -520,7 +520,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
         const raw = damage ?? 0;
         const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
 
-        next = dealDamage(next, t.instanceId, finalDmg);
+        next = dealDamage(next, t.instanceId, finalDmg, casterId);
       }
 
       next = removeDead(next);
@@ -561,7 +561,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
           const raw = damage ?? 0;
           const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
 
-          next = dealDamage(next, t.instanceId, finalDmg);
+          next = dealDamage(next, t.instanceId, finalDmg, casterId);
           next = addBurn(next, t.instanceId, burnTicks ?? 3);
           next = addStun(next, t.instanceId, stunTurns ?? 1);
         }
@@ -719,7 +719,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
 
       const raw = damage ?? 0;
       const finalDmg = computeFinalDamage(stateLike, caster, target, raw);
-      next = dealDamage(next, targetId, finalDmg);
+      next = dealDamage(next, targetId, finalDmg, casterId);
 
       const aliveTarget = next.find((u) => u.instanceId === targetId);
       if (!aliveTarget || (aliveTarget.hp ?? 0) <= 0) {
@@ -772,7 +772,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
       const raw = damage ?? 0;
       const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
 
-      next = dealDamage(next, t.instanceId, finalDmg);
+      next = dealDamage(next, t.instanceId, finalDmg, casterId);
       next = removeDead(next);
       return next;
     },
@@ -809,7 +809,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
         const raw = damage ?? 0;
         const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
 
-        next = dealDamage(next, t.instanceId, finalDmg);
+        next = dealDamage(next, t.instanceId, finalDmg, casterId);
 
         if ((knockback ?? 0) > 0) {
           const dR = Math.sign(t.pos.r - caster.pos.r);
@@ -893,7 +893,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
       const raw = (damage ?? 0) + bonus;
       const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
 
-      next = dealDamage(next, targetId, finalDmg);
+      next = dealDamage(next, targetId, finalDmg, casterId);
       next = addStun(next, targetId, stunTurns ?? 2);
       next = removeDead(next);
       return next;
@@ -934,7 +934,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
       const raw = damage ?? 0;
       const finalDmg = computeFinalDamage(stateLike, caster, first, raw);
 
-      next = dealDamage(next, first.instanceId, finalDmg);
+      next = dealDamage(next, first.instanceId, finalDmg, casterId);
       next = addBurn(next, first.instanceId, burnTicks ?? 0);
       next = addStun(next, first.instanceId, stunTurns ?? 0);
       next = removeDead(next);
@@ -961,7 +961,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
       {
         const raw = damage ?? 0;
         const finalDmg = computeFinalDamage(stateLike, caster, t0, raw);
-        next = dealDamage(next, targetId, finalDmg);
+        next = dealDamage(next, targetId, finalDmg, casterId);
       }
 
       // 死亡なら終了
@@ -1013,7 +1013,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
         if (t) {
           const rawImpact = 2;
           const finalImpact = computeFinalDamage(stateLike, caster, t, rawImpact);
-          next = dealDamage(next, targetId, finalImpact);
+          next = dealDamage(next, targetId, finalImpact, casterId);
         }
       }
 
@@ -1055,7 +1055,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
 
         const raw = damage ?? 0;
         const finalDmg = computeFinalDamage(stateLike, caster, t, raw);
-        next = dealDamage(next, t.instanceId, finalDmg);
+        next = dealDamage(next, t.instanceId, finalDmg, casterId);
 
         if ((knockback ?? 0) > 0) {
           const dR = Math.sign(t.pos.r - caster.pos.r);
@@ -1070,7 +1070,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
         if (caster) {
           const rawSelf = selfDamage ?? 0;
           const finalSelf = computeFinalDamage(stateLike, caster, caster, rawSelf);
-          next = dealDamage(next, casterId, finalSelf);
+          next = dealDamage(next, casterId, finalSelf, casterId);
         }
       }
 

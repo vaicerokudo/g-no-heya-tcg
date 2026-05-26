@@ -17,6 +17,7 @@ export type UnitInstance = {
   dmgReduction?: number;
   stunImmune?: boolean;
   extraActionsPerTurn?: number;
+  authorDamageTakenThisTurn?: number;
   hibikiShieldAllActive?: boolean;
   aegisLineActive?: boolean;
   dmgBonus?: number;

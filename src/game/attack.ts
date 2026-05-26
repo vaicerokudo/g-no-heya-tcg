@@ -1,6 +1,7 @@
 // src/game/attack.ts
 import type { Side } from "./types";
 import { computeFinalDamage } from "./combat/damage";
+import { applyUnitDamage } from "./combat/unitDamage";
 
 type Pos = { r: number; c: number };
 export type AttackMark = { kind: "range" | "blocker"; r: number; c: number };
@@ -30,13 +31,8 @@ function occMap(instances: any[]) {
   return m;
 }
 
-function damageOne(instances: any[], targetId: string, amount: number) {
-  const dmg = Math.max(0, amount ?? 0);
-  return instances
-    .map((u) =>
-      u.instanceId === targetId ? { ...u, hp: (u.hp ?? 0) - dmg } : u
-    )
-    .filter((u) => (u.hp ?? 0) > 0);
+function damageOne(instances: any[], targetId: string, amount: number, sourceId?: string) {
+  return applyUnitDamage(instances, targetId, amount, sourceId, { applyDmgReduction: false });
 }
 
 function sign(n: number) {
@@ -218,7 +214,7 @@ export function applyNormalAttack(
   const finalDmg = computeFinalDamage(stateLike as any, attacker, target, raw);
 
   // ターゲットにダメージ（イミュータブル更新）
-  let next = damageOne(instances, targetId, finalDmg);
+  let next = damageOne(instances, targetId, finalDmg, attacker.instanceId);
 
   // Player 反射（被弾したら1ダメ返す）※finalDmg>0 のときだけ
   if (target.unitId === "PLAYER" && finalDmg > 0) {
