@@ -2,6 +2,7 @@ import type { UnitInstance } from "./types";
 
 export function applyStun(inst: UnitInstance, turns: number): UnitInstance {
   if (!turns || turns <= 0) return inst;
+  if (inst.stunImmune) return inst;
   const cur = inst.stun ?? 0;
   return { ...inst, stun: Math.max(cur, turns) };
 }

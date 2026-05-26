@@ -292,6 +292,11 @@ export default function App() {
 
     const passive: any = {};
     if (opts.unitId === "HIBIKI") passive.dmgReduction = 1;
+    if (opts.unitId === "ROKUDO_AUTHOR") {
+      passive.dmgReduction = 1;
+      passive.stunImmune = true;
+      passive.extraActionsPerTurn = 1;
+    }
 
     const form = opts.form ?? "base";
     const hp = opts.hp ?? def.base.hp;

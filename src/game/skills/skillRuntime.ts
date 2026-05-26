@@ -48,7 +48,7 @@ export function addStun(instances: Inst[], targetId: string, turns: number) {
   const t = Math.max(0, turns ?? 0);
   if (t <= 0) return instances;
   return instances.map((u) =>
-    u.instanceId === targetId ? { ...u, stun: Math.max(u.stun ?? 0, t) } : u
+    u.instanceId === targetId && !u.stunImmune ? { ...u, stun: Math.max(u.stun ?? 0, t) } : u
   );
 }
 

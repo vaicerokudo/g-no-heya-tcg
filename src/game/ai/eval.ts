@@ -5,6 +5,7 @@ import { buildDangerCells } from "./danger";
 
 export type CpuAction =
   | { kind: "attack"; actorId: string; targetId: string }
+  | { kind: "skill"; actorId: string; skillId: string; targetId?: string }
   | { kind: "move"; actorId: string; r: number; c: number; evolved?: boolean }
   | { kind: "skip"; actorId: string; reason: string };
 
@@ -52,6 +53,15 @@ export function scoreCandidate(ctx: EvalCtx, cand: { action: CpuAction; nextInst
     if (tgt) {
       // 低HP優先（雑でOK）
       s += 120 - (tgt.hp ?? 0) * 10;
+    }
+  }
+
+  if (action.kind === "skill") {
+    s += 260;
+
+    if (action.targetId) {
+      const tgt = ctx.instances.find((u) => u.instanceId === action.targetId);
+      if (tgt) s += 140 - (tgt.hp ?? 0) * 10;
     }
   }
 

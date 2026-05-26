@@ -1142,6 +1142,35 @@ export function skillKey(side: Side, instanceId: string, skillId: SkillId) {
   return `${side}:${instanceId}:${skillId}`;
 }
 
+const ROKUDO_AUTHOR_SKILL_IDS: SkillId[] = [
+  "socho_iaijutsu",
+  "myouou_karyura_g",
+  "rokudo_kage_nui",
+  "rokudo_poison_stun_g",
+  "7171_gaze",
+  "7171_shisen_no_ori_g",
+  "tsutsu_mietenda",
+  "tsutsu_chikayorasenee_g",
+  "hibiki_shield_all",
+  "hibiki_aegisline_g",
+  "ushimaru_pierce",
+  "ushimaru_kantetsu_g",
+  "deli_throw",
+  "yabuko_fm_smash",
+  "rockel_slash",
+  "rockel_whirlwind_g",
+  "player_support_shot",
+  "player_overclock_g",
+];
+
 export function getAvailableSkillsForUnit(unitId: string): SkillDef[] {
+  if (unitId === "ROKUDO_AUTHOR") {
+    return ROKUDO_AUTHOR_SKILL_IDS.map((id) => ({
+      ...SKILLS[id],
+      unitId: "ROKUDO_AUTHOR",
+      requiresForm: undefined,
+    })) as SkillDef[];
+  }
+
   return Object.values(SKILLS).filter((s) => s.unitId === unitId);
 }

@@ -39,6 +39,7 @@ export function executeSkillToInstances({
         targetId: target.inst.instanceId,
         damage: def.damage,
         knockback: def.knockback,
+        stunTurns: def.stunTurns,
       }) as UnitInstance[];
 
     case "chooseAllyInRange":

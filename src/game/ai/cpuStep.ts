@@ -4,6 +4,9 @@ import { getAttackableTargets, applyNormalAttack } from "../attack";
 import { getEffectiveMaxHp } from "../stats";
 import type { Side } from "../types";
 import { isAtOrBeyondEvolveRow } from "../boardConfig";
+import { getAvailableSkillsForUnit, type SkillDef } from "../skills/registry";
+import { executeSkillToInstances } from "../skills/execution";
+import { createSkillExecutionContext } from "../skills/executionContext";
 
 import { pickBest, type CpuAction, type EvalCtx } from "./eval";
 
@@ -54,6 +57,29 @@ function simulateMoveAndEvolve(params: {
   return { nextInstances: next, evolved };
 }
 
+function isLineTarget(from: { r: number; c: number }, to: { r: number; c: number }, range: number) {
+  const dr = to.r - from.r;
+  const dc = to.c - from.c;
+  const absR = Math.abs(dr);
+  const absC = Math.abs(dc);
+  const isLine = (absR === 0 && absC > 0) || (absC === 0 && absR > 0) || (absR === absC && absR > 0);
+  return isLine && Math.max(absR, absC) <= range;
+}
+
+function skillTargetForEnemy(def: SkillDef, actor: any, enemy: any) {
+  switch (def.targetMode) {
+    case "chooseEnemyAdjacent": {
+      const dr = Math.abs(enemy.pos.r - actor.pos.r);
+      const dc = Math.abs(enemy.pos.c - actor.pos.c);
+      return Math.max(dr, dc) === 1 ? { r: enemy.pos.r, c: enemy.pos.c, inst: enemy } : null;
+    }
+    case "chooseLineDirection":
+      return isLineTarget(actor.pos, enemy.pos, def.range) ? { r: enemy.pos.r, c: enemy.pos.c, inst: enemy } : null;
+    default:
+      return null;
+  }
+}
+
 export function cpuStepV1(opts: {
   side: Side;
   rows: number;
@@ -78,6 +104,39 @@ export function cpuStepV1(opts: {
   const ctx: EvalCtx = { side, rows, cols, unitsById, instances, actorId };
 
   const candidates: Array<{ action: CpuAction; nextInstances: any[] }> = [];
+
+  {
+    const skillContext = createSkillExecutionContext({ rows, cols, instances, unitsById, selected: actor });
+    const enemies = instances.filter((u) => u.side !== actor.side);
+
+    for (const def of getAvailableSkillsForUnit(actor.unitId)) {
+      if (def.requiresForm && actor.form !== def.requiresForm) continue;
+      if (def.targetMode === "chooseAllyInRange") continue;
+
+      if (
+        def.targetMode === "instant" ||
+        def.targetMode === "chooseFront3Cells" ||
+        def.targetMode === "enemiesInRange"
+      ) {
+        const next = executeSkillToInstances({ def, skillContext, selected: actor });
+        if (next && next !== instances) {
+          candidates.push({ action: { kind: "skill", actorId, skillId: def.id }, nextInstances: next });
+        }
+        continue;
+      }
+
+      for (const enemy of enemies) {
+        const target = skillTargetForEnemy(def, actor, enemy);
+        if (!target) continue;
+        const next = executeSkillToInstances({ def, skillContext, selected: actor, target });
+        if (!next || next === instances) continue;
+        candidates.push({
+          action: { kind: "skill", actorId, skillId: def.id, targetId: enemy.instanceId },
+          nextInstances: next,
+        });
+      }
+    }
+  }
 
   // 1) 攻撃候補（全部作って評価に投げる）
   {

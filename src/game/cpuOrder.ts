@@ -1,9 +1,8 @@
-import type { UnitInstance } from "./state";
-import type { Side } from "./types";
+import type { Side, UnitInstance } from "./types";
 
 export function getCpuActorOrder(instances: UnitInstance[], side: Side) {
   return instances
     .filter((u) => u.side === side)
-    .map((u) => u.instanceId)
+    .flatMap((u) => Array.from({ length: Math.max(1, 1 + (u.extraActionsPerTurn ?? 0)) }, () => u.instanceId))
     .sort();
 }
