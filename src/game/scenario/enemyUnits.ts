@@ -44,11 +44,24 @@ export const HIDDEN_MYOUOU_UNIT_DEF: UnitDef = {
   },
 };
 
+export const ROKUDO_AUTHOR_UNIT_DEF: UnitDef = {
+  id: "ROKUDO_AUTHOR",
+  name: "作者ロクド",
+  enemyOnly: true,
+  hiddenFromCatalog: true,
+  base: {
+    atk: 6,
+    hp: 30,
+    movePattern: { type: "orthogonal", range: 2, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
 export const scenarioEnemyUnits: UnitDef[] = [
   BOAR_UNIT_DEF,
   LESSER_WYVERN_UNIT_DEF,
   GOBLIN_UNIT_DEF,
   HIDDEN_MYOUOU_UNIT_DEF,
+  ROKUDO_AUTHOR_UNIT_DEF,
 ];
 
 export function getScenarioEnemyUnit(unitId: string) {

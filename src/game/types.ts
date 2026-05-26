@@ -90,6 +90,7 @@ export type UnitDef = {
   id: string;
   name: string;
   enemyOnly?: boolean;
+  hiddenFromCatalog?: boolean;
   base: { atk: number; hp: number; movePattern: MovePattern };
   evolve?: { grantsSkill2?: boolean };
   passives?: Passive[];

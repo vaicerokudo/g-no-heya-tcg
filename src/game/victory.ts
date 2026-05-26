@@ -48,6 +48,20 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side }>
 ): Victory | null {
+  if (scenarioId === "scenario_hidden_author") {
+    const authorAlive = instances.some((u) => u.unitId === "ROKUDO_AUTHOR" && u.side === "north");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!authorAlive) {
+      return { winner: "south", detail: "Hidden author trial clear: ROKUDO_AUTHOR defeated." };
+    }
+    if (!southAlive) {
+      return { winner: "north", detail: "Hidden author trial failed: all allies were defeated." };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario_hidden_myouou") {
     const myououAlive = instances.some((u) => u.unitId === "HIDDEN_MYOUOU" && u.side === "north");
     const southAlive = instances.some((u) => u.side === "south");

@@ -1,7 +1,12 @@
 import type { BoardSizeMode } from "../boardConfig";
 import type { Form, Side } from "../types";
 
-export type ScenarioId = "scenario1" | "scenario2" | "scenario3" | "scenario_hidden_myouou";
+export type ScenarioId =
+  | "scenario1"
+  | "scenario2"
+  | "scenario3"
+  | "scenario_hidden_myouou"
+  | "scenario_hidden_author";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
 
 export type ScenarioLine = {
@@ -157,6 +162,42 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "明王", text: "まだ早い。出直すのじゃ。" },
         { speaker: "総長", text: "……修行が足りませんでした。" },
         { speaker: "ROKUDO", text: "次こそは……。" },
+      ],
+    },
+  },
+  scenario_hidden_author: {
+    id: "scenario_hidden_author",
+    title: "創造主の試練",
+    stageName: "作者の間",
+    boardSizeMode: "intermediate9",
+    placements: [
+      { unitId: "SOCHO", side: "south", r: 7, c: 3, instanceId: "SCA-SOCHO" },
+      { unitId: "MYOUOU", side: "south", r: 7, c: 4, instanceId: "SCA-MYOUOU" },
+      { unitId: "ROKUDO", side: "south", r: 7, c: 2, instanceId: "SCA-ROKUDO" },
+      { unitId: "7171", side: "south", r: 7, c: 5, instanceId: "SCA-7171" },
+      { unitId: "TSUTSU", side: "south", r: 7, c: 1, instanceId: "SCA-TSUTSU" },
+      { unitId: "DELI", side: "south", r: 7, c: 6, instanceId: "SCA-DELI" },
+      { unitId: "ROKUDO_AUTHOR", side: "north", r: 2, c: 4, instanceId: "SCA-ROKUDO-AUTHOR", hp: 30 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "作者ロクド", text: "……ここまで来たんだね。" },
+        { speaker: "明王", text: "ふむ。ついに、この場所まで辿り着いたか。" },
+        { speaker: "ROKUDO", text: "ロクドさん……あなたが、最後の相手なのですね。" },
+        { speaker: "7171", text: "作者と戦うとか、聞いてないにゃ。" },
+        { speaker: "総長", text: "それでも、進みます。これが最後の試練なら。" },
+      ],
+      victory: [
+        { speaker: "作者ロクド", text: "すごいね。ここまで育ったんだ。" },
+        { speaker: "明王", text: "見事じゃ。Gの部屋は、もうおぬしら自身の物語じゃ。" },
+        { speaker: "ROKUDO", text: "……ありがとうございます。これからも、進みます。" },
+        { speaker: "総長", text: "これが終わりではありません。ここからが、始まりです。" },
+      ],
+      defeat: [
+        { speaker: "作者ロクド", text: "まだ早いかな。でも、ここまで来たことは誇っていい。" },
+        { speaker: "明王", text: "鍛え直してくるのじゃ。" },
+        { speaker: "7171", text: "次は勝つにゃ……たぶん。" },
+        { speaker: "総長", text: "もう一度、挑みましょう。" },
       ],
     },
   },

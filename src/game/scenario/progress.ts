@@ -2,7 +2,13 @@ import type { ScenarioId } from "./scenarios";
 
 export const CLEARED_SCENARIOS_STORAGE_KEY = "gnoheya_tcg_cleared_scenarios";
 
-const SCENARIO_IDS: ScenarioId[] = ["scenario1", "scenario2", "scenario3"];
+const SCENARIO_IDS: ScenarioId[] = [
+  "scenario1",
+  "scenario2",
+  "scenario3",
+  "scenario_hidden_myouou",
+  "scenario_hidden_author",
+];
 
 function isScenarioId(value: unknown): value is ScenarioId {
   return typeof value === "string" && SCENARIO_IDS.includes(value as ScenarioId);

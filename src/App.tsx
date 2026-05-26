@@ -755,6 +755,14 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     startScenario(scenarioId);
   }
 
+  function handleHiddenScenarioStart() {
+    const cleared = readClearedScenarios();
+    const nextScenarioId: ScenarioId = cleared.includes("scenario_hidden_myouou")
+      ? "scenario_hidden_author"
+      : "scenario_hidden_myouou";
+    handleScenarioSelectStart(nextScenarioId);
+  }
+
   useEffect(() => {
     setLastMove(null);
   }, [turn]);
@@ -1304,7 +1312,7 @@ const reinforceSet = useMemo(() => {
         <TownScene
           onExitToMap={() => setScene("astoria")}
           onEnterTcg={() => setScene("tcg")}
-          onStartHiddenScenario={() => handleScenarioSelectStart("scenario_hidden_myouou")}
+          onStartHiddenScenario={handleHiddenScenarioStart}
           onSkinUnlocked={refreshUnlockedSkins}
           unitsById={unitsById}
         />
