@@ -62,7 +62,7 @@ export const ROKUDO_AUTHOR_UNIT_DEF: UnitDef = {
   enemyOnly: true,
   hiddenFromCatalog: true,
   base: {
-    atk: 7,
+    atk: 10,
     hp: 69,
     movePattern: { type: "orthogonal", range: 2, diagonal: false, canPassThroughUnits: false },
   },
