@@ -734,6 +734,15 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     startSetup();
   }
 
+  function handleGameReset() {
+    if (gameMode === "scenario" && activeScenarioId) {
+      startScenario(activeScenarioId);
+      return;
+    }
+
+    resetGame();
+  }
+
   function returnToAstoriaFromScenario() {
     setScenarioSelectOpen(false);
     setScenarioDialog(null);
@@ -1400,7 +1409,7 @@ const reinforceSet = useMemo(() => {
         turn={turn}
         cpuEnabled={cpuEnabled}
         onToggleCpu={toggleCpuEnabled}
-        onResetGame={resetGame}
+        onResetGame={handleGameReset}
         deckSouthCount={deckSouth.length}
         handSouthCount={handSouth.length}
         deckNorthCount={deckNorth.length}
