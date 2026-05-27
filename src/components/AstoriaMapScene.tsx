@@ -153,7 +153,8 @@ const DIALOGS: Record<DialogId, DialogContent> = {
     speaker: "門天",
     portraitUrl: MONTEN_IMAGE_URL,
     portraitAlt: "門天",
-    text: "ここはアストリアの広場だ。\nいずれ知らせや依頼が集まる場所になる。",
+    text:
+      "広場の中央に、静かに佇む門天がいる。\n\nここへ来たか。力を試したいなら、相手をしよう。",
   },
   gate: {
     title: "門",
@@ -197,11 +198,6 @@ export function AstoriaMapScene({ onEnterLobby, onOpenScenarioSelect, onStartMon
 
       if (id === "gate") {
         onOpenScenarioSelect();
-        return;
-      }
-
-      if (id === "plaza") {
-        onStartMontenTrial?.();
         return;
       }
 
@@ -332,6 +328,28 @@ export function AstoriaMapScene({ onEnterLobby, onOpenScenarioSelect, onStartMon
             ) : null}
 
             {dialog.disabledReason ? <div style={disabledNoteStyle}>{dialog.disabledReason}</div> : null}
+
+            {activeDialog === "plaza" ? (
+              <div style={plazaActionsStyle}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveDialog(null);
+                    onStartMontenTrial?.();
+                  }}
+                  style={actionButtonStyle(true)}
+                >
+                  対戦する
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveDialog(null)}
+                  style={plazaCancelButtonStyle}
+                >
+                  やめる
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       )}
@@ -563,6 +581,25 @@ function actionButtonStyle(enabled: boolean): CSSProperties {
     touchAction: "manipulation",
   };
 }
+
+const plazaActionsStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  flexWrap: "wrap",
+};
+
+const plazaCancelButtonStyle: CSSProperties = {
+  marginTop: 18,
+  minHeight: 42,
+  padding: "0 16px",
+  borderRadius: 12,
+  border: "1px solid rgba(255,232,180,0.28)",
+  background: "rgba(255,241,204,0.10)",
+  color: "#fff1cc",
+  fontWeight: 900,
+  touchAction: "manipulation",
+};
 
 const disabledNoteStyle: CSSProperties = {
   marginTop: 10,
