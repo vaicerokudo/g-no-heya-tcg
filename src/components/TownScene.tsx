@@ -11,6 +11,7 @@ type TownSceneProps = {
   onStartHiddenScenario?: () => void;
   onExitToMap?: () => void;
   onSkinUnlocked?: () => void;
+  hiddenTrialHintUnlocked?: boolean;
   unitsById: Record<string, UnitDef>;
 };
 
@@ -187,6 +188,7 @@ export function TownScene({
   onStartHiddenScenario,
   onExitToMap,
   onSkinUnlocked,
+  hiddenTrialHintUnlocked = false,
   unitsById,
 }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 50, y: 78 });
@@ -424,6 +426,17 @@ export function TownScene({
             </button>
           ))}
 
+          {hiddenTrialHintUnlocked ? (
+            <div
+              aria-hidden="true"
+              style={{
+                ...hiddenTrialHintStyle,
+                opacity: nearHiddenTrial ? 0.86 : 0.46,
+                transform: `translate(-50%, -50%) scale(${nearHiddenTrial ? 1.08 : 1})`,
+              }}
+            />
+          ) : null}
+
           {activeDialog === "reception" && (
             <div style={dialogOverlayStyle}>
               <div style={dialogPanelStyle}>
@@ -618,6 +631,22 @@ const mapStyle: CSSProperties = {
   backgroundRepeat: "no-repeat",
   backgroundColor: "#211913",
   boxShadow: "0 22px 56px rgba(0,0,0,0.46), inset 0 0 48px rgba(0,0,0,0.24)",
+};
+
+const hiddenTrialHintStyle: CSSProperties = {
+  position: "absolute",
+  left: `${HIDDEN_TRIAL.x + HIDDEN_TRIAL.w / 2}%`,
+  top: `${HIDDEN_TRIAL.y + HIDDEN_TRIAL.h / 2}%`,
+  width: `${HIDDEN_TRIAL.w * 0.72}%`,
+  height: `${HIDDEN_TRIAL.h * 0.72}%`,
+  borderRadius: "999px",
+  pointerEvents: "none",
+  background:
+    "radial-gradient(circle, rgba(255,90,64,0.42) 0%, rgba(255,45,40,0.20) 42%, rgba(255,45,40,0) 72%)",
+  boxShadow: "0 0 18px rgba(255,68,48,0.42), 0 0 36px rgba(255,40,32,0.18)",
+  mixBlendMode: "screen",
+  transition: "opacity 180ms ease, transform 180ms ease",
+  zIndex: 3,
 };
 
 const townHotspotStyle: CSSProperties = {

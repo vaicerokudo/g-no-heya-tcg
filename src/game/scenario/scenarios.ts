@@ -5,6 +5,7 @@ export type ScenarioId =
   | "scenario1"
   | "scenario2"
   | "scenario3"
+  | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
@@ -131,6 +132,33 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "Deli", text: "囲まれた……！一度下がろう！" },
         { speaker: "つつ", text: "くそっ、数で押してきやがる。" },
         { speaker: "総長", text: "立て直します。撤退です。" },
+      ],
+    },
+  },
+  scenario_plaza_monten: {
+    id: "scenario_plaza_monten",
+    title: "Monten Trial",
+    stageName: "Astoria Plaza",
+    boardSizeMode: "starter7",
+    placements: [
+      { unitId: "MYOUOU", side: "south", r: 5, c: 3, instanceId: "SPM-MYOUOU" },
+      { unitId: "MONTEN", side: "north", r: 2, c: 3, instanceId: "SPM-MONTEN", hp: 7 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "Monten", text: "The plaza gate does not open for the untested." },
+        { speaker: "ROKUDO", text: "So this is a trial, then." },
+        { speaker: "7171", text: "Something feels strange here." },
+        { speaker: "SOCHO", text: "We will pass." },
+      ],
+      victory: [
+        { speaker: "Monten", text: "Good. Then notice what the quiet corners are saying." },
+        { speaker: "ROKUDO", text: "A quiet corner..." },
+        { speaker: "SOCHO", text: "Let us return and look carefully." },
+      ],
+      defeat: [
+        { speaker: "Monten", text: "Not yet. Stand again." },
+        { speaker: "SOCHO", text: "We will try once more." },
       ],
     },
   },

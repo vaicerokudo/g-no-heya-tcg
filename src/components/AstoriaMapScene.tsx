@@ -4,6 +4,7 @@ import rokuSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 type AstoriaMapSceneProps = {
   onEnterLobby: () => void;
   onOpenScenarioSelect: () => void;
+  onStartMontenTrial?: () => void;
 };
 
 type HotspotId = "gRoom" | "blacksmith" | "generalStore" | "plaza" | "gate";
@@ -160,7 +161,7 @@ const DIALOGS: Record<DialogId, DialogContent> = {
   },
 };
 
-export function AstoriaMapScene({ onEnterLobby, onOpenScenarioSelect }: AstoriaMapSceneProps) {
+export function AstoriaMapScene({ onEnterLobby, onOpenScenarioSelect, onStartMontenTrial }: AstoriaMapSceneProps) {
   const [activeDialog, setActiveDialog] = useState<DialogId | null>(null);
   const [failedPortraits, setFailedPortraits] = useState<Set<string>>(() => new Set());
   const [rokuPos, setRokuPos] = useState<MapPos>({ x: 50, y: 82 });
@@ -196,6 +197,11 @@ export function AstoriaMapScene({ onEnterLobby, onOpenScenarioSelect }: AstoriaM
 
       if (id === "gate") {
         onOpenScenarioSelect();
+        return;
+      }
+
+      if (id === "plaza") {
+        onStartMontenTrial?.();
         return;
       }
 

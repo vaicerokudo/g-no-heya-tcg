@@ -68,6 +68,11 @@ import {
 } from "./assets/imagePaths";
 import { isSkinUnlocked, readUnlockedSkins } from "./assets/skinUnlocks";
 import { readClearedScenarios, writeClearedScenarios } from "./game/scenario/progress";
+import {
+  markHiddenHintFlag,
+  readHiddenHintFlags,
+  type HiddenHintFlag,
+} from "./game/scenario/hiddenHints";
 
 function posKey(r: number, c: number) {
   return `${r},${c}`;
@@ -154,6 +159,7 @@ export default function App() {
   const activeScenario = gameMode === "scenario" && activeScenarioId ? getScenarioConfig(activeScenarioId) : null;
   const [scenarioSelectOpen, setScenarioSelectOpen] = useState(false);
   const [clearedScenarioIds, setClearedScenarioIds] = useState<ScenarioId[]>(() => readClearedScenarios());
+  const [hiddenHintFlags, setHiddenHintFlags] = useState<HiddenHintFlag[]>(() => readHiddenHintFlags());
   const [cpuEnabled, setCpuEnabled] = useState(true);
 
   const [deployPlaced, setDeployPlaced] = useState(0);
@@ -675,6 +681,9 @@ export default function App() {
 
     if (victory.winner === "south") {
       markScenarioCleared(activeScenarioId);
+      if (activeScenarioId === "scenario_plaza_monten") {
+        setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
+      }
     }
 
     setScenarioResultDialogShown(true);
@@ -776,6 +785,10 @@ const deploySouthReinforceAt = (r: number, c: number) => {
       ? "scenario_hidden_author"
       : "scenario_hidden_myouou";
     handleScenarioSelectStart(nextScenarioId);
+  }
+
+  function handleStartMontenTrial() {
+    handleScenarioSelectStart("scenario_plaza_monten");
   }
 
   useEffect(() => {
@@ -1310,7 +1323,11 @@ const reinforceSet = useMemo(() => {
   if (scene === "astoria") {
     return (
       <>
-        <AstoriaMapScene onEnterLobby={() => setScene("town")} onOpenScenarioSelect={openScenarioSelect} />
+        <AstoriaMapScene
+          onEnterLobby={() => setScene("town")}
+          onOpenScenarioSelect={openScenarioSelect}
+          onStartMontenTrial={handleStartMontenTrial}
+        />
         <ScenarioSelectDialog
           open={scenarioSelectOpen}
           clearedScenarioIds={clearedScenarioIds}
@@ -1329,6 +1346,7 @@ const reinforceSet = useMemo(() => {
           onEnterTcg={() => setScene("tcg")}
           onStartHiddenScenario={handleHiddenScenarioStart}
           onSkinUnlocked={refreshUnlockedSkins}
+          hiddenTrialHintUnlocked={hiddenHintFlags.includes("monten_defeated")}
           unitsById={unitsById}
         />
         <ScenarioSelectDialog

@@ -44,6 +44,18 @@ export const HIDDEN_MYOUOU_UNIT_DEF: UnitDef = {
   },
 };
 
+export const MONTEN_UNIT_DEF: UnitDef = {
+  id: "MONTEN",
+  name: "\u9580\u5929",
+  enemyOnly: true,
+  hiddenFromCatalog: true,
+  base: {
+    atk: 3,
+    hp: 7,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
 export const ROKUDO_AUTHOR_UNIT_DEF: UnitDef = {
   id: "ROKUDO_AUTHOR",
   name: "作者ロクド",
@@ -61,6 +73,7 @@ export const scenarioEnemyUnits: UnitDef[] = [
   LESSER_WYVERN_UNIT_DEF,
   GOBLIN_UNIT_DEF,
   HIDDEN_MYOUOU_UNIT_DEF,
+  MONTEN_UNIT_DEF,
   ROKUDO_AUTHOR_UNIT_DEF,
 ];
 
