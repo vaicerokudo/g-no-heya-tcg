@@ -15,6 +15,7 @@ attackMotion?: { id: string; dr: number; dc: number } | null;
 moveEventId?: string | null;
 impactFx?: { id: string; targetId: string } | null;
 skillImpactFx?: { id: string; skillId: string; variant: string; casterId: string; targetId: string } | null;
+gateImageUrl?: string | null;
 
  getPortrait: (unitId: string, side: "south" | "north", form?: "base" | "g") => string;
 maxHp?: number;
@@ -61,6 +62,7 @@ const {
   moveEventId,
   impactFx,
   skillImpactFx,
+  gateImageUrl,
   maxHp,
   label,
   inst,
@@ -248,6 +250,27 @@ return (
       }}
       title={label}
     >
+      {gateImageUrl && (
+        <img
+          src={gateImageUrl}
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            width: "82%",
+            height: "92%",
+            objectFit: "contain",
+            transform: "translate(-50%, -50%)",
+            opacity: inst ? 0.42 : 0.74,
+            filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.58))",
+            pointerEvents: "none",
+            zIndex: 1,
+          }}
+        />
+      )}
+
       {showInitialDeploy && <div className="initialDeployPreview" />}
 
       {isReadySouthUnit && !isSelected && <div className="readyUnitRing" />}

@@ -4,6 +4,9 @@ import { Cell } from "./Cell";
 import { getEffectiveMaxHp } from "../../game/stats";
 import { getGateCols, getNorthGateRow, getSouthGateRow } from "../../game/boardConfig";
 
+const WHITE_GATE_IMAGE_URL = "/ui/gates/gate_white.png";
+const BLACK_GATE_IMAGE_URL = "/ui/gates/gate_black.png";
+
 type BoardProps = {
   rows: number;
   cols: number;
@@ -150,6 +153,11 @@ export function Board(props: BoardProps) {
               const isGateCol = gateCols.includes(c);
               const isGateNorth = r === getNorthGateRow() && isGateCol;
               const isGateSouth = r === getSouthGateRow(rows) && isGateCol;
+              const gateImageUrl = isGateNorth
+                ? BLACK_GATE_IMAGE_URL
+                : isGateSouth
+                  ? WHITE_GATE_IMAGE_URL
+                  : null;
 
               const inSkill = !!skillMode;
               const isLegalMove = legalMoveSet.has(k);
@@ -241,6 +249,7 @@ export function Board(props: BoardProps) {
                   moveEventId={inst ? moveEventIdByInstanceId.get(inst.instanceId) ?? null : null}
                   impactFx={impactFxByCellKey.get(k) ?? null}
                   skillImpactFx={skillImpactFxByCellKey.get(k) ?? null}
+                  gateImageUrl={gateImageUrl}
                   isDebugTarget={!!inst && inst.instanceId === debugTargetId}
                   disableInput={gameOver}
                   onClickCell={() => onCellClick(r, c, inst)}
