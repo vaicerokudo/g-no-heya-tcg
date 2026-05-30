@@ -5,6 +5,7 @@ export type ScenarioId =
   | "scenario1"
   | "scenario2"
   | "scenario3"
+  | "scenario4"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -132,6 +133,35 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "Deli", text: "囲まれた……！一度下がろう！" },
         { speaker: "つつ", text: "くそっ、数で押してきやがる。" },
         { speaker: "総長", text: "立て直します。撤退です。" },
+      ],
+    },
+  },
+  scenario4: {
+    id: "scenario4",
+    title: "第4話 パン屋を探して",
+    stageName: "街中",
+    boardSizeMode: "starter7",
+    placements: [
+      { unitId: "HIBIKI", side: "south", r: 5, c: 2, instanceId: "SC4-HIBIKI" },
+      { unitId: "YABUKO_NORMAL", side: "south", r: 5, c: 4, instanceId: "SC4-YABUKO" },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "受付", text: "ギルドに、少し変わった依頼が届いています。" },
+        { speaker: "hibiki", text: "ふん。どんな依頼でも俺にかかれば余裕だ。" },
+        { speaker: "やぶこ", text: "パン屋さんを探すの？いいにおいがしそうなの。" },
+        { speaker: "受付", text: "街の中で場所が分からなくなっているようです。落ち着いて探してください。" },
+        { speaker: "hibiki", text: "……場所が分からないパン屋とは何だ。" },
+      ],
+      victory: [
+        { speaker: "やぶこ", text: "見つけたの！ここ、いいにおいがするの！" },
+        { speaker: "hibiki", text: "当然だ。俺は最初から分かっていた。" },
+        { speaker: "明王", text: "落ち着いて周りを見ることが大事じゃ。" },
+        { speaker: "hibiki", text: "……べ、別に迷ってなどいない。" },
+        { speaker: "やぶこ", text: "パン、買って帰るの？" },
+      ],
+      defeat: [
+        { speaker: "受付", text: "焦らず、もう一度探してみましょう。" },
       ],
     },
   },

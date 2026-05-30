@@ -46,8 +46,24 @@ export function checkVictory(
 
 export function checkScenarioVictory(
   scenarioId: ScenarioId,
-  instances: Array<{ unitId: string; side: Side }>
+  instances: Array<{ unitId: string; side: Side; pos?: { r: number; c: number } }>
 ): Victory | null {
+  if (scenarioId === "scenario4") {
+    const bakerFound = instances.some(
+      (u) =>
+        u.side === "south" &&
+        (u.unitId === "HIBIKI" || u.unitId === "YABUKO_NORMAL") &&
+        u.pos?.r === 2 &&
+        u.pos?.c === 3
+    );
+
+    if (bakerFound) {
+      return { winner: "south", detail: "Scenario 4 clear: the hidden bakery was found." };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario_plaza_monten") {
     const montenAlive = instances.some((u) => u.unitId === "MONTEN" && u.side === "north");
     const southAlive = instances.some((u) => u.side === "south");

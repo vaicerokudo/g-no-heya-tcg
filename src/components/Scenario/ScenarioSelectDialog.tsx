@@ -41,6 +41,14 @@ const SCENARIO_SELECT_ITEMS: ScenarioSelectItem[] = [
     unlockRequires: "scenario2",
     implemented: true,
   },
+  {
+    id: "scenario4",
+    title: "第4話 パン屋を探して",
+    description: "hibikiとやぶこで、街の中に隠れているパン屋を探そう。",
+    unlockText: "第3話クリアで解放",
+    unlockRequires: "scenario3",
+    implemented: true,
+  },
 ];
 
 export function ScenarioSelectDialog({
