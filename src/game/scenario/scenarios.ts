@@ -52,7 +52,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       { unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC1-SOCHO" },
       { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC1-USHIMARU" },
       { unitId: "HIBIKI", side: "south", r: 5, c: 4, instanceId: "SC1-HIBIKI" },
-      { unitId: "BOAR", side: "north", r: 2, c: 3, instanceId: "SC1-BOAR", hp: 8 },
+      { unitId: "BOAR", side: "north", r: 0, c: 3, instanceId: "SC1-BOAR", hp: 8 },
     ],
     dialogs: {
       intro: [
@@ -273,6 +273,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "Monten Trial",
     stageName: "Astoria Plaza",
     boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-town.png",
     placements: [
       { unitId: "MYOUOU", side: "south", r: 5, c: 3, instanceId: "SPM-MYOUOU" },
       { unitId: "MONTEN", side: "north", r: 2, c: 3, instanceId: "SPM-MONTEN", hp: 7 },
