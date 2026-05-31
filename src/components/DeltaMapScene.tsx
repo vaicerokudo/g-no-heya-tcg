@@ -1,8 +1,10 @@
 import { useState, type CSSProperties } from "react";
 import { getDeltaMachineParts } from "../game/delta/progress";
+import type { ScenarioId } from "../game/scenario/scenarios";
 
 type DeltaMapSceneProps = {
   onReturnContinent: () => void;
+  onStartScenario: (scenarioId: ScenarioId) => void;
 };
 
 type DeltaAreaId = "entrance" | "control" | "archive" | "quarantine";
@@ -25,7 +27,7 @@ const AREAS: DeltaArea[] = [
   { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", icon: "EXIT", x: 32, y: 76, w: 36, h: 14 },
 ];
 
-export function DeltaMapScene({ onReturnContinent }: DeltaMapSceneProps) {
+export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSceneProps) {
   const [activeArea, setActiveArea] = useState<DeltaAreaId | null>(null);
   const [machineParts] = useState<number[]>(() => getDeltaMachineParts());
   const collectedPartIds = new Set(machineParts);
@@ -105,6 +107,17 @@ export function DeltaMapScene({ onReturnContinent }: DeltaMapSceneProps) {
           <div style={dialogStyle(activeArea, machineComplete)}>
             <div style={dialogEyebrowStyle}>{getAreaTitle(activeArea)}</div>
             <div style={dialogTitleStyle}>{getAreaDialogTitle(activeArea, machineComplete)}</div>
+            {activeArea === "control" ? (
+              <div style={scenarioEntryStyle}>
+                <div>
+                  <div style={scenarioEntryTitleStyle}>第8話 厄介な訳解</div>
+                  <div style={scenarioEntryTextStyle}>Deliがジーマを捕まえて、完成図パーツの手がかりを入手します。</div>
+                </div>
+                <button type="button" onClick={() => onStartScenario("scenario8")} style={scenarioStartButtonStyle}>
+                  開始
+                </button>
+              </div>
+            ) : null}
             {activeArea === "archive" ? (
               <>
                 <div style={puzzleCaptionStyle}>メタルマシーン完成図パーツ {collectedPartCount} / 9</div>
@@ -436,6 +449,45 @@ const dialogTitleStyle: CSSProperties = {
   fontSize: 24,
   lineHeight: 1.15,
   fontWeight: 950,
+};
+
+const scenarioEntryStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  marginTop: 16,
+  padding: 12,
+  borderRadius: 14,
+  border: "1px solid rgba(125,231,255,0.32)",
+  background: "rgba(125,231,255,0.07)",
+};
+
+const scenarioEntryTitleStyle: CSSProperties = {
+  color: "#eaf7ff",
+  fontSize: 15,
+  lineHeight: 1.2,
+  fontWeight: 950,
+};
+
+const scenarioEntryTextStyle: CSSProperties = {
+  marginTop: 5,
+  color: "rgba(234,247,255,0.72)",
+  fontSize: 12,
+  lineHeight: 1.45,
+};
+
+const scenarioStartButtonStyle: CSSProperties = {
+  flex: "0 0 auto",
+  minHeight: 38,
+  padding: "0 14px",
+  borderRadius: 12,
+  border: "1px solid rgba(125,231,255,0.72)",
+  background: "linear-gradient(180deg, #7de7ff, #388aa8)",
+  color: "#061018",
+  fontWeight: 950,
+  touchAction: "manipulation",
+  cursor: "pointer",
 };
 
 const puzzleCaptionStyle: CSSProperties = {

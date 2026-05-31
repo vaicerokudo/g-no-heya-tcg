@@ -70,6 +70,7 @@ import {
 } from "./assets/imagePaths";
 import { isSkinUnlocked, readUnlockedSkins } from "./assets/skinUnlocks";
 import { readClearedScenarios, writeClearedScenarios } from "./game/scenario/progress";
+import { addDeltaMachinePart } from "./game/delta/progress";
 import {
   markHiddenHintFlag,
   readHiddenHintFlags,
@@ -683,6 +684,9 @@ export default function App() {
 
     if (victory.winner === "south") {
       markScenarioCleared(activeScenarioId);
+      if (activeScenarioId === "scenario8") {
+        addDeltaMachinePart(1);
+      }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
       }
@@ -1349,7 +1353,7 @@ const reinforceSet = useMemo(() => {
   }
 
   if (scene === "delta") {
-    return <DeltaMapScene onReturnContinent={() => setScene("continent")} />;
+    return <DeltaMapScene onReturnContinent={() => setScene("continent")} onStartScenario={handleScenarioSelectStart} />;
   }
 
   if (scene === "town") {

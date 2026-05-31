@@ -48,6 +48,26 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side; pos?: { r: number; c: number } }>
 ): Victory | null {
+  if (scenarioId === "scenario8") {
+    const deli = instances.find((u) => u.unitId === "DELI" && u.side === "south");
+    const zima = instances.find((u) => u.unitId === "ZIMA" && u.side === "north");
+
+    if (!deli) {
+      return { winner: "north", detail: "Scenario 8 failed: DELI lost track of ZIMA." };
+    }
+    if (!zima) {
+      return { winner: "south", detail: "Scenario 8 clear: ZIMA was caught." };
+    }
+    if (deli.pos && zima.pos) {
+      const distance = Math.abs(deli.pos.r - zima.pos.r) + Math.abs(deli.pos.c - zima.pos.c);
+      if (distance <= 1) {
+        return { winner: "south", detail: "Scenario 8 clear: DELI caught ZIMA." };
+      }
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario7") {
     const northAlive = instances.some((u) => u.side === "north");
     const southAlive = instances.some((u) => u.side === "south");

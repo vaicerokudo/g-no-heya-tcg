@@ -9,6 +9,7 @@ export type ScenarioId =
   | "scenario5"
   | "scenario6"
   | "scenario7"
+  | "scenario8"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -266,6 +267,39 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "うしまる", text: "いったん引くっす！立て直すっす！" },
         { speaker: "総長", text: "すみません、明王様……もう一度準備を整えて向かいます。" },
         { speaker: "明王", text: "うむ。焦らず態勢を立て直すのじゃ。" },
+      ],
+    },
+  },
+  scenario8: {
+    id: "scenario8",
+    title: "第8話 厄介な訳解",
+    stageName: "研究施設デルタ",
+    boardSizeMode: "starter7",
+    placements: [
+      { unitId: "DELI", side: "south", r: 5, c: 3, instanceId: "SC8-DELI" },
+      { unitId: "ZIMA", side: "north", r: 1, c: 3, instanceId: "SC8-ZIMA", hp: 5 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "ジーマ", text: "よう！Deli。おいしい話を持ってきたぜ！" },
+        { speaker: "Deli", text: "ほんとに～？ あやしい……。" },
+        { speaker: "ジーマ", text: "この施設に隠されたパーツを全部集めたら、お宝がもらえるらしいぜ！" },
+        { speaker: "Deli", text: "お宝？ こないだもそんなこと言って……ﾌﾞﾂﾌﾞﾂ……" },
+        { speaker: "ジーマ", text: "証拠がこれだ！俺を捕まえたら、やるよ！" },
+        { speaker: "Deli", text: "待ってください！そういうところが信用できないんですよ！" },
+      ],
+      victory: [
+        { speaker: "ジーマ", text: "へへっ、やるじゃねぇか。ほら、約束の証拠だ。" },
+        { speaker: "Deli", text: "これは……メタルマシーンの完成図の一部？" },
+        { speaker: "ジーマ", text: "な？ 言っただろ。おいしい話だって。" },
+        { speaker: "Deli", text: "……おいしいかどうかは、まだ判断保留です。" },
+        { speaker: "ジーマ", text: "ま、そう言うなって。残りも探そうぜ。" },
+      ],
+      defeat: [
+        { speaker: "ジーマ", text: "おっと、そこまでだ。まだ俺には追いつけないか？" },
+        { speaker: "Deli", text: "逃げ足だけは本当に一級品ですね……！" },
+        { speaker: "ジーマ", text: "褒め言葉として受け取っとくぜ。" },
+        { speaker: "Deli", text: "褒めてません！" },
       ],
     },
   },
