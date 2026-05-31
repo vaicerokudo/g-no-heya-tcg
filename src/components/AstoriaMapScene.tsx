@@ -5,6 +5,8 @@ type AstoriaMapSceneProps = {
   onEnterLobby: () => void;
   onOpenScenarioSelect: () => void;
   onStartMontenTrial?: () => void;
+  continentUnlocked?: boolean;
+  onEnterContinent?: () => void;
 };
 
 type HotspotId = "gRoom" | "blacksmith" | "generalStore" | "plaza" | "gate";
@@ -162,7 +164,13 @@ const DIALOGS: Record<DialogId, DialogContent> = {
   },
 };
 
-export function AstoriaMapScene({ onEnterLobby, onOpenScenarioSelect, onStartMontenTrial }: AstoriaMapSceneProps) {
+export function AstoriaMapScene({
+  onEnterLobby,
+  onOpenScenarioSelect,
+  onStartMontenTrial,
+  continentUnlocked = false,
+  onEnterContinent,
+}: AstoriaMapSceneProps) {
   const [activeDialog, setActiveDialog] = useState<DialogId | null>(null);
   const [failedPortraits, setFailedPortraits] = useState<Set<string>>(() => new Set());
   const [rokuPos, setRokuPos] = useState<MapPos>({ x: 50, y: 82 });
@@ -242,6 +250,17 @@ export function AstoriaMapScene({ onEnterLobby, onOpenScenarioSelect, onStartMon
             <h1 style={titleStyle}>アストリアの街</h1>
           </div>
           <p style={hintStyle}>施設をタップして、会話や導線を確認できます。</p>
+          <button
+            type="button"
+            disabled={!continentUnlocked}
+            onClick={() => {
+              if (continentUnlocked) onEnterContinent?.();
+            }}
+            title={continentUnlocked ? "大陸MAPへ移動" : "第7話クリアで解放"}
+            style={continentButtonStyle(continentUnlocked)}
+          >
+            大陸へ
+          </button>
         </header>
 
         <div style={mapStyle}>
@@ -401,6 +420,23 @@ const hintStyle: CSSProperties = {
   fontSize: 13,
   lineHeight: 1.5,
 };
+
+function continentButtonStyle(unlocked: boolean): CSSProperties {
+  return {
+    minHeight: 38,
+    padding: "0 14px",
+    borderRadius: 12,
+    border: unlocked ? "1px solid rgba(255,216,102,0.82)" : "1px solid rgba(255,232,180,0.22)",
+    background: unlocked
+      ? "linear-gradient(180deg, #ffd66d, #c5872d)"
+      : "linear-gradient(180deg, rgba(68,45,31,0.66), rgba(26,20,18,0.86))",
+    color: unlocked ? "#2a1a0d" : "rgba(255,241,204,0.64)",
+    fontWeight: 950,
+    opacity: unlocked ? 1 : 0.64,
+    cursor: unlocked ? "pointer" : "default",
+    touchAction: "manipulation",
+  };
+}
 
 const mapStyle: CSSProperties = {
   position: "relative",
