@@ -18,7 +18,7 @@ type Hotspot = {
 };
 
 const HOTSPOTS: Hotspot[] = [
-  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 60, y: 36, w: 28, h: 9 },
+  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 61, y: 57, w: 28, h: 9 },
   { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 33, y: 74, w: 34, h: 10 },
 ];
 
