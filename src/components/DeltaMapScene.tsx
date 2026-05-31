@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from "react";
+import { getDeltaMachineParts } from "../game/delta/progress";
 
 type DeltaMapSceneProps = {
   onReturnContinent: () => void;
@@ -26,6 +27,10 @@ const AREAS: DeltaArea[] = [
 
 export function DeltaMapScene({ onReturnContinent }: DeltaMapSceneProps) {
   const [activeArea, setActiveArea] = useState<DeltaAreaId | null>(null);
+  const [machineParts] = useState<number[]>(() => getDeltaMachineParts());
+  const collectedPartIds = new Set(machineParts);
+  const collectedPartCount = machineParts.length;
+  const machineComplete = collectedPartCount === 9;
 
   const openArea = (areaId: DeltaAreaId) => {
     if (areaId === "entrance") {
@@ -68,17 +73,27 @@ export function DeltaMapScene({ onReturnContinent }: DeltaMapSceneProps) {
               onClick={() => openArea(area.id)}
               title={`${area.label}: ${area.subLabel}`}
               style={{
-                ...areaButtonStyle(area.id),
+                ...areaButtonStyle(area.id, machineComplete),
                 left: `${area.x}%`,
                 top: `${area.y}%`,
                 width: `${area.w}%`,
                 height: `${area.h}%`,
               }}
             >
-              <span style={areaIconStyle(area.id)}>{area.icon}</span>
+              <span style={areaIconStyle(area.id, machineComplete)}>
+                {area.id === "quarantine" ? (machineComplete ? "OPEN" : area.icon) : area.icon}
+              </span>
               <span style={areaTextStyle}>
                 <span style={areaLabelStyle}>{area.label}</span>
-                <span style={areaSubLabelStyle}>{area.subLabel}</span>
+                <span style={areaSubLabelStyle}>
+                  {area.id === "archive"
+                    ? `完成図パーツ ${collectedPartCount} / 9`
+                    : area.id === "quarantine"
+                      ? machineComplete
+                        ? "ロック解除"
+                        : "9パーツ必要"
+                      : area.subLabel}
+                </span>
               </span>
             </button>
           ))}
@@ -87,23 +102,25 @@ export function DeltaMapScene({ onReturnContinent }: DeltaMapSceneProps) {
 
       {activeArea ? (
         <div style={overlayStyle}>
-          <div style={dialogStyle(activeArea)}>
+          <div style={dialogStyle(activeArea, machineComplete)}>
             <div style={dialogEyebrowStyle}>{getAreaTitle(activeArea)}</div>
-            <div style={dialogTitleStyle}>{getAreaDialogTitle(activeArea)}</div>
+            <div style={dialogTitleStyle}>{getAreaDialogTitle(activeArea, machineComplete)}</div>
             {activeArea === "archive" ? (
               <>
-                <div style={puzzleCaptionStyle}>メタルマシーン完成図</div>
+                <div style={puzzleCaptionStyle}>メタルマシーン完成図パーツ {collectedPartCount} / 9</div>
                 <div style={puzzleGridStyle} aria-label="メタルマシーン完成図パズル枠">
                   {Array.from({ length: 9 }).map((_, index) => (
-                    <div key={index} style={puzzleSlotStyle}>
-                      <span style={puzzleSlotNumberStyle}>{index + 1}</span>
+                    <div key={index} style={puzzleSlotStyle(collectedPartIds.has(index + 1))}>
+                      <span style={puzzleSlotNumberStyle(collectedPartIds.has(index + 1))}>
+                        {collectedPartIds.has(index + 1) ? index + 1 : "???"}
+                      </span>
                     </div>
                   ))}
                 </div>
               </>
             ) : null}
-            <p style={dialogTextStyle}>{getAreaDialogText(activeArea)}</p>
-            <button type="button" onClick={() => setActiveArea(null)} style={dialogButtonStyle(activeArea)}>
+            <p style={dialogTextStyle}>{getAreaDialogText(activeArea, machineComplete)}</p>
+            <button type="button" onClick={() => setActiveArea(null)} style={dialogButtonStyle(activeArea, machineComplete)}>
               閉じる
             </button>
           </div>
@@ -119,18 +136,21 @@ function getAreaTitle(areaId: DeltaAreaId) {
   return "隔離ゲート";
 }
 
-function getAreaDialogTitle(areaId: DeltaAreaId) {
+function getAreaDialogTitle(areaId: DeltaAreaId, machineComplete: boolean) {
   if (areaId === "control") return "デルタ編シナリオ選択予定";
   if (areaId === "archive") return "メタルマシーン完成図";
-  return "ロック中";
+  return machineComplete ? "ロック解除" : "ロック中";
 }
 
-function getAreaDialogText(areaId: DeltaAreaId) {
+function getAreaDialogText(areaId: DeltaAreaId, machineComplete: boolean) {
   if (areaId === "control") {
     return "管制室はまだ準備中です。ここからデルタ編の物語へ入る予定です。";
   }
   if (areaId === "archive") {
     return "資料室には9つの空枠があります。完成図の欠片を集める場所として、次工程以降で保存ロジックを追加します。";
+  }
+  if (machineComplete) {
+    return "9パーツが揃い、隔離ゲートは起動可能になりました。ブラックノイズ戦はまだ準備中です。";
   }
   return "隔離ゲートは9パーツ完成後に開く予定です。奥にはBOSSブラックノイズの反応があります。";
 }
@@ -297,8 +317,8 @@ const nodeBottomStyle: CSSProperties = {
   boxShadow: "0 0 24px rgba(125,231,255,0.12)",
 };
 
-function areaButtonStyle(areaId: DeltaAreaId): CSSProperties {
-  const locked = areaId === "quarantine";
+function areaButtonStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProperties {
+  const locked = areaId === "quarantine" && !machineComplete;
   const archive = areaId === "archive";
   const entrance = areaId === "entrance";
   return {
@@ -332,8 +352,8 @@ function areaButtonStyle(areaId: DeltaAreaId): CSSProperties {
   };
 }
 
-function areaIconStyle(areaId: DeltaAreaId): CSSProperties {
-  const locked = areaId === "quarantine";
+function areaIconStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProperties {
+  const locked = areaId === "quarantine" && !machineComplete;
   const archive = areaId === "archive";
   return {
     flex: "0 0 auto",
@@ -389,8 +409,8 @@ const overlayStyle: CSSProperties = {
   backdropFilter: "blur(2px)",
 };
 
-function dialogStyle(areaId: DeltaAreaId): CSSProperties {
-  const locked = areaId === "quarantine";
+function dialogStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProperties {
+  const locked = areaId === "quarantine" && !machineComplete;
   return {
     width: "min(460px, calc(100% - 10px))",
     padding: "24px 22px 20px",
@@ -436,27 +456,36 @@ const puzzleGridStyle: CSSProperties = {
   background: "rgba(181,145,255,0.06)",
 };
 
-const puzzleSlotStyle: CSSProperties = {
-  aspectRatio: "1",
-  borderRadius: 10,
-  border: "1px dashed rgba(181,145,255,0.48)",
-  display: "grid",
-  placeItems: "center",
-  color: "rgba(234,247,255,0.42)",
-  background:
-    "linear-gradient(180deg, rgba(181,145,255,0.08), rgba(125,231,255,0.04)), repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 4px, transparent 4px 10px)",
-  fontWeight: 900,
-};
+function puzzleSlotStyle(collected: boolean): CSSProperties {
+  return {
+    aspectRatio: "1",
+    borderRadius: 10,
+    border: collected ? "1px solid rgba(125,231,255,0.72)" : "1px dashed rgba(181,145,255,0.48)",
+    display: "grid",
+    placeItems: "center",
+    color: collected ? "#eaf7ff" : "rgba(234,247,255,0.42)",
+    background: collected
+      ? "linear-gradient(180deg, rgba(125,231,255,0.22), rgba(181,145,255,0.10))"
+      : "linear-gradient(180deg, rgba(181,145,255,0.08), rgba(125,231,255,0.04)), repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 4px, transparent 4px 10px)",
+    boxShadow: collected ? "0 0 18px rgba(125,231,255,0.22), inset 0 0 16px rgba(125,231,255,0.12)" : undefined,
+    fontWeight: 900,
+  };
+}
 
-const puzzleSlotNumberStyle: CSSProperties = {
-  width: 22,
-  height: 22,
-  borderRadius: 999,
-  display: "grid",
-  placeItems: "center",
-  background: "rgba(10,13,22,0.62)",
-  fontSize: 11,
-};
+function puzzleSlotNumberStyle(collected: boolean): CSSProperties {
+  return {
+    minWidth: collected ? 28 : 36,
+    height: 24,
+    padding: "0 6px",
+    boxSizing: "border-box",
+    borderRadius: 999,
+    display: "grid",
+    placeItems: "center",
+    background: collected ? "rgba(125,231,255,0.26)" : "rgba(10,13,22,0.62)",
+    color: collected ? "#eaf7ff" : "rgba(234,247,255,0.46)",
+    fontSize: 11,
+  };
+}
 
 const dialogTextStyle: CSSProperties = {
   margin: "14px 0 0",
@@ -465,8 +494,8 @@ const dialogTextStyle: CSSProperties = {
   lineHeight: 1.7,
 };
 
-function dialogButtonStyle(areaId: DeltaAreaId): CSSProperties {
-  const locked = areaId === "quarantine";
+function dialogButtonStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProperties {
+  const locked = areaId === "quarantine" && !machineComplete;
   return {
     marginTop: 18,
     minHeight: 42,
