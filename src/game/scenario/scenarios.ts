@@ -6,6 +6,7 @@ export type ScenarioId =
   | "scenario2"
   | "scenario3"
   | "scenario4"
+  | "scenario5"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -162,6 +163,35 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       ],
       defeat: [
         { speaker: "受付", text: "焦らず、もう一度探してみましょう。" },
+      ],
+    },
+  },
+  scenario5: {
+    id: "scenario5",
+    title: "第5話 釣り場の大騒ぎ",
+    stageName: "川辺",
+    boardSizeMode: "starter7",
+    placements: [
+      { unitId: "USHIMARU", side: "south", r: 5, c: 3, instanceId: "SC5-USHIMARU" },
+      { unitId: "ROCKEL", side: "north", r: 2, c: 3, instanceId: "SC5-ROCKEL" },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "うしまる", text: "今日はのんびり釣り日和っすねぇ。" },
+        { speaker: "ROCKEL", text: "うおおお！この木、いい感じに倒れそうっす！" },
+        { speaker: "うしまる", text: "……魚、全部逃げたっす。" },
+        { speaker: "ROCKEL", text: "え？なんか言ったっすか？" },
+        { speaker: "うしまる", text: "ちょっと止まるっす。止まらないなら、止めるっす。" },
+      ],
+      victory: [
+        { speaker: "ROCKEL", text: "うわー！負けたっす！でも楽しかったっす！" },
+        { speaker: "うしまる", text: "楽しいじゃないっす。魚が一匹もいないっす。" },
+        { speaker: "ROCKEL", text: "じゃあ、次は魚を切ればいいっすか？" },
+        { speaker: "うしまる", text: "絶対ダメっす。" },
+      ],
+      defeat: [
+        { speaker: "ROCKEL", text: "やったっす！まだまだ切れるっす！" },
+        { speaker: "うしまる", text: "だめっす……釣り場が更地になるっす……。" },
       ],
     },
   },

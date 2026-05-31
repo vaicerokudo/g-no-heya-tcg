@@ -49,6 +49,14 @@ const SCENARIO_SELECT_ITEMS: ScenarioSelectItem[] = [
     unlockRequires: "scenario3",
     implemented: true,
   },
+  {
+    id: "scenario5",
+    title: "第5話 釣り場の大騒ぎ",
+    description: "釣りを邪魔されたうしまるが、木を切り倒すROCKELを止めようとする。",
+    unlockText: "第4話クリアで解放",
+    unlockRequires: "scenario4",
+    implemented: true,
+  },
 ];
 
 export function ScenarioSelectDialog({
