@@ -203,6 +203,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第6話 にたものどうし",
     stageName: "街中",
     boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-town.png",
     placements: [
       { unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC6-SOCHO" },
       { unitId: "ROKUDO", side: "north", r: 2, c: 3, instanceId: "SC6-ROKUDO" },

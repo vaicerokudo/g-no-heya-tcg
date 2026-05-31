@@ -1437,7 +1437,7 @@ const reinforceSet = useMemo(() => {
       <SelectedUnitStatus selected={selected} unitsById={unitsById} perUnitTurn={perUnitTurn} />
 
       <button
-        onClick={() => setScene("town")}
+        onClick={gameMode === "scenario" && activeScenarioId ? returnToAstoriaFromScenario : () => setScene("town")}
         style={{
           position: "fixed",
           right: 12,
