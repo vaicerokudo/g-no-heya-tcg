@@ -64,16 +64,18 @@ export function ContinentMapScene({ onReturnAstoria, onEnterDelta }: ContinentMa
 const sceneStyle: CSSProperties = {
   minHeight: "100dvh",
   boxSizing: "border-box",
-  padding: 14,
+  padding: "10px 8px 18px",
   color: "#fff6df",
   background:
     "radial-gradient(circle at 22% 12%, rgba(255,207,112,0.18), transparent 28%), radial-gradient(circle at 78% 8%, rgba(113,169,255,0.14), transparent 26%), linear-gradient(180deg, #1c2430 0%, #181513 54%, #0e1118 100%)",
-  display: "grid",
-  placeItems: "center",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "flex-start",
+  overflowX: "hidden",
 };
 
 const shellStyle: CSSProperties = {
-  width: "min(900px, 100%)",
+  width: "min(680px, 100%)",
 };
 
 const headerStyle: CSSProperties = {
@@ -112,11 +114,10 @@ const returnButtonStyle: CSSProperties = {
 
 const mapStyle: CSSProperties = {
   position: "relative",
-  width: "min(100%, calc(78dvh * 941 / 1672))",
-  minWidth: "min(100%, 320px)",
+  width: "clamp(320px, 96vw, 640px)",
+  maxWidth: "100%",
   aspectRatio: "941 / 1672",
   minHeight: 0,
-  maxHeight: "78dvh",
   margin: "0 auto",
   overflow: "hidden",
   borderRadius: 18,
