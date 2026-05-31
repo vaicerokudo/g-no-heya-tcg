@@ -275,6 +275,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第8話 厄介な訳解",
     stageName: "研究施設デルタ",
     boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-delta.png",
     placements: [
       { unitId: "DELI", side: "south", r: 5, c: 3, instanceId: "SC8-DELI" },
       { unitId: "ZIMA", side: "north", r: 1, c: 3, instanceId: "SC8-ZIMA", hp: 5 },
