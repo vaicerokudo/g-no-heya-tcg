@@ -171,6 +171,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第5話 釣り場の大騒ぎ",
     stageName: "川辺",
     boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-forest.png",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 3, instanceId: "SC5-USHIMARU" },
       { unitId: "ROCKEL", side: "north", r: 2, c: 3, instanceId: "SC5-ROCKEL" },

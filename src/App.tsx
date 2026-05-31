@@ -1474,6 +1474,7 @@ const reinforceSet = useMemo(() => {
         compactWideBoard={isCompactWideBoard}
         showHandDeck={gameMode === "versus"}
         boardBackgroundUrl={activeScenario?.backgroundUrl}
+        showGateImages={gameMode === "versus"}
         rows={rows}
         cols={cols}
         cellSize={cell}

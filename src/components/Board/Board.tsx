@@ -12,6 +12,7 @@ type BoardProps = {
   cols: number;
   cellSize: number;
   boardBackgroundUrl?: string;
+  showGateImages?: boolean;
 
   letters: string[];
   occ: Map<string, any>;
@@ -68,6 +69,7 @@ export function Board(props: BoardProps) {
     cols,
     cellSize,
     boardBackgroundUrl,
+    showGateImages = true,
     letters,
     occ,
     selectedId,
@@ -153,9 +155,9 @@ export function Board(props: BoardProps) {
               const isGateCol = gateCols.includes(c);
               const isGateNorth = r === getNorthGateRow() && isGateCol;
               const isGateSouth = r === getSouthGateRow(rows) && isGateCol;
-              const gateImageUrl = isGateNorth
+              const gateImageUrl = showGateImages && isGateNorth
                 ? BLACK_GATE_IMAGE_URL
-                : isGateSouth
+                : showGateImages && isGateSouth
                   ? WHITE_GATE_IMAGE_URL
                   : null;
 
