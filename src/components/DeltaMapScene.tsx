@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { getDeltaMachineParts } from "../game/delta/progress";
+import { addDeltaMachinePart, getDeltaMachineParts } from "../game/delta/progress";
 import type { ScenarioId } from "../game/scenario/scenarios";
 
 type DeltaMapSceneProps = {
@@ -29,10 +29,12 @@ const AREAS: DeltaArea[] = [
 
 export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSceneProps) {
   const [activeArea, setActiveArea] = useState<DeltaAreaId | null>(null);
-  const [machineParts] = useState<number[]>(() => getDeltaMachineParts());
+  const [machineParts, setMachineParts] = useState<number[]>(() => getDeltaMachineParts());
+  const [partNotice, setPartNotice] = useState<string | null>(null);
   const collectedPartIds = new Set(machineParts);
   const collectedPartCount = machineParts.length;
   const machineComplete = collectedPartCount === 9;
+  const hasPart2 = collectedPartIds.has(2);
 
   const openArea = (areaId: DeltaAreaId) => {
     if (areaId === "entrance") {
@@ -41,6 +43,17 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSc
     }
 
     setActiveArea(areaId);
+  };
+
+  const inspectPart2Point = () => {
+    if (machineParts.includes(2)) {
+      setPartNotice("このデータ片は回収済みです。");
+      return;
+    }
+
+    const nextParts = addDeltaMachinePart(2);
+    setMachineParts(nextParts);
+    setPartNotice("メタルマシーン完成図の欠片を見つけた。完成図パーツ 2 を入手した。");
   };
 
   return (
@@ -99,6 +112,18 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSc
               </span>
             </button>
           ))}
+
+          <button
+            type="button"
+            onClick={inspectPart2Point}
+            title={hasPart2 ? "完成図パーツ 2 取得済み" : "小さなデータ片"}
+            style={part2PointStyle(hasPart2)}
+          >
+            <span style={part2GlowStyle(hasPart2)} />
+            <span style={part2LabelStyle}>{hasPart2 ? "取得済み" : "???"}</span>
+          </button>
+
+          {partNotice ? <div style={partNoticeStyle}>{partNotice}</div> : null}
         </div>
       </div>
 
@@ -328,6 +353,68 @@ const nodeBottomStyle: CSSProperties = {
   borderRadius: 999,
   background: "rgba(125,231,255,0.12)",
   boxShadow: "0 0 24px rgba(125,231,255,0.12)",
+};
+
+function part2PointStyle(collected: boolean): CSSProperties {
+  return {
+    position: "absolute",
+    right: "9%",
+    bottom: "16%",
+    width: "18%",
+    minHeight: 42,
+    borderRadius: 999,
+    border: collected ? "1px solid rgba(125,231,255,0.30)" : "1px solid rgba(125,231,255,0.62)",
+    background: collected ? "rgba(10,24,32,0.58)" : "rgba(15,48,64,0.72)",
+    color: collected ? "rgba(234,247,255,0.56)" : "#eaf7ff",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    padding: "0 10px",
+    boxSizing: "border-box",
+    boxShadow: collected ? "inset 0 0 12px rgba(125,231,255,0.08)" : "0 0 24px rgba(125,231,255,0.24)",
+    touchAction: "manipulation",
+    cursor: "pointer",
+  };
+}
+
+function part2GlowStyle(collected: boolean): CSSProperties {
+  return {
+    width: 10,
+    height: 10,
+    borderRadius: 999,
+    background: collected ? "rgba(125,231,255,0.38)" : "#7de7ff",
+    boxShadow: collected ? "0 0 10px rgba(125,231,255,0.18)" : "0 0 18px rgba(125,231,255,0.86)",
+    flex: "0 0 auto",
+  };
+}
+
+const part2LabelStyle: CSSProperties = {
+  fontSize: 11,
+  lineHeight: 1,
+  fontWeight: 950,
+};
+
+const partNoticeStyle: CSSProperties = {
+  position: "absolute",
+  left: "8%",
+  right: "8%",
+  bottom: "7%",
+  minHeight: 42,
+  borderRadius: 14,
+  border: "1px solid rgba(125,231,255,0.42)",
+  background: "rgba(7,18,27,0.86)",
+  color: "#eaf7ff",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "8px 12px",
+  boxSizing: "border-box",
+  fontSize: 13,
+  lineHeight: 1.45,
+  fontWeight: 850,
+  textAlign: "center",
+  boxShadow: "0 12px 28px rgba(0,0,0,0.30), 0 0 22px rgba(125,231,255,0.12)",
 };
 
 function areaButtonStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProperties {
