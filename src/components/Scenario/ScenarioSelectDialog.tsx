@@ -65,6 +65,14 @@ const SCENARIO_SELECT_ITEMS: ScenarioSelectItem[] = [
     unlockRequires: "scenario5",
     implemented: true,
   },
+  {
+    id: "scenario7",
+    title: "第7話 サッグからの依頼",
+    description: "サッグからの緊急依頼で、総長たちが鉱山の魔物を討伐する。",
+    unlockText: "第6話クリアで解放",
+    unlockRequires: "scenario6",
+    implemented: true,
+  },
 ];
 
 export function ScenarioSelectDialog({

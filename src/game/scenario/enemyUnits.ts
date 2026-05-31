@@ -33,6 +33,17 @@ export const GOBLIN_UNIT_DEF: UnitDef = {
   },
 };
 
+export const BEAR_UNIT_DEF: UnitDef = {
+  id: "BEAR",
+  name: "ベア",
+  enemyOnly: true,
+  base: {
+    atk: 3,
+    hp: 8,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
 export const HIDDEN_MYOUOU_UNIT_DEF: UnitDef = {
   id: "HIDDEN_MYOUOU",
   name: "明王・試練",
@@ -72,6 +83,7 @@ export const scenarioEnemyUnits: UnitDef[] = [
   BOAR_UNIT_DEF,
   LESSER_WYVERN_UNIT_DEF,
   GOBLIN_UNIT_DEF,
+  BEAR_UNIT_DEF,
   HIDDEN_MYOUOU_UNIT_DEF,
   MONTEN_UNIT_DEF,
   ROKUDO_AUTHOR_UNIT_DEF,

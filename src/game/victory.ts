@@ -48,6 +48,20 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side; pos?: { r: number; c: number } }>
 ): Victory | null {
+  if (scenarioId === "scenario7") {
+    const northAlive = instances.some((u) => u.side === "north");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!northAlive) {
+      return { winner: "south", detail: "Scenario 7 clear: all mine monsters were defeated." };
+    }
+    if (!southAlive) {
+      return { winner: "north", detail: "Scenario 7 failed: all allies were defeated." };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario6") {
     const rokudoAlive = instances.some((u) => u.unitId === "ROKUDO" && u.side === "north");
     const sochoAlive = instances.some((u) => u.unitId === "SOCHO" && u.side === "south");

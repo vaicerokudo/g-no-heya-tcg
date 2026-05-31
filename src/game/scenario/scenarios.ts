@@ -8,6 +8,7 @@ export type ScenarioId =
   | "scenario4"
   | "scenario5"
   | "scenario6"
+  | "scenario7"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -226,6 +227,44 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "総長", text: "大丈夫です。少し、油断しました。" },
         { speaker: "ROKUDO", text: "もう一度やってみようか！" },
         { speaker: "総長", text: "はい！お願いします！" },
+      ],
+    },
+  },
+  scenario7: {
+    id: "scenario7",
+    title: "第7話 サッグからの依頼",
+    stageName: "鉱山",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-mine.png",
+    placements: [
+      { unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC7-SOCHO" },
+      { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC7-USHIMARU" },
+      { unitId: "HIBIKI", side: "south", r: 5, c: 4, instanceId: "SC7-HIBIKI" },
+      { unitId: "BEAR", side: "north", r: 2, c: 3, instanceId: "SC7-BEAR", hp: 8 },
+      { unitId: "GOBLIN", side: "north", r: 1, c: 2, instanceId: "SC7-GOBLIN-1", hp: 4 },
+      { unitId: "GOBLIN", side: "north", r: 1, c: 3, instanceId: "SC7-GOBLIN-2", hp: 4 },
+      { unitId: "GOBLIN", side: "north", r: 1, c: 4, instanceId: "SC7-GOBLIN-3", hp: 4 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "明王", text: "サッグからの依頼じゃ！すぐに鉱山へ向かうのじゃ！" },
+        { speaker: "総長", text: "えっ？ 明王様、何かあったんですか？" },
+        { speaker: "うしまる", text: "そんなに慌てて、どうしたんすか？" },
+        { speaker: "明王", text: "いいから、はやく行くのじゃ！鉱山に魔物が出たそうじゃ！" },
+        { speaker: "hibiki", text: "は、はぃぃぃぃ……！お、おれは準備できてるぞ！" },
+      ],
+      victory: [
+        { speaker: "総長", text: "討伐完了です。これで鉱山の安全は確保できましたね。" },
+        { speaker: "うしまる", text: "思ったより数が多かったっすけど、なんとかなったっす！" },
+        { speaker: "hibiki", text: "ふ、ふん。このくらい当然だ。多少騒がしかったがな。" },
+        { speaker: "明王", text: "うむ。サッグもこれで安心じゃろう。" },
+        { speaker: "総長", text: "戻って報告しましょう。" },
+      ],
+      defeat: [
+        { speaker: "hibiki", text: "む、無理だ……数が多すぎる……！" },
+        { speaker: "うしまる", text: "いったん引くっす！立て直すっす！" },
+        { speaker: "総長", text: "すみません、明王様……もう一度準備を整えて向かいます。" },
+        { speaker: "明王", text: "うむ。焦らず態勢を立て直すのじゃ。" },
       ],
     },
   },
