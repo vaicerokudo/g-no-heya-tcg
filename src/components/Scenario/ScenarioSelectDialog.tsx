@@ -57,6 +57,14 @@ const SCENARIO_SELECT_ITEMS: ScenarioSelectItem[] = [
     unlockRequires: "scenario4",
     implemented: true,
   },
+  {
+    id: "scenario6",
+    title: "第6話 にたものどうし",
+    description: "総長とROKUDOが、互いの強さと背負い方を確かめる模擬戦。",
+    unlockText: "第5話クリアで解放",
+    unlockRequires: "scenario5",
+    implemented: true,
+  },
 ];
 
 export function ScenarioSelectDialog({

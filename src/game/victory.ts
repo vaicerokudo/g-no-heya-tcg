@@ -48,6 +48,20 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side; pos?: { r: number; c: number } }>
 ): Victory | null {
+  if (scenarioId === "scenario6") {
+    const rokudoAlive = instances.some((u) => u.unitId === "ROKUDO" && u.side === "north");
+    const sochoAlive = instances.some((u) => u.unitId === "SOCHO" && u.side === "south");
+
+    if (!rokudoAlive) {
+      return { winner: "south", detail: "Scenario 6 clear: ROKUDO was defeated in training." };
+    }
+    if (!sochoAlive) {
+      return { winner: "north", detail: "Scenario 6 failed: SOCHO was defeated." };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario5") {
     const rockelAlive = instances.some((u) => u.unitId === "ROCKEL" && u.side === "north");
     const ushimaruAlive = instances.some((u) => u.unitId === "USHIMARU" && u.side === "south");

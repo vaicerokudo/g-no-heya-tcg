@@ -7,6 +7,7 @@ export type ScenarioId =
   | "scenario3"
   | "scenario4"
   | "scenario5"
+  | "scenario6"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -193,6 +194,38 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       defeat: [
         { speaker: "ROCKEL", text: "やったっす！まだまだ切れるっす！" },
         { speaker: "うしまる", text: "だめっす……釣り場が更地になるっす……。" },
+      ],
+    },
+  },
+  scenario6: {
+    id: "scenario6",
+    title: "第6話 にたものどうし",
+    stageName: "街中",
+    boardSizeMode: "starter7",
+    placements: [
+      { unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC6-SOCHO" },
+      { unitId: "ROKUDO", side: "north", r: 2, c: 3, instanceId: "SC6-ROKUDO" },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "総長", text: "ROKUDOさん、少し付き合ってもらえますか。" },
+        { speaker: "ROKUDO", text: "鍛錬だね！いいよ！" },
+        { speaker: "総長", text: "あなたは、仲間のために一人で背負いすぎるところがあります。" },
+        { speaker: "ROKUDO", text: "……へぇ～、よく視てるね。" },
+        { speaker: "総長", text: "そうですね。だからこそ、似たものどうしです。" },
+        { speaker: "ROKUDO", text: "総長は、こうなっちゃダメだよっ！" },
+      ],
+      victory: [
+        { speaker: "ROKUDO", text: "……。総長は、つよいなぁ～。" },
+        { speaker: "総長", text: "本気だしてないでしょ！" },
+        { speaker: "ROKUDO", text: "まぁ、それぞれの役割があるからね。" },
+        { speaker: "総長", text: "それでいいです。私たちは、一人で戦っているわけではありません。" },
+      ],
+      defeat: [
+        { speaker: "ROKUDO", text: "総長……大丈夫？" },
+        { speaker: "総長", text: "大丈夫です。少し、油断しました。" },
+        { speaker: "ROKUDO", text: "もう一度やってみようか！" },
+        { speaker: "総長", text: "はい！お願いします！" },
       ],
     },
   },
