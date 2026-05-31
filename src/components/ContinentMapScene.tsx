@@ -18,8 +18,8 @@ type Hotspot = {
 };
 
 const HOTSPOTS: Hotspot[] = [
-  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 41, y: 69, w: 24, h: 9 },
-  { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 47, y: 29, w: 31, h: 10 },
+  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 60, y: 36, w: 28, h: 9 },
+  { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 33, y: 74, w: 34, h: 10 },
 ];
 
 export function ContinentMapScene({ onReturnAstoria, onEnterDelta }: ContinentMapSceneProps) {
