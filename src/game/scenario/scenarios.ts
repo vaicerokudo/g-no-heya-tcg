@@ -240,7 +240,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       { unitId: "SOCHO", side: "south", r: 5, c: 3, instanceId: "SC7-SOCHO" },
       { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC7-USHIMARU" },
       { unitId: "HIBIKI", side: "south", r: 5, c: 4, instanceId: "SC7-HIBIKI" },
-      { unitId: "BEAR", side: "north", r: 2, c: 3, instanceId: "SC7-BEAR", hp: 8 },
+      { unitId: "BEAR", side: "north", r: 0, c: 3, instanceId: "SC7-BEAR", hp: 8 },
       { unitId: "GOBLIN", side: "north", r: 1, c: 2, instanceId: "SC7-GOBLIN-1", hp: 4 },
       { unitId: "GOBLIN", side: "north", r: 1, c: 3, instanceId: "SC7-GOBLIN-2", hp: 4 },
       { unitId: "GOBLIN", side: "north", r: 1, c: 4, instanceId: "SC7-GOBLIN-3", hp: 4 },
