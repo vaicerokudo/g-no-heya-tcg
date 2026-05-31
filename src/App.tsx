@@ -48,6 +48,7 @@ import { SkillModeBanner } from "./components/SkillModeBanner";
 import { TopStatusBar } from "./components/TopStatusBar";
 import { AstoriaMapScene } from "./components/AstoriaMapScene";
 import { ContinentMapScene } from "./components/ContinentMapScene";
+import { DeltaMapScene } from "./components/DeltaMapScene";
 import { TownScene } from "./components/TownScene";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
@@ -101,7 +102,7 @@ type SkillMotionEvent = { id: string; instanceId: string };
 type AttackMotionEvent = { id: string; instanceId: string; dr: number; dc: number };
 type MoveMotionEvent = { id: string; instanceId: string };
 type ImpactFxEvent = { id: string; targetId: string; r: number; c: number };
-type Scene = "astoria" | "continent" | "town" | "tcg";
+type Scene = "astoria" | "continent" | "delta" | "town" | "tcg";
 type BoardPreviewMode = "move" | "attack";
 type SkillImpactFxEvent = {
   id: string;
@@ -1344,7 +1345,11 @@ const reinforceSet = useMemo(() => {
   }
 
   if (scene === "continent") {
-    return <ContinentMapScene onReturnAstoria={() => setScene("astoria")} />;
+    return <ContinentMapScene onReturnAstoria={() => setScene("astoria")} onEnterDelta={() => setScene("delta")} />;
+  }
+
+  if (scene === "delta") {
+    return <DeltaMapScene onReturnContinent={() => setScene("continent")} />;
   }
 
   if (scene === "town") {

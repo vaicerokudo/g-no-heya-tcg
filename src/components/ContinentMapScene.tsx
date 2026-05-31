@@ -1,7 +1,8 @@
-import { useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
 type ContinentMapSceneProps = {
   onReturnAstoria: () => void;
+  onEnterDelta: () => void;
 };
 
 const CONTINENT_MAP_IMAGE_URL = "/backgrounds/continent-map.png";
@@ -17,29 +18,11 @@ type Hotspot = {
 };
 
 const HOTSPOTS: Hotspot[] = [
-  {
-    id: "astoria",
-    label: "アストリア",
-    subLabel: "戻る",
-    x: 41,
-    y: 69,
-    w: 24,
-    h: 9,
-  },
-  {
-    id: "delta",
-    label: "研究施設デルタ",
-    subLabel: "準備中",
-    x: 47,
-    y: 29,
-    w: 31,
-    h: 10,
-  },
+  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 41, y: 69, w: 24, h: 9 },
+  { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 47, y: 29, w: 31, h: 10 },
 ];
 
-export function ContinentMapScene({ onReturnAstoria }: ContinentMapSceneProps) {
-  const [deltaDialogOpen, setDeltaDialogOpen] = useState(false);
-
+export function ContinentMapScene({ onReturnAstoria, onEnterDelta }: ContinentMapSceneProps) {
   return (
     <div style={sceneStyle}>
       <div style={shellStyle}>
@@ -58,7 +41,7 @@ export function ContinentMapScene({ onReturnAstoria }: ContinentMapSceneProps) {
             <button
               key={spot.id}
               type="button"
-              onClick={spot.id === "astoria" ? onReturnAstoria : () => setDeltaDialogOpen(true)}
+              onClick={spot.id === "astoria" ? onReturnAstoria : onEnterDelta}
               title={`${spot.label}: ${spot.subLabel}`}
               style={{
                 ...hotspotStyle,
@@ -74,19 +57,6 @@ export function ContinentMapScene({ onReturnAstoria }: ContinentMapSceneProps) {
           ))}
         </div>
       </div>
-
-      {deltaDialogOpen ? (
-        <div style={overlayStyle}>
-          <div style={dialogStyle}>
-            <div style={dialogEyebrowStyle}>研究施設デルタ</div>
-            <div style={dialogTitleStyle}>準備中</div>
-            <p style={dialogTextStyle}>デルタ編はまだ準備中です。次の物語をお待ちください。</p>
-            <button type="button" onClick={() => setDeltaDialogOpen(false)} style={dialogButtonStyle}>
-              閉じる
-            </button>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -199,60 +169,4 @@ const hotspotSubLabelStyle: CSSProperties = {
   overflow: "hidden",
   clip: "rect(0 0 0 0)",
   whiteSpace: "nowrap",
-};
-
-const overlayStyle: CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  zIndex: 14000,
-  display: "grid",
-  placeItems: "center",
-  padding: 14,
-  boxSizing: "border-box",
-  background: "rgba(5,5,8,0.62)",
-  backdropFilter: "blur(2px)",
-};
-
-const dialogStyle: CSSProperties = {
-  width: "min(460px, calc(100% - 10px))",
-  padding: "24px 22px 20px",
-  boxSizing: "border-box",
-  borderRadius: 18,
-  border: "1px solid rgba(255,216,102,0.54)",
-  background: "linear-gradient(180deg, rgba(39,27,20,0.97), rgba(17,14,15,0.97))",
-  boxShadow: "0 24px 58px rgba(0,0,0,0.58), inset 0 0 34px rgba(255,198,86,0.08)",
-};
-
-const dialogEyebrowStyle: CSSProperties = {
-  color: "rgba(255,232,180,0.78)",
-  fontSize: 12,
-  fontWeight: 950,
-};
-
-const dialogTitleStyle: CSSProperties = {
-  marginTop: 8,
-  color: "#ffd66d",
-  fontSize: 24,
-  lineHeight: 1.15,
-  fontWeight: 950,
-};
-
-const dialogTextStyle: CSSProperties = {
-  margin: "14px 0 0",
-  color: "#fff6df",
-  fontSize: 15,
-  lineHeight: 1.7,
-};
-
-const dialogButtonStyle: CSSProperties = {
-  marginTop: 18,
-  minHeight: 42,
-  padding: "0 16px",
-  borderRadius: 12,
-  border: "1px solid rgba(255,216,102,0.82)",
-  background: "linear-gradient(180deg, #ffd66d, #c5872d)",
-  color: "#2a1a0d",
-  fontWeight: 950,
-  touchAction: "manipulation",
-  cursor: "pointer",
 };
