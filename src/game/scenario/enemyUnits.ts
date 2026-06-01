@@ -56,6 +56,17 @@ export const ZIMA_UNIT_DEF: UnitDef = {
   },
 };
 
+export const PROTO_ROBOT_UNIT_DEF: UnitDef = {
+  id: "PROTO_ROBOT",
+  name: "試作ロボ",
+  enemyOnly: true,
+  base: {
+    atk: 2,
+    hp: 6,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
 export const HIDDEN_MYOUOU_UNIT_DEF: UnitDef = {
   id: "HIDDEN_MYOUOU",
   name: "明王・試練",
@@ -97,6 +108,7 @@ export const scenarioEnemyUnits: UnitDef[] = [
   GOBLIN_UNIT_DEF,
   BEAR_UNIT_DEF,
   ZIMA_UNIT_DEF,
+  PROTO_ROBOT_UNIT_DEF,
   HIDDEN_MYOUOU_UNIT_DEF,
   MONTEN_UNIT_DEF,
   ROKUDO_AUTHOR_UNIT_DEF,

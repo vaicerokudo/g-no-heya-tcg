@@ -5,6 +5,7 @@ import type { ScenarioId } from "../game/scenario/scenarios";
 type DeltaMapSceneProps = {
   onReturnContinent: () => void;
   onStartScenario: (scenarioId: ScenarioId) => void;
+  clearedScenarioIds: ScenarioId[];
 };
 
 type DeltaAreaId = "entrance" | "control" | "archive" | "quarantine";
@@ -27,7 +28,7 @@ const AREAS: DeltaArea[] = [
   { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", icon: "EXIT", x: 38, y: 84, w: 24, h: 9 },
 ];
 
-export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSceneProps) {
+export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScenarioIds }: DeltaMapSceneProps) {
   const [activeArea, setActiveArea] = useState<DeltaAreaId | null>(null);
   const [machineParts, setMachineParts] = useState<number[]>(() => getDeltaMachineParts());
   const [partNotice, setPartNotice] = useState<string | null>(null);
@@ -35,6 +36,7 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSc
   const collectedPartCount = machineParts.length;
   const machineComplete = collectedPartCount === 9;
   const hasPart2 = collectedPartIds.has(2);
+  const scenario9Unlocked = clearedScenarioIds.includes("scenario8");
 
   const openArea = (areaId: DeltaAreaId) => {
     if (areaId === "entrance") {
@@ -134,14 +136,38 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSc
             <div style={dialogEyebrowStyle}>{getAreaTitle(activeArea)}</div>
             <div style={dialogTitleStyle}>{getAreaDialogTitle(activeArea, machineComplete)}</div>
             {activeArea === "control" ? (
-              <div style={scenarioEntryStyle}>
-                <div>
-                  <div style={scenarioEntryTitleStyle}>第8話 厄介な訳解</div>
-                  <div style={scenarioEntryTextStyle}>Deliがジーマを捕まえて、完成図パーツの手がかりを入手します。</div>
+              <div style={scenarioListStyle}>
+                <div style={scenarioEntryStyle}>
+                  <div>
+                    <div style={scenarioEntryTitleStyle}>第8話 厄介な訳解</div>
+                    <div style={scenarioEntryTextStyle}>Deliがジーマを捕まえて、完成図パーツの手がかりを入手します。</div>
+                  </div>
+                  <button type="button" onClick={() => onStartScenario("scenario8")} style={scenarioStartButtonStyle}>
+                    開始
+                  </button>
                 </div>
-                <button type="button" onClick={() => onStartScenario("scenario8")} style={scenarioStartButtonStyle}>
-                  開始
-                </button>
+                <div style={scenarioEntryStyle}>
+                  <div>
+                    <div style={scenarioEntryTitleStyle}>第9話 誤起動</div>
+                    <div style={scenarioEntryTextStyle}>
+                      {scenario9Unlocked
+                        ? "DeliとPlayerで、誤起動した試作ロボを制圧します。"
+                        : "第8話クリアで解放"}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onStartScenario("scenario9")}
+                    style={{
+                      ...scenarioStartButtonStyle,
+                      opacity: scenario9Unlocked ? 1 : 0.52,
+                      cursor: scenario9Unlocked ? "pointer" : "not-allowed",
+                    }}
+                    disabled={!scenario9Unlocked}
+                  >
+                    {scenario9Unlocked ? "開始" : "LOCK"}
+                  </button>
+                </div>
               </div>
             ) : null}
             {activeArea === "archive" ? (
@@ -604,12 +630,18 @@ const dialogTitleStyle: CSSProperties = {
   fontWeight: 950,
 };
 
+const scenarioListStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 10,
+  marginTop: 16,
+};
+
 const scenarioEntryStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   gap: 12,
-  marginTop: 16,
   padding: 12,
   borderRadius: 10,
   clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)",

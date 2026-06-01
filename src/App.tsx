@@ -687,6 +687,9 @@ export default function App() {
       if (activeScenarioId === "scenario8") {
         addDeltaMachinePart(1);
       }
+      if (activeScenarioId === "scenario9") {
+        addDeltaMachinePart(3);
+      }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
       }
@@ -1353,7 +1356,13 @@ const reinforceSet = useMemo(() => {
   }
 
   if (scene === "delta") {
-    return <DeltaMapScene onReturnContinent={() => setScene("continent")} onStartScenario={handleScenarioSelectStart} />;
+    return (
+      <DeltaMapScene
+        onReturnContinent={() => setScene("continent")}
+        onStartScenario={handleScenarioSelectStart}
+        clearedScenarioIds={clearedScenarioIds}
+      />
+    );
   }
 
   if (scene === "town") {

@@ -10,6 +10,7 @@ export type ScenarioId =
   | "scenario6"
   | "scenario7"
   | "scenario8"
+  | "scenario9"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -301,6 +302,50 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "Deli", text: "逃げ足だけは本当に一級品ですね……！" },
         { speaker: "ジーマ", text: "褒め言葉として受け取っとくぜ。" },
         { speaker: "Deli", text: "褒めてません！" },
+      ],
+    },
+  },
+  scenario9: {
+    id: "scenario9",
+    title: "第9話 誤起動",
+    stageName: "研究施設デルタ",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-delta.png",
+    placements: [
+      { unitId: "DELI", side: "south", r: 5, c: 2, instanceId: "SC9-DELI" },
+      { unitId: "PLAYER", side: "south", r: 5, c: 4, instanceId: "SC9-PLAYER" },
+      { unitId: "PROTO_ROBOT", side: "north", r: 2, c: 2, instanceId: "SC9-PROTO-ROBOT-1", hp: 6 },
+      { unitId: "PROTO_ROBOT", side: "north", r: 2, c: 4, instanceId: "SC9-PROTO-ROBOT-2", hp: 6 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "ジーマ", text: "おっ、こいつまだ動くんじゃねぇか？" },
+        { speaker: "Deli", text: "ちょ、勝手に触らないでください！" },
+        { speaker: "ジーマ", text: "……あ。" },
+        { speaker: "試作ロボ", text: "SYSTEM REBOOT... TARGET CONFIRMED." },
+        { speaker: "Deli", text: "ほら！絶対こうなると思ってましたよ！" },
+        { speaker: "ジーマ", text: "悪い！あとは頼んだぜ、Deli！" },
+        { speaker: "Deli", text: "逃げるの早すぎませんか！？" },
+        { speaker: "Player", text: "……かっこいい。" },
+        { speaker: "Deli", text: "えっ、誰ですか！？" },
+        { speaker: "Player", text: "援護します。Deliさん、かっこいいです。" },
+        { speaker: "Deli", text: "今それどころじゃないんですけど！助かります！" },
+      ],
+      victory: [
+        { speaker: "Deli", text: "なんとか止まりましたね……。" },
+        { speaker: "Player", text: "すごい……Deliさん、かっこいい。" },
+        { speaker: "Deli", text: "いや、あの、そんな真顔で言われると困るんですが……。" },
+        { speaker: "ジーマ", text: "いやー、助かった助かった！" },
+        { speaker: "Deli", text: "ジーマさん？あとで説明してもらいますからね。" },
+        { speaker: "ジーマ", text: "おっと、そうだ。これ、見つけたんだった。" },
+        { speaker: "Player", text: "完成図の欠片……？" },
+        { speaker: "Deli", text: "またパーツですか。これで少しは信用……できるんですかね？" },
+      ],
+      defeat: [
+        { speaker: "Deli", text: "制御が……間に合いません！" },
+        { speaker: "Player", text: "Deliさん、下がってください。" },
+        { speaker: "ジーマ", text: "こりゃ一回逃げた方がよさそうだな！" },
+        { speaker: "Deli", text: "最初に逃げた人が言わないでください！" },
       ],
     },
   },
