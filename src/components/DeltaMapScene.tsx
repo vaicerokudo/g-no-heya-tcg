@@ -377,19 +377,25 @@ function part2PointStyle(collected: boolean): CSSProperties {
     position: "absolute",
     right: "9%",
     bottom: "16%",
-    width: "18%",
-    minHeight: 42,
-    borderRadius: 999,
-    border: collected ? "1px solid rgba(125,231,255,0.30)" : "1px solid rgba(125,231,255,0.62)",
-    background: collected ? "rgba(10,24,32,0.58)" : "rgba(15,48,64,0.72)",
+    width: "20%",
+    minHeight: 46,
+    borderRadius: 8,
+    clipPath: "polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px)",
+    border: collected ? "1px solid rgba(125,231,255,0.24)" : "1px solid rgba(125,231,255,0.72)",
+    background: collected
+      ? "linear-gradient(135deg, rgba(7,18,27,0.56), rgba(16,38,50,0.46))"
+      : "linear-gradient(135deg, rgba(13,45,61,0.78), rgba(8,17,29,0.68))",
     color: collected ? "rgba(234,247,255,0.56)" : "#eaf7ff",
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: 7,
-    padding: "0 10px",
+    gap: 5,
+    padding: "3px 8px",
     boxSizing: "border-box",
-    boxShadow: collected ? "inset 0 0 12px rgba(125,231,255,0.08)" : "0 0 24px rgba(125,231,255,0.24)",
+    boxShadow: collected
+      ? "inset 0 0 18px rgba(125,231,255,0.06)"
+      : "0 0 26px rgba(125,231,255,0.34), inset 0 0 18px rgba(125,231,255,0.14)",
+    backdropFilter: "blur(4px)",
     touchAction: "manipulation",
     cursor: "pointer",
   };
@@ -429,9 +435,9 @@ const partNoticeStyle: CSSProperties = {
   right: "8%",
   bottom: "7%",
   minHeight: 42,
-  borderRadius: 14,
-  border: "1px solid rgba(125,231,255,0.42)",
-  background: "rgba(7,18,27,0.86)",
+  borderRadius: 10,
+  border: "1px solid rgba(125,231,255,0.52)",
+  background: "linear-gradient(135deg, rgba(7,18,27,0.90), rgba(15,40,54,0.82))",
   color: "#eaf7ff",
   display: "flex",
   alignItems: "center",
@@ -442,39 +448,49 @@ const partNoticeStyle: CSSProperties = {
   lineHeight: 1.45,
   fontWeight: 850,
   textAlign: "center",
-  boxShadow: "0 12px 28px rgba(0,0,0,0.30), 0 0 22px rgba(125,231,255,0.12)",
+  backdropFilter: "blur(5px)",
+  boxShadow: "0 12px 28px rgba(0,0,0,0.30), 0 0 22px rgba(125,231,255,0.20), inset 0 0 18px rgba(125,231,255,0.08)",
 };
 
 function areaButtonStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProperties {
   const locked = areaId === "quarantine" && !machineComplete;
   const archive = areaId === "archive";
   const entrance = areaId === "entrance";
+  const openGate = areaId === "quarantine" && machineComplete;
   return {
     position: "absolute",
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-start",
-    gap: 8,
-    padding: 10,
-    borderRadius: 16,
+    gap: 9,
+    padding: "10px 11px",
+    borderRadius: 8,
+    clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)",
     border: locked
-      ? "1px solid rgba(255,93,93,0.58)"
+      ? "1px solid rgba(255,93,93,0.72)"
       : archive
-        ? "1px solid rgba(181,145,255,0.54)"
-        : "1px solid rgba(125,231,255,0.58)",
+        ? "1px solid rgba(181,145,255,0.68)"
+        : openGate
+          ? "1px solid rgba(127,255,193,0.72)"
+          : "1px solid rgba(125,231,255,0.70)",
     background: locked
-      ? "linear-gradient(180deg, rgba(72,22,28,0.94), rgba(24,12,19,0.92))"
+      ? "linear-gradient(135deg, rgba(82,22,31,0.78), rgba(20,8,14,0.76)), linear-gradient(90deg, rgba(255,93,93,0.18), transparent 42%)"
       : archive
-        ? "linear-gradient(180deg, rgba(41,35,76,0.94), rgba(13,19,34,0.92))"
+        ? "linear-gradient(135deg, rgba(43,35,82,0.76), rgba(10,17,31,0.74)), linear-gradient(90deg, rgba(181,145,255,0.16), transparent 48%)"
         : entrance
-          ? "linear-gradient(180deg, rgba(48,64,74,0.94), rgba(14,22,30,0.92))"
-          : "linear-gradient(180deg, rgba(24,58,76,0.94), rgba(11,22,32,0.92))",
+          ? "linear-gradient(135deg, rgba(53,71,84,0.72), rgba(12,24,34,0.74)), linear-gradient(90deg, rgba(234,247,255,0.12), transparent 45%)"
+          : openGate
+            ? "linear-gradient(135deg, rgba(25,82,59,0.78), rgba(8,25,21,0.76)), linear-gradient(90deg, rgba(127,255,193,0.18), transparent 45%)"
+            : "linear-gradient(135deg, rgba(18,66,86,0.76), rgba(8,21,32,0.74)), linear-gradient(90deg, rgba(125,231,255,0.17), transparent 46%)",
     color: "#eaf7ff",
     boxShadow: locked
-      ? "0 0 22px rgba(255,93,93,0.16)"
+      ? "0 0 26px rgba(255,93,93,0.28), inset 0 0 24px rgba(255,93,93,0.08)"
       : archive
-        ? "0 0 22px rgba(181,145,255,0.15)"
-        : "0 0 22px rgba(125,231,255,0.15)",
+        ? "0 0 26px rgba(181,145,255,0.24), inset 0 0 24px rgba(181,145,255,0.07)"
+        : openGate
+          ? "0 0 28px rgba(127,255,193,0.28), inset 0 0 24px rgba(127,255,193,0.08)"
+          : "0 0 26px rgba(125,231,255,0.24), inset 0 0 24px rgba(125,231,255,0.08)",
+    backdropFilter: "blur(5px)",
     touchAction: "manipulation",
     cursor: "pointer",
   };
@@ -483,24 +499,41 @@ function areaButtonStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProp
 function areaIconStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProperties {
   const locked = areaId === "quarantine" && !machineComplete;
   const archive = areaId === "archive";
+  const openGate = areaId === "quarantine" && machineComplete;
   return {
     flex: "0 0 auto",
     width: 44,
     minWidth: 44,
     height: 34,
-    borderRadius: 10,
+    borderRadius: 6,
+    clipPath: "polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px)",
     display: "grid",
     placeItems: "center",
     border: locked
-      ? "1px solid rgba(255,93,93,0.52)"
+      ? "1px solid rgba(255,93,93,0.62)"
       : archive
-        ? "1px solid rgba(181,145,255,0.50)"
-        : "1px solid rgba(125,231,255,0.50)",
-    background: locked ? "rgba(255,93,93,0.12)" : archive ? "rgba(181,145,255,0.12)" : "rgba(125,231,255,0.12)",
-    color: locked ? "#ff8f8f" : archive ? "#c8b6ff" : "#7de7ff",
+        ? "1px solid rgba(181,145,255,0.60)"
+        : openGate
+          ? "1px solid rgba(127,255,193,0.62)"
+          : "1px solid rgba(125,231,255,0.62)",
+    background: locked
+      ? "rgba(255,93,93,0.15)"
+      : archive
+        ? "rgba(181,145,255,0.15)"
+        : openGate
+          ? "rgba(127,255,193,0.15)"
+          : "rgba(125,231,255,0.15)",
+    color: locked ? "#ff8f8f" : archive ? "#c8b6ff" : openGate ? "#9dffd4" : "#7de7ff",
     fontSize: 10,
     fontWeight: 950,
     letterSpacing: 0,
+    boxShadow: locked
+      ? "0 0 14px rgba(255,93,93,0.22)"
+      : archive
+        ? "0 0 14px rgba(181,145,255,0.18)"
+        : openGate
+          ? "0 0 14px rgba(127,255,193,0.20)"
+          : "0 0 14px rgba(125,231,255,0.18)",
   };
 }
 
@@ -516,10 +549,11 @@ const areaLabelStyle: CSSProperties = {
   fontSize: 16,
   lineHeight: 1.1,
   fontWeight: 950,
+  textShadow: "0 0 10px rgba(125,231,255,0.20), 0 2px 4px rgba(0,0,0,0.55)",
 };
 
 const areaSubLabelStyle: CSSProperties = {
-  color: "rgba(234,247,255,0.72)",
+  color: "rgba(234,247,255,0.78)",
   fontSize: 11,
   lineHeight: 1.1,
   fontWeight: 800,
@@ -543,12 +577,16 @@ function dialogStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProperti
     width: "min(460px, calc(100% - 10px))",
     padding: "24px 22px 20px",
     boxSizing: "border-box",
-    borderRadius: 18,
-    border: locked ? "1px solid rgba(255,93,93,0.48)" : "1px solid rgba(125,231,255,0.44)",
-    background: "linear-gradient(180deg, rgba(13,31,43,0.98), rgba(10,13,22,0.98))",
+    borderRadius: 12,
+    clipPath: "polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px)",
+    border: locked ? "1px solid rgba(255,93,93,0.58)" : "1px solid rgba(125,231,255,0.54)",
+    background: locked
+      ? "linear-gradient(135deg, rgba(36,13,20,0.98), rgba(8,10,16,0.98)), linear-gradient(90deg, rgba(255,93,93,0.10), transparent)"
+      : "linear-gradient(135deg, rgba(12,33,45,0.98), rgba(8,12,21,0.98)), linear-gradient(90deg, rgba(125,231,255,0.10), transparent)",
     boxShadow: locked
-      ? "0 24px 58px rgba(0,0,0,0.58), inset 0 0 34px rgba(255,93,93,0.08)"
-      : "0 24px 58px rgba(0,0,0,0.58), inset 0 0 34px rgba(125,231,255,0.08)",
+      ? "0 24px 58px rgba(0,0,0,0.58), 0 0 28px rgba(255,93,93,0.20), inset 0 0 34px rgba(255,93,93,0.10)"
+      : "0 24px 58px rgba(0,0,0,0.58), 0 0 28px rgba(125,231,255,0.18), inset 0 0 34px rgba(125,231,255,0.10)",
+    backdropFilter: "blur(6px)",
   };
 }
 
@@ -573,9 +611,11 @@ const scenarioEntryStyle: CSSProperties = {
   gap: 12,
   marginTop: 16,
   padding: 12,
-  borderRadius: 14,
-  border: "1px solid rgba(125,231,255,0.32)",
-  background: "rgba(125,231,255,0.07)",
+  borderRadius: 10,
+  clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)",
+  border: "1px solid rgba(125,231,255,0.44)",
+  background: "linear-gradient(135deg, rgba(125,231,255,0.12), rgba(6,14,24,0.54))",
+  boxShadow: "inset 0 0 20px rgba(125,231,255,0.08)",
 };
 
 const scenarioEntryTitleStyle: CSSProperties = {
@@ -596,7 +636,8 @@ const scenarioStartButtonStyle: CSSProperties = {
   flex: "0 0 auto",
   minHeight: 38,
   padding: "0 14px",
-  borderRadius: 12,
+  borderRadius: 8,
+  clipPath: "polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px)",
   border: "1px solid rgba(125,231,255,0.72)",
   background: "linear-gradient(180deg, #7de7ff, #388aa8)",
   color: "#061018",
@@ -618,15 +659,16 @@ const puzzleGridStyle: CSSProperties = {
   gap: 8,
   marginTop: 10,
   padding: 10,
-  borderRadius: 14,
-  border: "1px solid rgba(181,145,255,0.28)",
-  background: "rgba(181,145,255,0.06)",
+  borderRadius: 10,
+  border: "1px solid rgba(181,145,255,0.42)",
+  background: "linear-gradient(135deg, rgba(181,145,255,0.10), rgba(11,18,31,0.58))",
+  boxShadow: "inset 0 0 22px rgba(181,145,255,0.08), 0 0 20px rgba(181,145,255,0.08)",
 };
 
 function puzzleSlotStyle(collected: boolean): CSSProperties {
   return {
     aspectRatio: "1",
-    borderRadius: 10,
+    borderRadius: 6,
     overflow: "hidden",
     border: collected ? "1px solid rgba(125,231,255,0.72)" : "1px dashed rgba(181,145,255,0.48)",
     display: "grid",
