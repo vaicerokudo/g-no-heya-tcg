@@ -271,7 +271,7 @@ const mapFrameStyle: CSSProperties = {
   borderRadius: 20,
   border: "1px solid rgba(125,231,255,0.30)",
   background:
-    "radial-gradient(circle at 50% 38%, rgba(125,231,255,0.12), transparent 26%), linear-gradient(180deg, rgba(12,31,43,0.98), rgba(11,16,28,0.98)), repeating-linear-gradient(90deg, rgba(125,231,255,0.05) 0 1px, transparent 1px 42px), repeating-linear-gradient(0deg, rgba(125,231,255,0.04) 0 1px, transparent 1px 42px)",
+    "linear-gradient(180deg, rgba(4,10,16,0.08), rgba(4,10,16,0.26)), url('/backgrounds/delta-facility-map.png') center / 100% 100% no-repeat, linear-gradient(180deg, rgba(12,31,43,0.98), rgba(11,16,28,0.98))",
   boxShadow: "0 22px 60px rgba(0,0,0,0.52), inset 0 0 62px rgba(64,211,255,0.13)",
 };
 
@@ -296,6 +296,8 @@ const facilityCoreStyle: CSSProperties = {
   boxShadow: "inset 0 0 28px rgba(125,231,255,0.15), 0 12px 28px rgba(0,0,0,0.28)",
   display: "grid",
   placeItems: "center",
+  opacity: 0.28,
+  pointerEvents: "none",
 };
 
 const coreTitleStyle: CSSProperties = {
@@ -328,6 +330,8 @@ const walkwayVerticalStyle: CSSProperties = {
   height: "59%",
   borderRadius: 999,
   background: "linear-gradient(180deg, rgba(125,231,255,0.20), rgba(125,231,255,0.05))",
+  opacity: 0.28,
+  pointerEvents: "none",
 };
 
 const walkwayHorizontalStyle: CSSProperties = {
@@ -338,6 +342,8 @@ const walkwayHorizontalStyle: CSSProperties = {
   height: "5%",
   borderRadius: 999,
   background: "linear-gradient(90deg, rgba(125,231,255,0.07), rgba(125,231,255,0.22), rgba(125,231,255,0.07))",
+  opacity: 0.28,
+  pointerEvents: "none",
 };
 
 const nodeTopStyle: CSSProperties = {
@@ -349,6 +355,8 @@ const nodeTopStyle: CSSProperties = {
   borderRadius: 999,
   background: "rgba(125,231,255,0.16)",
   boxShadow: "0 0 24px rgba(125,231,255,0.18)",
+  opacity: 0.28,
+  pointerEvents: "none",
 };
 
 const nodeBottomStyle: CSSProperties = {
@@ -360,6 +368,8 @@ const nodeBottomStyle: CSSProperties = {
   borderRadius: 999,
   background: "rgba(125,231,255,0.12)",
   boxShadow: "0 0 24px rgba(125,231,255,0.12)",
+  opacity: 0.28,
+  pointerEvents: "none",
 };
 
 function part2PointStyle(collected: boolean): CSSProperties {
