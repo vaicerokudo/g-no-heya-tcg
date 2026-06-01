@@ -13,11 +13,15 @@ export type ScenarioId =
   | "scenario9"
   | "scenario10"
   | "scenario11"
+  | "scenario12"
+  | "scenario13"
+  | "scenario14"
+  | "scenario15"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
-export type ScenarioReturnScene = "astoria" | "delta";
+export type ScenarioReturnScene = "astoria" | "delta" | "dustWasteland";
 
 export type ScenarioLine = {
   speaker: string;
@@ -41,6 +45,9 @@ export type ScenarioConfig = {
   boardSizeMode: BoardSizeMode;
   backgroundUrl?: string;
   returnScene?: ScenarioReturnScene;
+  terrain?: {
+    quicksand?: string[];
+  };
   placements: ScenarioUnitPlacement[];
   dialogs: Record<ScenarioDialogKind, ScenarioLine[]>;
 };
@@ -445,6 +452,134 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "ROKUDO", text: "つよいね……。" },
         { speaker: "Deli", text: "このままじゃ、ロクさんが……！" },
         { speaker: "Player", text: "立て直しましょう。" },
+      ],
+    },
+  },
+  scenario12: {
+    id: "scenario12",
+    title: "第12話 荒野の入口",
+    stageName: "砂塵の荒野",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/dust-wasteland-map.png",
+    returnScene: "dustWasteland",
+    placements: [
+      { unitId: "TSUTSU", side: "south", r: 5, c: 2, instanceId: "SC12-TSUTSU" },
+      { unitId: "YABUKO_NORMAL", side: "south", r: 5, c: 4, instanceId: "SC12-YABUKO" },
+      { unitId: "WASTELAND_SCORPION", side: "north", r: 2, c: 2, instanceId: "SC12-SCORPION-1", hp: 5 },
+      { unitId: "WASTELAND_SCORPION", side: "north", r: 2, c: 4, instanceId: "SC12-SCORPION-2", hp: 5 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "つつ", text: "しょうがねぇなぁ……そっちは危ねぇって言ってんだろ。" },
+        { speaker: "やぶこ", text: "えー？でも、こっちのほうが近そうなの？" },
+        { speaker: "つつ", text: "近いかどうかじゃねぇ。まずは入口の安全確認だ。" },
+      ],
+      victory: [
+        { speaker: "つつ", text: "よし、入口は抜けたな。次は地面をよく見て進むぞ。" },
+        { speaker: "やぶこ", text: "地面？おいしそうな砂はないの？" },
+      ],
+      defeat: [
+        { speaker: "つつ", text: "一回戻るぞ。荒野を甘く見ると足元から持っていかれる。" },
+      ],
+    },
+  },
+  scenario13: {
+    id: "scenario13",
+    title: "第13話 流砂地帯",
+    stageName: "砂塵の荒野・流砂地帯",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/dust-wasteland-map.png",
+    returnScene: "dustWasteland",
+    terrain: {
+      quicksand: ["C3", "D4", "E5"],
+    },
+    placements: [
+      { unitId: "TSUTSU", side: "south", r: 5, c: 2, instanceId: "SC13-TSUTSU" },
+      { unitId: "YABUKO_NORMAL", side: "south", r: 5, c: 4, instanceId: "SC13-YABUKO" },
+      { unitId: "WASTELAND_SCORPION", side: "north", r: 2, c: 1, instanceId: "SC13-SCORPION-1", hp: 5 },
+      { unitId: "WASTELAND_SCORPION", side: "north", r: 2, c: 5, instanceId: "SC13-SCORPION-2", hp: 5 },
+      { unitId: "ROCK_GOLEM", side: "north", r: 1, c: 3, instanceId: "SC13-ROCK-GOLEM", hp: 8 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "やぶこ", text: "あっち、ふかふかしてるの。" },
+        { speaker: "つつ", text: "そこが一番危ねぇんだよ。止まったら沈む。流砂だ。" },
+        { speaker: "つつ", text: "流砂マスでターンを終えるとスタンする。通るだけならまだ何とかなる。" },
+      ],
+      victory: [
+        { speaker: "つつ", text: "足元を見る癖、少しはついたか？" },
+        { speaker: "やぶこ", text: "ふかふかは危ない、覚えたの。" },
+      ],
+      defeat: [
+        { speaker: "つつ", text: "無理に踏み込むな。流砂は待ってくれねぇ。" },
+      ],
+    },
+  },
+  scenario14: {
+    id: "scenario14",
+    title: "第14話 砂嵐の抜け道",
+    stageName: "砂塵の荒野・砂嵐の抜け道",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/dust-wasteland-map.png",
+    returnScene: "dustWasteland",
+    terrain: {
+      quicksand: ["B4", "F4"],
+    },
+    placements: [
+      { unitId: "TSUTSU", side: "south", r: 5, c: 2, instanceId: "SC14-TSUTSU" },
+      { unitId: "YABUKO_NORMAL", side: "south", r: 5, c: 4, instanceId: "SC14-YABUKO" },
+      { unitId: "LESSER_WYVERN", side: "north", r: 1, c: 2, instanceId: "SC14-WYVERN-1", hp: 7 },
+      { unitId: "LESSER_WYVERN", side: "north", r: 2, c: 3, instanceId: "SC14-WYVERN-2", hp: 7 },
+      { unitId: "LESSER_WYVERN", side: "north", r: 1, c: 4, instanceId: "SC14-WYVERN-3", hp: 7 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "つつ", text: "砂嵐で視界が悪い。派手に動くより、抜け道を読む。" },
+        { speaker: "やぶこ", text: "じゃあ、やぶこは風の気分で行くの。" },
+        { speaker: "つつ", text: "その気分を俺の指示と同じ方向にしてくれ。" },
+      ],
+      victory: [
+        { speaker: "つつ", text: "抜け道は見えた。奥地までもう少しだ。" },
+        { speaker: "やぶこ", text: "砂だらけだけど、進めるの。" },
+      ],
+      defeat: [
+        { speaker: "つつ", text: "視界が悪い時ほど、立て直しだ。" },
+      ],
+    },
+  },
+  scenario15: {
+    id: "scenario15",
+    title: "第15話 荒野の奥地",
+    stageName: "砂塵の荒野・奥地",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/dust-wasteland-map.png",
+    returnScene: "dustWasteland",
+    terrain: {
+      quicksand: ["C4", "D3", "E4"],
+    },
+    placements: [
+      { unitId: "TSUTSU", side: "south", r: 5, c: 1, instanceId: "SC15-TSUTSU" },
+      { unitId: "YABUKO_NORMAL", side: "south", r: 5, c: 3, instanceId: "SC15-YABUKO" },
+      { unitId: "7171", side: "south", r: 5, c: 5, instanceId: "SC15-7171" },
+      { unitId: "GIANT_SCORPION", side: "north", r: 1, c: 3, instanceId: "SC15-GIANT-SCORPION", hp: 14 },
+      { unitId: "ROCK_GOLEM", side: "north", r: 2, c: 1, instanceId: "SC15-ROCK-GOLEM-1", hp: 8 },
+      { unitId: "ROCK_GOLEM", side: "north", r: 2, c: 3, instanceId: "SC15-ROCK-GOLEM-2", hp: 8 },
+      { unitId: "ROCK_GOLEM", side: "north", r: 2, c: 5, instanceId: "SC15-ROCK-GOLEM-3", hp: 8 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "つつ", text: "奥地だ。ここからは判断を間違えられねぇ。" },
+        { speaker: "7171", text: "助っ人にゃ。足元を見るにゃ。" },
+        { speaker: "やぶこ", text: "7171も来たの。これで近道できるの？" },
+        { speaker: "つつ", text: "近道じゃなくて、安全な道だ。" },
+      ],
+      victory: [
+        { speaker: "つつ", text: "荒野の奥地、到達だ。ひとまず調査完了だな。" },
+        { speaker: "7171", text: "砂まみれにゃ。でも無事なら勝ちにゃ。" },
+        { speaker: "やぶこ", text: "じゃあ、次は砂じゃないところがいいの。" },
+      ],
+      defeat: [
+        { speaker: "つつ", text: "奥地は簡単じゃねぇ。進路を読み直すぞ。" },
       ],
     },
   },

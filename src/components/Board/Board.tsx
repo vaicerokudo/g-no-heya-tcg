@@ -24,6 +24,7 @@ type BoardProps = {
 
   legalMoveSet: Set<string>;
   initialDeploySet: Set<string>;
+  quicksandSet?: Set<string>;
   attackRangeSet: Set<string>;
   attackBlockerSet: Set<string>;
   attackSet: Set<string>;
@@ -78,6 +79,7 @@ export function Board(props: BoardProps) {
     gameOver,
     legalMoveSet,
     initialDeploySet,
+    quicksandSet,
     attackRangeSet,
     attackBlockerSet,
     attackSet,
@@ -164,6 +166,7 @@ export function Board(props: BoardProps) {
               const inSkill = !!skillMode;
               const isLegalMove = legalMoveSet.has(k);
               const isInitialDeploy = initialDeploySet.has(k);
+              const isQuicksand = !!quicksandSet && quicksandSet.has(k);
               const isAttackRange = attackRangeSet.has(k);
               const isAttackBlocker = attackBlockerSet.has(k);
               const isAttackableEnemy = !!inst && inst.side !== turn && attackSet.has(inst.instanceId);
@@ -240,6 +243,7 @@ export function Board(props: BoardProps) {
                   bg={bg}
                   cursor={cursor}
                   showInitialDeploy={showInitialDeploy}
+                  isQuicksand={isQuicksand}
                   showRng={showRng}
                   isAttackBlocker={isAttackBlocker}
                   isAttackableEnemy={isAttackableEnemy}

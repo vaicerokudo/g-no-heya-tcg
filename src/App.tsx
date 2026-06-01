@@ -75,6 +75,7 @@ import { isSkinUnlocked, readUnlockedSkins } from "./assets/skinUnlocks";
 import { readClearedScenarios, writeClearedScenarios } from "./game/scenario/progress";
 import { addDeltaEventFlag, hasDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
+import { markWastelandScenarioCleared } from "./game/wasteland/progress";
 import {
   markHiddenHintFlag,
   readHiddenHintFlags,
@@ -83,6 +84,16 @@ import {
 
 function posKey(r: number, c: number) {
   return `${r},${c}`;
+}
+
+function labelToPosKey(label: string, letters: string[]) {
+  const match = /^([A-Z]+)(\d+)$/i.exec(label.trim());
+  if (!match) return null;
+
+  const c = letters.findIndex((letter) => letter.toUpperCase() === match[1].toUpperCase());
+  const r = Number(match[2]) - 1;
+  if (c < 0 || !Number.isInteger(r) || r < 0) return null;
+  return posKey(r, c);
 }
 
 function getHandThumbSrc(unitId: string, side: Side, skin: Skin) {
@@ -236,6 +247,8 @@ export default function App() {
   // Blocks repeated endTurn calls inside the same tick.
   const endTurnTickLockRef = useRef(false);
 
+  const quicksandStunPendingIdsRef = useRef<Set<string>>(new Set());
+
   // Tracks phase transitions into battle.
   const prevPhaseRef = useRef<Phase>("setup_draw");
 
@@ -387,6 +400,7 @@ export default function App() {
     setMoveMotionEvents([]);
     setImpactFxEvents([]);
     setSkillImpactFxEvents([]);
+    quicksandStunPendingIdsRef.current.clear();
     setShowEndTurnConfirm(false);
     setBattleDeployUsed(false);
     setDeployPlaced(0);
@@ -415,6 +429,7 @@ export default function App() {
     setMoveMotionEvents([]);
     setImpactFxEvents([]);
     setSkillImpactFxEvents([]);
+    quicksandStunPendingIdsRef.current.clear();
     setShowEndTurnConfirm(false);
     setBattleDeployUsed(true);
     setDeployPlaced(0);
@@ -469,11 +484,21 @@ export default function App() {
         nextSide,
         applyInstancesTransform: (list) => applyYabukoTransform(list as any, unitsById) as any,
       });
+      const afterQuicksand =
+        quicksandSet.size > 0
+          ? afterStart.map((unit: any) => {
+              if (unit.side !== turn) return unit;
+              if (unit.stunImmune) return unit;
+              if (!quicksandSet.has(posKey(unit.pos.r, unit.pos.c))) return unit;
+              quicksandStunPendingIdsRef.current.add(unit.instanceId);
+              return { ...unit, stun: Math.max(unit.stun ?? 0, 1) };
+            })
+          : afterStart;
 
-      const v = checkActiveVictory(afterStart as any);
+      const v = checkActiveVictory(afterQuicksand as any);
       if (v) setVictory(v);
 
-      return afterStart as any;
+      return afterQuicksand as any;
     });
 
     finishEndTurn();
@@ -721,6 +746,9 @@ export default function App() {
         addDeltaEventFlag("deli_metal_machine_unlocked");
         setDeliMetalMachineUnlocked(true);
       }
+      if (["scenario12", "scenario13", "scenario14", "scenario15"].includes(activeScenarioId)) {
+        markWastelandScenarioCleared(activeScenarioId);
+      }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
       }
@@ -799,6 +827,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
 
   function getScenarioReturnLabel() {
     const returnScene = getScenarioReturnScene(activeScenarioId);
+    if (returnScene === "dustWasteland") return "荒野へ戻る";
     if (returnScene === "delta") return "デルタへ戻る";
     return "街へ戻る";
   }
@@ -811,6 +840,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     setScenarioResultDialogShown(false);
     setActiveScenarioId(null);
     setActiveScenarioReturnScene("astoria");
+    quicksandStunPendingIdsRef.current.clear();
     setGameMode("versus");
     setVictory(null);
     setSelectedId(null);
@@ -870,10 +900,23 @@ const deploySouthReinforceAt = (r: number, c: number) => {
 
   function compilerSafeResetPerUnitTurn() {
     setPerUnitTurn(() => {
-      return buildTurnStartPerUnitTurn({
+      const next = buildTurnStartPerUnitTurn({
         instances: instancesRef.current as any,
         turn: turnRef.current,
       });
+
+      const pendingIds = quicksandStunPendingIdsRef.current;
+      if (pendingIds.size === 0) return next;
+
+      for (const unit of instancesRef.current as any[]) {
+        if (unit.side !== turnRef.current) continue;
+        if (!pendingIds.has(unit.instanceId)) continue;
+
+        next[unit.instanceId] = { moved: false, attacked: false, done: true };
+        pendingIds.delete(unit.instanceId);
+      }
+
+      return next;
     });
   }
 
@@ -916,6 +959,10 @@ const deploySouthReinforceAt = (r: number, c: number) => {
   }, [winW, cols]);
 
   const letters = useMemo(() => getLetters(cols), [cols]);
+  const quicksandSet = useMemo(() => {
+    const labels = activeScenario?.terrain?.quicksand ?? [];
+    return new Set(labels.map((label) => labelToPosKey(label, letters)).filter((key): key is string => key !== null));
+  }, [activeScenario, letters]);
 
   const selected = instances.find((x: any) => x.instanceId === selectedId) ?? null;
 
@@ -1423,7 +1470,12 @@ const reinforceSet = useMemo(() => {
   }
 
   if (scene === "dustWasteland") {
-    return <DustWastelandScene onReturnContinent={() => setScene("continent")} />;
+    return (
+      <DustWastelandScene
+        onReturnContinent={() => setScene("continent")}
+        onStartScenario={handleScenarioSelectStart}
+      />
+    );
   }
 
   if (scene === "town") {
@@ -1584,6 +1636,7 @@ const reinforceSet = useMemo(() => {
         gameOver={gameOver}
         legalMoveSet={legalMoveSet}
         initialDeploySet={initialDeploySet}
+        quicksandSet={quicksandSet}
         reinforceSet={reinforceSet}
         attackRangeSet={attackRangeSet}
         attackBlockerSet={attackBlockerSet}

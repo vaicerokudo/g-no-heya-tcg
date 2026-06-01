@@ -36,6 +36,7 @@ getPortraitCandidates?: (
   cursor: string;
 
   showInitialDeploy: boolean;
+  isQuicksand?: boolean;
   showRng: boolean;
   isAttackBlocker: boolean;
   isAttackableEnemy: boolean;
@@ -69,6 +70,7 @@ const {
   bg,
   cursor,
   showInitialDeploy,
+  isQuicksand = false,
   showRng,
   isAttackBlocker,
   isAttackableEnemy,
@@ -248,8 +250,44 @@ return (
         outline: isDebugTarget ? "2px solid #00e5ff" : "none",
         outlineOffset: -2,
       }}
-      title={label}
+      title={isQuicksand ? `${label} / 流砂：停止でスタン1` : label}
     >
+      {isQuicksand && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 4,
+            borderRadius: 12,
+            background:
+              "radial-gradient(circle at 50% 52%, rgba(255, 238, 170, 0.32), transparent 26%), repeating-radial-gradient(circle at 50% 52%, rgba(255, 201, 104, 0.36) 0 3px, rgba(102, 62, 26, 0.16) 3px 7px)",
+            boxShadow: "inset 0 0 12px rgba(93, 55, 22, 0.58)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+      )}
+      {isQuicksand && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            padding: "1px 4px",
+            borderRadius: 999,
+            background: "rgba(55, 31, 13, 0.68)",
+            color: "#ffe3a3",
+            fontSize: 9,
+            fontWeight: 950,
+            textShadow: "0 1px 2px rgba(0,0,0,0.7)",
+            pointerEvents: "none",
+            zIndex: 2,
+          }}
+        >
+          流砂
+        </div>
+      )}
       {gateImageUrl && (
         <img
           src={gateImageUrl}

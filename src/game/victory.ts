@@ -48,6 +48,20 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side; pos?: { r: number; c: number } }>
 ): Victory | null {
+  if (["scenario12", "scenario13", "scenario14", "scenario15"].includes(scenarioId)) {
+    const northAlive = instances.some((u) => u.side === "north");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!northAlive) {
+      return { winner: "south", detail: `${scenarioId} clear: all wasteland enemies were defeated.` };
+    }
+    if (!southAlive) {
+      return { winner: "north", detail: `${scenarioId} failed: all allies were defeated.` };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario11") {
     const blackNoiseAlive = instances.some((u) => u.unitId === "BLACK_NOISE_ROKU" && u.side === "north");
     const southAlive = instances.some((u) => u.side === "south");

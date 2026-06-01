@@ -152,6 +152,39 @@ export const ROKUDO_AUTHOR_UNIT_DEF: UnitDef = {
   },
 };
 
+export const WASTELAND_SCORPION_UNIT_DEF: UnitDef = {
+  id: "WASTELAND_SCORPION",
+  name: "スコーピオン",
+  enemyOnly: true,
+  base: {
+    atk: 2,
+    hp: 5,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
+export const ROCK_GOLEM_UNIT_DEF: UnitDef = {
+  id: "ROCK_GOLEM",
+  name: "ロックゴーレム",
+  enemyOnly: true,
+  base: {
+    atk: 3,
+    hp: 8,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
+export const GIANT_SCORPION_UNIT_DEF: UnitDef = {
+  id: "GIANT_SCORPION",
+  name: "ジャイアントスコーピオン",
+  enemyOnly: true,
+  base: {
+    atk: 4,
+    hp: 14,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
 export const scenarioEnemyUnits: UnitDef[] = [
   BOAR_UNIT_DEF,
   LESSER_WYVERN_UNIT_DEF,
@@ -164,6 +197,9 @@ export const scenarioEnemyUnits: UnitDef[] = [
   HIDDEN_MYOUOU_UNIT_DEF,
   MONTEN_UNIT_DEF,
   ROKUDO_AUTHOR_UNIT_DEF,
+  WASTELAND_SCORPION_UNIT_DEF,
+  ROCK_GOLEM_UNIT_DEF,
+  GIANT_SCORPION_UNIT_DEF,
 ];
 
 export function getScenarioEnemyUnit(unitId: string) {
