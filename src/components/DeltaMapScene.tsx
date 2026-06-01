@@ -21,10 +21,10 @@ type DeltaArea = {
 };
 
 const AREAS: DeltaArea[] = [
-  { id: "control", label: "管制室", subLabel: "シナリオ選択予定", icon: "CTRL", x: 28, y: 13, w: 44, h: 15 },
-  { id: "archive", label: "資料室", subLabel: "完成図パズル", icon: "DATA", x: 8, y: 42, w: 36, h: 17 },
-  { id: "quarantine", label: "隔離ゲート", subLabel: "ロック中", icon: "LOCK", x: 56, y: 42, w: 36, h: 17 },
-  { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", icon: "EXIT", x: 32, y: 76, w: 36, h: 14 },
+  { id: "control", label: "管制室", subLabel: "シナリオ選択予定", icon: "CTRL", x: 34, y: 10, w: 32, h: 11 },
+  { id: "archive", label: "資料室", subLabel: "完成図パズル", icon: "DATA", x: 8, y: 43, w: 29, h: 13 },
+  { id: "quarantine", label: "隔離ゲート", subLabel: "ロック中", icon: "LOCK", x: 63, y: 43, w: 29, h: 13 },
+  { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", icon: "EXIT", x: 36, y: 82, w: 28, h: 10 },
 ];
 
 export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSceneProps) {
@@ -375,10 +375,10 @@ const nodeBottomStyle: CSSProperties = {
 function part2PointStyle(collected: boolean): CSSProperties {
   return {
     position: "absolute",
-    right: "9%",
-    bottom: "16%",
-    width: "20%",
-    minHeight: 46,
+    right: "8%",
+    bottom: "13%",
+    width: "16%",
+    minHeight: 38,
     borderRadius: 8,
     clipPath: "polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px)",
     border: collected ? "1px solid rgba(125,231,255,0.24)" : "1px solid rgba(125,231,255,0.72)",
@@ -389,8 +389,8 @@ function part2PointStyle(collected: boolean): CSSProperties {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: 5,
-    padding: "3px 8px",
+    gap: 4,
+    padding: "2px 6px",
     boxSizing: "border-box",
     boxShadow: collected
       ? "inset 0 0 18px rgba(125,231,255,0.06)"
@@ -414,8 +414,8 @@ function part2GlowStyle(collected: boolean): CSSProperties {
 
 function part2ImageStyle(collected: boolean): CSSProperties {
   return {
-    width: 32,
-    height: 32,
+    width: 26,
+    height: 26,
     objectFit: "contain",
     opacity: collected ? 0.42 : 0.96,
     filter: collected ? "grayscale(0.5)" : "drop-shadow(0 0 10px rgba(125,231,255,0.72))",
@@ -424,7 +424,7 @@ function part2ImageStyle(collected: boolean): CSSProperties {
 }
 
 const part2LabelStyle: CSSProperties = {
-  fontSize: 11,
+  fontSize: 10,
   lineHeight: 1,
   fontWeight: 950,
 };
@@ -462,8 +462,8 @@ function areaButtonStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProp
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-start",
-    gap: 9,
-    padding: "10px 11px",
+    gap: 6,
+    padding: "7px 8px",
     borderRadius: 8,
     clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)",
     border: locked
@@ -502,9 +502,9 @@ function areaIconStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProper
   const openGate = areaId === "quarantine" && machineComplete;
   return {
     flex: "0 0 auto",
-    width: 44,
-    minWidth: 44,
-    height: 34,
+    width: 36,
+    minWidth: 36,
+    height: 28,
     borderRadius: 6,
     clipPath: "polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px)",
     display: "grid",
@@ -524,7 +524,7 @@ function areaIconStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProper
           ? "rgba(127,255,193,0.15)"
           : "rgba(125,231,255,0.15)",
     color: locked ? "#ff8f8f" : archive ? "#c8b6ff" : openGate ? "#9dffd4" : "#7de7ff",
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 950,
     letterSpacing: 0,
     boxShadow: locked
@@ -541,12 +541,12 @@ const areaTextStyle: CSSProperties = {
   minWidth: 0,
   display: "flex",
   flexDirection: "column",
-  gap: 3,
+  gap: 2,
   alignItems: "flex-start",
 };
 
 const areaLabelStyle: CSSProperties = {
-  fontSize: 16,
+  fontSize: 14,
   lineHeight: 1.1,
   fontWeight: 950,
   textShadow: "0 0 10px rgba(125,231,255,0.20), 0 2px 4px rgba(0,0,0,0.55)",
@@ -554,7 +554,7 @@ const areaLabelStyle: CSSProperties = {
 
 const areaSubLabelStyle: CSSProperties = {
   color: "rgba(234,247,255,0.78)",
-  fontSize: 11,
+  fontSize: 10,
   lineHeight: 1.1,
   fontWeight: 800,
 };
