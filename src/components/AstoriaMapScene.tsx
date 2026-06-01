@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { hasDeltaEventFlag } from "../game/delta/eventFlags";
 import rokuSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import { addDeltaMachinePart, hasDeltaMachinePart } from "../game/delta/progress";
 import type { ScenarioId } from "../game/scenario/scenarios";
@@ -182,9 +183,14 @@ export function AstoriaMapScene({
   const [isMoving, setIsMoving] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
   const [hasPart4, setHasPart4] = useState(() => hasDeltaMachinePart(4));
+  const [hasPart5, setHasPart5] = useState(() => hasDeltaMachinePart(5));
+  const [hasPart6, setHasPart6] = useState(() => hasDeltaMachinePart(6));
+  const [part5HintHeard, setPart5HintHeard] = useState(() => hasDeltaEventFlag("part5_heard_from_7171"));
   const moveTimerRef = useRef<number | null>(null);
   const dialog = activeDialog ? DIALOGS[activeDialog] : null;
   const part4Unlocked = clearedScenarioIds.includes("scenario8");
+  const part5Unlocked = clearedScenarioIds.includes("scenario8") && part5HintHeard;
+  const part6Unlocked = clearedScenarioIds.includes("scenario7");
 
   const handleHotspot = (id: HotspotId) => {
     if (isMoving) return;
@@ -228,6 +234,16 @@ export function AstoriaMapScene({
     setHasPart4(true);
   };
 
+  const receivePart5 = () => {
+    addDeltaMachinePart(5);
+    setHasPart5(true);
+  };
+
+  const receivePart6 = () => {
+    addDeltaMachinePart(6);
+    setHasPart6(true);
+  };
+
   const spriteState: SpriteState = isMoving
     ? facing === "left"
       ? "running-left"
@@ -247,6 +263,13 @@ export function AstoriaMapScene({
   useEffect(() => {
     if (activeDialog === "plaza") {
       setHasPart4(hasDeltaMachinePart(4));
+    }
+    if (activeDialog === "generalStore") {
+      setHasPart5(hasDeltaMachinePart(5));
+      setPart5HintHeard(hasDeltaEventFlag("part5_heard_from_7171"));
+    }
+    if (activeDialog === "blacksmith") {
+      setHasPart6(hasDeltaMachinePart(6));
     }
   }, [activeDialog]);
 
@@ -364,6 +387,40 @@ export function AstoriaMapScene({
             ) : null}
 
             {dialog.disabledReason ? <div style={disabledNoteStyle}>{dialog.disabledReason}</div> : null}
+
+            {activeDialog === "generalStore" && clearedScenarioIds.includes("scenario8") ? (
+              <div style={partGiftStyle(hasPart5)}>
+                <div style={partGiftSpeakerStyle}>雑貨屋</div>
+                <div style={partGiftTextStyle}>
+                  {!part5HintHeard
+                    ? "7171ちゃんが何か預けていったみたいだけど、まずは本人に聞いておいで。"
+                    : hasPart5
+                      ? "例の紙切れなら、もう渡したよ。ちゃんと保管しておくれ。"
+                      : "7171ちゃんから変な紙切れを買い取ったんだけど、これかい？ そんな大事なものだったなら持っていきな。"}
+                </div>
+                {part5Unlocked && !hasPart5 ? (
+                  <button type="button" onClick={receivePart5} style={partGiftButtonStyle}>
+                    受け取る
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+
+            {activeDialog === "blacksmith" && part6Unlocked ? (
+              <div style={partGiftStyle(hasPart6)}>
+                <div style={partGiftSpeakerStyle}>ザック</div>
+                <div style={partGiftTextStyle}>
+                  {hasPart6
+                    ? "あの部品なら、もう渡したぜ。役に立ったなら何よりだ。"
+                    : "鉱山の件、助かったぜ。鉱石に混じって変な部品があったんでな。使えそうな形に整えといた。持っていきな。"}
+                </div>
+                {!hasPart6 ? (
+                  <button type="button" onClick={receivePart6} style={partGiftButtonStyle}>
+                    受け取る
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
 
             {activeDialog === "plaza" && part4Unlocked ? (
               <div style={partGiftStyle(hasPart4)}>

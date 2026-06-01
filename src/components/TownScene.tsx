@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import playerSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import reception7171 from "../assets/town/reception-7171.png";
 import { COMIC_SKIN_ID, TRAVEL_SKIN_ID, unlockSkin } from "../assets/skinUnlocks";
+import { addDeltaEventFlag, hasDeltaEventFlag } from "../game/delta/eventFlags";
+import type { ScenarioId } from "../game/scenario/scenarios";
 import type { UnitDef } from "../game/types";
 import { CollectionDialog } from "./Town/CollectionDialog";
 
@@ -12,6 +14,7 @@ type TownSceneProps = {
   onExitToMap?: () => void;
   onSkinUnlocked?: () => void;
   hiddenTrialHintUnlocked?: boolean;
+  clearedScenarioIds?: ScenarioId[];
   unitsById: Record<string, UnitDef>;
 };
 
@@ -19,7 +22,7 @@ type Pos = { x: number; y: number };
 type InteractionArea = { x: number; y: number; w: number; h: number };
 type InteractionTarget = "table" | "story" | "reception" | "collection" | "myououRoom" | "hiddenTrial" | "exit" | null;
 type TownDialog = "reception" | "collection" | "myououRoom" | null;
-type ReceptionTopic = "home" | "first" | "table" | "skin" | "password";
+type ReceptionTopic = "home" | "first" | "table" | "skin" | "password" | "deltaPart5";
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
 type TownHotspotId = Exclude<InteractionTarget, null>;
@@ -163,6 +166,11 @@ const RECEPTION_DIALOG: Record<Exclude<ReceptionTopic, "password">, { label: str
     label: "スキンについて",
     text: "スキンは見た目だけ変わるにゃ。強さは変わらないから安心するにゃ。",
   },
+  deltaPart5: {
+    label: "変な紙切れ",
+    text:
+      "変な紙切れ？ ああ、そんなの拾ったにゃ。\nDeli「それ、どこにありますか？」\n7171「いらないから雑貨屋に売ったにゃ。」\nDeli「売ったんですか！？」\n7171「ただの紙切れにゃ。ほしかったら雑貨屋に行くにゃ。」",
+  },
 };
 const RECEPTION_CHOICES: ReceptionTopic[] = ["first", "table", "skin", "password"];
 const MYOUOU_ROOM_HINTS = [
@@ -189,11 +197,13 @@ export function TownScene({
   onExitToMap,
   onSkinUnlocked,
   hiddenTrialHintUnlocked = false,
+  clearedScenarioIds = [],
   unitsById,
 }: TownSceneProps) {
   const [pos, setPos] = useState<Pos>({ x: 50, y: 78 });
   const [activeDialog, setActiveDialog] = useState<TownDialog>(null);
   const [receptionTopic, setReceptionTopic] = useState<ReceptionTopic>("home");
+  const [part5HintHeard, setPart5HintHeard] = useState(() => hasDeltaEventFlag("part5_heard_from_7171"));
   const [passphraseInput, setPassphraseInput] = useState("");
   const [passphraseMessage, setPassphraseMessage] = useState("");
   const [facing, setFacing] = useState<Facing>("right");
@@ -201,6 +211,7 @@ export function TownScene({
   const [isHotspotMoving, setIsHotspotMoving] = useState(false);
   const [moveTransitionMs, setMoveTransitionMs] = useState(140);
   const [frameIndex, setFrameIndex] = useState(0);
+  const part5HintUnlocked = clearedScenarioIds.includes("scenario8");
   const moveStopTimerRef = useRef<number | null>(null);
   const hotspotMoveTimerRef = useRef<number | null>(null);
   const nearTable = useMemo(() => isNearArea(pos, TABLE), [pos]);
@@ -368,6 +379,13 @@ export function TownScene({
     return () => window.clearInterval(timerId);
   }, [spriteAnim.frames, spriteAnim.intervalMs, spriteState]);
 
+  useEffect(() => {
+    if (receptionTopic !== "deltaPart5") return;
+
+    addDeltaEventFlag("part5_heard_from_7171");
+    setPart5HintHeard(true);
+  }, [receptionTopic]);
+
   const safeFrameIndex = frameIndex % spriteAnim.frames;
   const interactionButtonLabel =
     interactionTarget === "reception"
@@ -485,6 +503,17 @@ export function TownScene({
                     {topic === "password" ? PASSWORD_DIALOG.label : RECEPTION_DIALOG[topic].label}
                   </button>
                 ))}
+                {part5HintUnlocked ? (
+                  <button
+                    onClick={() => {
+                      setReceptionTopic("deltaPart5");
+                      setPassphraseMessage("");
+                    }}
+                    style={dialogChoiceButtonStyle(receptionTopic === "deltaPart5")}
+                  >
+                    {part5HintHeard ? "変な紙切れ（確認済み）" : "変な紙切れ"}
+                  </button>
+                ) : null}
                 <button onClick={() => setActiveDialog(null)} style={dialogChoiceButtonStyle(false)}>
                   閉じる
                 </button>

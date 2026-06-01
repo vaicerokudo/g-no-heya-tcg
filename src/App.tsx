@@ -1377,6 +1377,7 @@ const reinforceSet = useMemo(() => {
           onStartHiddenScenario={handleHiddenScenarioStart}
           onSkinUnlocked={refreshUnlockedSkins}
           hiddenTrialHintUnlocked={hiddenHintFlags.includes("monten_defeated")}
+          clearedScenarioIds={clearedScenarioIds}
           unitsById={unitsById}
         />
         <ScenarioSelectDialog
