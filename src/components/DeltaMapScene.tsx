@@ -120,7 +120,8 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSc
             style={part2PointStyle(hasPart2)}
           >
             <span style={part2GlowStyle(hasPart2)} />
-            <span style={part2LabelStyle}>{hasPart2 ? "取得済み" : "???"}</span>
+            <img src="/ui/delta-machine/map_part_fragment.png" alt="" style={part2ImageStyle(hasPart2)} />
+            <span style={part2LabelStyle}>{hasPart2 ? "取得済み" : "反応あり"}</span>
           </button>
 
           {partNotice ? <div style={partNoticeStyle}>{partNotice}</div> : null}
@@ -149,9 +150,15 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario }: DeltaMapSc
                 <div style={puzzleGridStyle} aria-label="メタルマシーン完成図パズル枠">
                   {Array.from({ length: 9 }).map((_, index) => (
                     <div key={index} style={puzzleSlotStyle(collectedPartIds.has(index + 1))}>
-                      <span style={puzzleSlotNumberStyle(collectedPartIds.has(index + 1))}>
-                        {collectedPartIds.has(index + 1) ? index + 1 : "???"}
-                      </span>
+                      {collectedPartIds.has(index + 1) ? (
+                        <img
+                          src={`/ui/delta-machine/part_${index + 1}.png`}
+                          alt={`Metal Machine blueprint part ${index + 1}`}
+                          style={puzzlePartImageStyle}
+                        />
+                      ) : (
+                        <span style={puzzleSlotNumberStyle(false)}>???</span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -389,6 +396,17 @@ function part2GlowStyle(collected: boolean): CSSProperties {
   };
 }
 
+function part2ImageStyle(collected: boolean): CSSProperties {
+  return {
+    width: 32,
+    height: 32,
+    objectFit: "contain",
+    opacity: collected ? 0.42 : 0.96,
+    filter: collected ? "grayscale(0.5)" : "drop-shadow(0 0 10px rgba(125,231,255,0.72))",
+    flex: "0 0 auto",
+  };
+}
+
 const part2LabelStyle: CSSProperties = {
   fontSize: 11,
   lineHeight: 1,
@@ -599,6 +617,7 @@ function puzzleSlotStyle(collected: boolean): CSSProperties {
   return {
     aspectRatio: "1",
     borderRadius: 10,
+    overflow: "hidden",
     border: collected ? "1px solid rgba(125,231,255,0.72)" : "1px dashed rgba(181,145,255,0.48)",
     display: "grid",
     placeItems: "center",
@@ -610,6 +629,13 @@ function puzzleSlotStyle(collected: boolean): CSSProperties {
     fontWeight: 900,
   };
 }
+
+const puzzlePartImageStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  display: "block",
+};
 
 function puzzleSlotNumberStyle(collected: boolean): CSSProperties {
   return {
