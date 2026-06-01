@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { cardCandidates, portraitThumbCandidates, type Form, type Skin } from "../../assets/imagePaths";
 import { getSkinLabel } from "../../assets/skinLabels";
 import type { UnitDef } from "../../game/types";
+import { hasDeltaEventFlag } from "../../game/delta/eventFlags";
 import { getAvailableSkillsForUnit, SKILLS } from "../../game/skills/registry";
 import { useImgFallback } from "../imgFallback";
 
@@ -13,15 +14,17 @@ type CollectionDialogProps = {
 const SKINS: Skin[] = ["default", "dark", "travel", "comic"];
 type CatalogTab = "members" | "enemies";
 
-function getCollectionForms(unit: UnitDef | null): Form[] {
+function getCollectionForms(unit: UnitDef | null, deliMetalUnlocked: boolean): Form[] {
   if (!unit) return ["base"];
   if (unit.id === "YABUKO_FM") return ["fm"];
+  if (unit.id === "DELI" && deliMetalUnlocked) return ["base", "g", "metal"];
   return ["base", "g"];
 }
 
 function getFormLabel(form: Form) {
   if (form === "g") return "G";
   if (form === "fm") return "FM";
+  if (form === "metal") return "メタルマシーン";
   return "Base";
 }
 
@@ -159,9 +162,21 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
   );
   const [catalogTab, setCatalogTab] = useState<CatalogTab>("members");
   const [skin, setSkin] = useState<Skin>("default");
+  const [deliMetalUnlocked, setDeliMetalUnlocked] = useState(() =>
+    hasDeltaEventFlag("deli_metal_machine_unlocked")
+  );
   const displayUnits = catalogTab === "enemies" ? enemyUnits : units;
   const [selectedUnitId, setSelectedUnitId] = useState<string>(() => displayUnits[0]?.id ?? "");
   const [selectedForm, setSelectedForm] = useState<Form>("base");
+
+  useEffect(() => {
+    const refreshDeliMetalUnlock = () =>
+      setDeliMetalUnlocked(hasDeltaEventFlag("deli_metal_machine_unlocked"));
+
+    refreshDeliMetalUnlock();
+    window.addEventListener("storage", refreshDeliMetalUnlock);
+    return () => window.removeEventListener("storage", refreshDeliMetalUnlock);
+  }, []);
 
   useEffect(() => {
     if (!displayUnits.some((unit) => unit.id === selectedUnitId)) {
@@ -171,7 +186,12 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
   }, [displayUnits, selectedUnitId]);
 
   const selectedUnit = unitsById[selectedUnitId] ?? displayUnits[0] ?? null;
-  const availableForms = useMemo(() => getCollectionForms(selectedUnit), [selectedUnit]);
+  const availableForms = useMemo(
+    () => getCollectionForms(selectedUnit, deliMetalUnlocked),
+    [deliMetalUnlocked, selectedUnit]
+  );
+  const showLockedDeliMetal =
+    catalogTab === "members" && selectedUnit?.id === "DELI" && !deliMetalUnlocked;
 
   useEffect(() => {
     if (!availableForms.includes(selectedForm)) {
@@ -266,7 +286,7 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
                 selected={unit.id === selectedUnit?.id}
                 onClick={() => {
                   setSelectedUnitId(unit.id);
-                  setSelectedForm(getCollectionForms(unit)[0] ?? "base");
+                  setSelectedForm(getCollectionForms(unit, deliMetalUnlocked)[0] ?? "base");
                 }}
               />
               )
@@ -332,6 +352,18 @@ export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) 
                           {getFormLabel(form)}
                         </button>
                       ))}
+                      {showLockedDeliMetal ? (
+                        <button
+                          disabled
+                          style={{
+                            ...formButtonStyle(false),
+                            opacity: 0.5,
+                            cursor: "not-allowed",
+                          }}
+                        >
+                          メタルマシーン 未解放
+                        </button>
+                      ) : null}
                     </div>
                   ) : null}
                   <div style={statsStyle}>
