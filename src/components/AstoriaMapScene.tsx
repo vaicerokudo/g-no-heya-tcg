@@ -393,10 +393,10 @@ export function AstoriaMapScene({
                 <div style={partGiftSpeakerStyle}>雑貨屋</div>
                 <div style={partGiftTextStyle}>
                   {!part5HintHeard
-                    ? "7171ちゃんが何か預けていったみたいだけど、まずは本人に聞いておいで。"
+                    ? "いらっしゃいませ。本日は何をお探しでしょうか。"
                     : hasPart5
-                      ? "例の紙切れなら、もう渡したよ。ちゃんと保管しておくれ。"
-                      : "7171ちゃんから変な紙切れを買い取ったんだけど、これかい？ そんな大事なものだったなら持っていきな。"}
+                      ? "あの紙片だったら、もうあげたわよ。\nDeli「はい。ちゃんと保管しています。」\n雑貨屋「きをつけてね。」"
+                      : "いらっしゃい。7171ちゃんが少し変わった紙片を持ってきたわよ。\nDeli「それです！ メタルマシーン完成図の一部かもしれません。」\n雑貨屋「あらら。それなら持っていっていいわよ。」\nDeli「ありがとうございます。」\n雑貨屋「うふふふふ。がんばってね。」"}
                 </div>
                 {part5Unlocked && !hasPart5 ? (
                   <button type="button" onClick={receivePart5} style={partGiftButtonStyle}>

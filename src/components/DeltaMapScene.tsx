@@ -1,4 +1,5 @@
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import rokuSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import { addDeltaMachinePart, getDeltaMachineParts } from "../game/delta/progress";
 import type { ScenarioId } from "../game/scenario/scenarios";
 
@@ -9,6 +10,10 @@ type DeltaMapSceneProps = {
 };
 
 type DeltaAreaId = "entrance" | "control" | "archive" | "quarantine";
+type DeltaMoveTargetId = DeltaAreaId | "part2";
+type MapPos = { x: number; y: number };
+type Facing = "left" | "right";
+type SpriteState = "idle" | "running-left" | "running-right";
 
 type DeltaArea = {
   id: DeltaAreaId;
@@ -28,15 +33,59 @@ const AREAS: DeltaArea[] = [
   { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", icon: "EXIT", x: 38, y: 84, w: 24, h: 9 },
 ];
 
+const ROKU_PLAYER_SIZE = 34;
+const ROKU_MOVE_MS = 620;
+const SPRITE_CELL_WIDTH = 192;
+const SPRITE_CELL_HEIGHT = 208;
+const ROKU_SPRITE_SCALE = ROKU_PLAYER_SIZE / SPRITE_CELL_WIDTH;
+const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalMs: number }> = {
+  idle: { row: 0, frames: 6, intervalMs: 190 },
+  "running-right": { row: 1, frames: 8, intervalMs: 105 },
+  "running-left": { row: 2, frames: 8, intervalMs: 105 },
+};
+
+const DELTA_TARGET_POSITIONS: Record<DeltaMoveTargetId, MapPos> = {
+  entrance: { x: 50, y: 87 },
+  control: { x: 50, y: 22 },
+  archive: { x: 22, y: 56 },
+  quarantine: { x: 78, y: 56 },
+  part2: { x: 86, y: 83 },
+};
+
 export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScenarioIds }: DeltaMapSceneProps) {
   const [activeArea, setActiveArea] = useState<DeltaAreaId | null>(null);
   const [machineParts, setMachineParts] = useState<number[]>(() => getDeltaMachineParts());
   const [partNotice, setPartNotice] = useState<string | null>(null);
+  const [rokuPos, setRokuPos] = useState<MapPos>(DELTA_TARGET_POSITIONS.entrance);
+  const [facing, setFacing] = useState<Facing>("right");
+  const [isMoving, setIsMoving] = useState(false);
+  const [frameIndex, setFrameIndex] = useState(0);
+  const moveTimerRef = useRef<number | null>(null);
   const collectedPartIds = new Set(machineParts);
   const collectedPartCount = machineParts.length;
   const machineComplete = collectedPartCount === 9;
   const hasPart2 = collectedPartIds.has(2);
   const scenario9Unlocked = clearedScenarioIds.includes("scenario8");
+
+  const runAfterRokuMove = (targetId: DeltaMoveTargetId, action: () => void) => {
+    if (isMoving) return;
+
+    const nextPos = DELTA_TARGET_POSITIONS[targetId];
+    setActiveArea(null);
+    setPartNotice(null);
+    setFacing(nextPos.x < rokuPos.x ? "left" : "right");
+    setIsMoving(true);
+    setRokuPos(nextPos);
+
+    if (moveTimerRef.current !== null) {
+      window.clearTimeout(moveTimerRef.current);
+    }
+    moveTimerRef.current = window.setTimeout(() => {
+      setIsMoving(false);
+      moveTimerRef.current = null;
+      action();
+    }, ROKU_MOVE_MS);
+  };
 
   const openArea = (areaId: DeltaAreaId) => {
     if (areaId === "entrance") {
@@ -57,6 +106,30 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
     setMachineParts(nextParts);
     setPartNotice("メタルマシーン完成図の欠片を見つけた。完成図パーツ 2 を入手した。");
   };
+
+  const spriteState: SpriteState = isMoving
+    ? facing === "left"
+      ? "running-left"
+      : "running-right"
+    : "idle";
+  const spriteAnim = SPRITE_ANIMS[spriteState];
+
+  useEffect(() => {
+    setFrameIndex(0);
+    const timerId = window.setInterval(() => {
+      setFrameIndex((current) => (current + 1) % spriteAnim.frames);
+    }, spriteAnim.intervalMs);
+
+    return () => window.clearInterval(timerId);
+  }, [spriteAnim.frames, spriteAnim.intervalMs, spriteState]);
+
+  useEffect(() => {
+    return () => {
+      if (moveTimerRef.current !== null) {
+        window.clearTimeout(moveTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div style={sceneStyle}>
@@ -87,10 +160,12 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
             <button
               key={area.id}
               type="button"
-              onClick={() => openArea(area.id)}
+              onClick={() => runAfterRokuMove(area.id, () => openArea(area.id))}
+              disabled={isMoving}
               title={`${area.label}: ${area.subLabel}`}
               style={{
                 ...areaButtonStyle(area.id, machineComplete),
+                ...(isMoving ? deltaActionDisabledStyle : null),
                 left: `${area.x}%`,
                 top: `${area.y}%`,
                 width: `${area.w}%`,
@@ -117,14 +192,31 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
 
           <button
             type="button"
-            onClick={inspectPart2Point}
+            onClick={() => runAfterRokuMove("part2", inspectPart2Point)}
+            disabled={isMoving}
             title={hasPart2 ? "完成図パーツ 2 取得済み" : "小さなデータ片"}
-            style={part2PointStyle(hasPart2)}
+            style={{
+              ...part2PointStyle(hasPart2),
+              ...(isMoving ? deltaActionDisabledStyle : null),
+            }}
           >
             <span style={part2GlowStyle(hasPart2)} />
             <img src="/ui/delta-machine/map_part_fragment.png" alt="" style={part2ImageStyle(hasPart2)} />
             <span style={part2LabelStyle}>{hasPart2 ? "取得済み" : "反応あり"}</span>
           </button>
+
+          <div
+            aria-label="ロク"
+            style={{
+              ...rokuSpriteStyle,
+              left: `${rokuPos.x}%`,
+              top: `${rokuPos.y}%`,
+              backgroundImage: `url(${rokuSpriteSheet})`,
+              backgroundPosition: `${-frameIndex * SPRITE_CELL_WIDTH * ROKU_SPRITE_SCALE}px ${
+                -spriteAnim.row * SPRITE_CELL_HEIGHT * ROKU_SPRITE_SCALE
+              }px`,
+            }}
+          />
 
           {partNotice ? <div style={partNoticeStyle}>{partNotice}</div> : null}
         </div>
@@ -299,6 +391,25 @@ const mapFrameStyle: CSSProperties = {
   background:
     "linear-gradient(180deg, rgba(4,10,16,0.08), rgba(4,10,16,0.26)), url('/backgrounds/delta-facility-map.png') center / 100% 100% no-repeat, linear-gradient(180deg, rgba(12,31,43,0.98), rgba(11,16,28,0.98))",
   boxShadow: "0 22px 60px rgba(0,0,0,0.52), inset 0 0 62px rgba(64,211,255,0.13)",
+};
+
+const deltaActionDisabledStyle: CSSProperties = {
+  opacity: 0.72,
+  cursor: "wait",
+};
+
+const rokuSpriteStyle: CSSProperties = {
+  position: "absolute",
+  width: ROKU_PLAYER_SIZE,
+  height: ROKU_PLAYER_SIZE * (SPRITE_CELL_HEIGHT / SPRITE_CELL_WIDTH),
+  transform: "translate(-50%, -88%)",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: `${SPRITE_CELL_WIDTH * ROKU_SPRITE_SCALE * 8}px ${SPRITE_CELL_HEIGHT * ROKU_SPRITE_SCALE * 9}px`,
+  imageRendering: "auto",
+  filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.46)) drop-shadow(0 0 12px rgba(125,231,255,0.36))",
+  transition: `left ${ROKU_MOVE_MS}ms ease, top ${ROKU_MOVE_MS}ms ease`,
+  zIndex: 8,
+  pointerEvents: "none",
 };
 
 const scanlineStyle: CSSProperties = {
