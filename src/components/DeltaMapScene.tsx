@@ -65,6 +65,9 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
   const collectedPartCount = machineParts.length;
   const machineComplete = collectedPartCount === 9;
   const hasPart2 = collectedPartIds.has(2);
+  const hasPart7 = collectedPartIds.has(7);
+  const hasPart8 = collectedPartIds.has(8);
+  const hasPart9 = collectedPartIds.has(9);
   const scenario9Unlocked = clearedScenarioIds.includes("scenario8");
   const scenario10Unlocked = clearedScenarioIds.includes("scenario9");
 
@@ -106,6 +109,20 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
     const nextParts = addDeltaMachinePart(2);
     setMachineParts(nextParts);
     setPartNotice("メタルマシーン完成図の欠片を見つけた。完成図パーツ 2 を入手した。");
+  };
+
+  const restorePart8 = () => {
+    if (!hasPart7 || hasPart8) return;
+
+    const nextParts = addDeltaMachinePart(8);
+    setMachineParts(nextParts);
+  };
+
+  const removePart9 = () => {
+    if (!hasPart8 || hasPart9) return;
+
+    const nextParts = addDeltaMachinePart(9);
+    setMachineParts(nextParts);
   };
 
   const spriteState: SpriteState = isMoving
@@ -303,7 +320,41 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
                     </div>
                   ))}
                 </div>
+                <div style={deltaEventPanelStyle(hasPart8 ? "complete" : hasPart7 ? "ready" : "locked")}>
+                  <div style={deltaEventSpeakerStyle}>資料室端末</div>
+                  <div style={deltaEventTextStyle}>
+                    {hasPart8
+                      ? "未復元データはありません。\nDeli「ここで復元できる分は、もう確認済みですね。」"
+                      : hasPart7
+                        ? "完成図照合率、上昇。未復元データを検出。\nDeli「まだ隠しデータがある……？」\nジーマ「ほらな？この施設、まだまだ怪しいだろ？」\nDeli「あなたが一番怪しいんですけどね。」"
+                        : "照合データ不足。追加パーツを確認してください。"}
+                  </div>
+                  {hasPart7 && !hasPart8 ? (
+                    <button type="button" onClick={restorePart8} style={deltaEventButtonStyle}>
+                      パーツ8を復元
+                    </button>
+                  ) : null}
+                  {hasPart8 ? <div style={deltaEventNoticeStyle}>メタルマシーン完成図 パーツ8 復元済み</div> : null}
+                </div>
               </>
+            ) : null}
+            {activeArea === "quarantine" ? (
+              <div style={deltaEventPanelStyle(machineComplete ? "complete" : hasPart8 ? "ready" : "locked")}>
+                <div style={deltaEventSpeakerStyle}>隔離ゲート制御盤</div>
+                <div style={deltaEventTextStyle}>
+                  {machineComplete
+                    ? "隔離ゲート「OPEN」\nDeli「メタルマシーン完成図は揃いました。あとは、この奥ですね……。」\nPlayer「……かっこいい。」\nジーマ「さあ、いよいよお宝ってやつだな！」"
+                    : hasPart8
+                      ? "Deli「これ……最後のパーツが、ゲート制御盤に組み込まれています。」\nPlayer「外したら、開く……？」\nジーマ「外すしかねぇだろ？」\nDeli「その軽さが怖いんですよ……。」"
+                      : "隔離ゲート「LOCKED」\nDeli「まだ制御情報が足りません。先に資料室を調べた方がよさそうです。」"}
+                </div>
+                {hasPart8 && !hasPart9 ? (
+                  <button type="button" onClick={removePart9} style={deltaEventButtonStyle}>
+                    パーツ9を取り外す
+                  </button>
+                ) : null}
+                {machineComplete ? <div style={deltaEventNoticeStyle}>ブラックノイズ戦は準備中</div> : null}
+              </div>
             ) : null}
             <p style={dialogTextStyle}>{getAreaDialogText(activeArea, machineComplete)}</p>
             <button type="button" onClick={() => setActiveArea(null)} style={dialogButtonStyle(activeArea, machineComplete)}>
@@ -810,6 +861,66 @@ const scenarioStartButtonStyle: CSSProperties = {
   fontWeight: 950,
   touchAction: "manipulation",
   cursor: "pointer",
+};
+
+function deltaEventPanelStyle(state: "locked" | "ready" | "complete"): CSSProperties {
+  const complete = state === "complete";
+  const ready = state === "ready";
+  return {
+    marginTop: 14,
+    padding: 12,
+    borderRadius: 10,
+    clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)",
+    border: complete
+      ? "1px solid rgba(127,255,193,0.62)"
+      : ready
+        ? "1px solid rgba(125,231,255,0.66)"
+        : "1px solid rgba(181,145,255,0.34)",
+    background: complete
+      ? "linear-gradient(135deg, rgba(20,76,56,0.52), rgba(7,18,27,0.70))"
+      : ready
+        ? "linear-gradient(135deg, rgba(20,65,82,0.58), rgba(7,18,27,0.74))"
+        : "linear-gradient(135deg, rgba(37,32,58,0.42), rgba(7,18,27,0.68))",
+    boxShadow: complete
+      ? "0 0 22px rgba(127,255,193,0.14), inset 0 0 18px rgba(127,255,193,0.08)"
+      : ready
+        ? "0 0 22px rgba(125,231,255,0.18), inset 0 0 18px rgba(125,231,255,0.08)"
+        : "inset 0 0 18px rgba(181,145,255,0.06)",
+  };
+}
+
+const deltaEventSpeakerStyle: CSSProperties = {
+  color: "#7de7ff",
+  fontSize: 12,
+  fontWeight: 950,
+};
+
+const deltaEventTextStyle: CSSProperties = {
+  marginTop: 8,
+  color: "rgba(234,247,255,0.88)",
+  fontSize: 13,
+  lineHeight: 1.55,
+  whiteSpace: "pre-line",
+};
+
+const deltaEventButtonStyle: CSSProperties = {
+  marginTop: 10,
+  minHeight: 36,
+  padding: "0 14px",
+  borderRadius: 8,
+  border: "1px solid rgba(125,231,255,0.72)",
+  background: "linear-gradient(180deg, #7de7ff, #388aa8)",
+  color: "#061018",
+  fontWeight: 950,
+  touchAction: "manipulation",
+  cursor: "pointer",
+};
+
+const deltaEventNoticeStyle: CSSProperties = {
+  marginTop: 10,
+  color: "#9dffd4",
+  fontSize: 12,
+  fontWeight: 950,
 };
 
 const puzzleCaptionStyle: CSSProperties = {
