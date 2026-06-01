@@ -14,6 +14,7 @@ import {
   getScenarioConfig,
   type ScenarioDialogKind,
   type ScenarioId,
+  type ScenarioReturnScene,
 } from "./game/scenario/scenarios";
 import { scenarioEnemyUnits } from "./game/scenario/enemyUnits";
 
@@ -786,8 +787,13 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     resetGame();
   }
 
+  function getScenarioReturnScene(scenarioId: ScenarioId | null): ScenarioReturnScene {
+    if (!scenarioId) return "astoria";
+    return getScenarioConfig(scenarioId)?.returnScene ?? "astoria";
+  }
+
   function returnFromScenario() {
-    const returnScene = activeScenarioId ? (getScenarioConfig(activeScenarioId)?.returnScene ?? "astoria") : "astoria";
+    const returnScene = getScenarioReturnScene(activeScenarioId);
 
     setScenarioSelectOpen(false);
     setScenarioDialog(null);

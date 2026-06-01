@@ -150,6 +150,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第4話 パン屋を探して",
     stageName: "街中",
     boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-town.png",
     placements: [
       { unitId: "HIBIKI", side: "south", r: 5, c: 2, instanceId: "SC4-HIBIKI" },
       { unitId: "YABUKO_NORMAL", side: "south", r: 5, c: 4, instanceId: "SC4-YABUKO" },
