@@ -1,16 +1,19 @@
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { hasDeltaEventFlag } from "../game/delta/eventFlags";
 
 type ContinentMapSceneProps = {
   onReturnAstoria: () => void;
   onEnterDelta: () => void;
+  onEnterDustWasteland: () => void;
 };
 
 const CONTINENT_MAP_IMAGE_URL = "/backgrounds/continent-map.png";
 
 type Hotspot = {
-  id: "astoria" | "delta";
+  id: "astoria" | "delta" | "dustWasteland";
   label: string;
   subLabel: string;
+  badge?: string;
   x: number;
   y: number;
   w: number;
@@ -20,9 +23,27 @@ type Hotspot = {
 const HOTSPOTS: Hotspot[] = [
   { id: "astoria", label: "アストリア", subLabel: "戻る", x: 61, y: 57, w: 28, h: 9 },
   { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 33, y: 74, w: 34, h: 10 },
+  { id: "dustWasteland", label: "砂塵の荒野", subLabel: "新たな調査地点", badge: "NEW", x: 12, y: 43, w: 34, h: 10 },
 ];
 
-export function ContinentMapScene({ onReturnAstoria, onEnterDelta }: ContinentMapSceneProps) {
+export function ContinentMapScene({
+  onReturnAstoria,
+  onEnterDelta,
+  onEnterDustWasteland,
+}: ContinentMapSceneProps) {
+  const [deltaChapterCleared, setDeltaChapterCleared] = useState(() =>
+    hasDeltaEventFlag("delta_chapter_cleared")
+  );
+
+  useEffect(() => {
+    const refreshDeltaClearStatus = () =>
+      setDeltaChapterCleared(hasDeltaEventFlag("delta_chapter_cleared"));
+
+    refreshDeltaClearStatus();
+    window.addEventListener("storage", refreshDeltaClearStatus);
+    return () => window.removeEventListener("storage", refreshDeltaClearStatus);
+  }, []);
+
   return (
     <div style={sceneStyle}>
       <div style={shellStyle}>
@@ -37,24 +58,37 @@ export function ContinentMapScene({ onReturnAstoria, onEnterDelta }: ContinentMa
         </header>
 
         <div style={mapStyle}>
-          {HOTSPOTS.map((spot) => (
-            <button
-              key={spot.id}
-              type="button"
-              onClick={spot.id === "astoria" ? onReturnAstoria : onEnterDelta}
-              title={`${spot.label}: ${spot.subLabel}`}
-              style={{
-                ...hotspotStyle,
-                left: `${spot.x}%`,
-                top: `${spot.y}%`,
-                width: `${spot.w}%`,
-                height: `${spot.h}%`,
-              }}
-            >
-              <span style={hotspotLabelStyle}>{spot.label}</span>
-              <span style={hotspotSubLabelStyle}>{spot.subLabel}</span>
-            </button>
-          ))}
+          {HOTSPOTS.map((spot) => {
+            const deltaCleared = spot.id === "delta" && deltaChapterCleared;
+            const subLabel = deltaCleared ? "クリア済み" : spot.subLabel;
+            const handleClick =
+              spot.id === "astoria"
+                ? onReturnAstoria
+                : spot.id === "delta"
+                  ? onEnterDelta
+                  : onEnterDustWasteland;
+
+            return (
+              <button
+                key={spot.id}
+                type="button"
+                onClick={handleClick}
+                title={`${spot.label}: ${subLabel}`}
+                style={{
+                  ...hotspotStyle,
+                  left: `${spot.x}%`,
+                  top: `${spot.y}%`,
+                  width: `${spot.w}%`,
+                  height: `${spot.h}%`,
+                }}
+              >
+                <span style={hotspotLabelStyle}>{spot.label}</span>
+                {deltaCleared ? <span style={deltaClearedBadgeStyle}>クリア済み</span> : null}
+                {spot.badge ? <span style={hotspotBadgeStyle}>{spot.badge}</span> : null}
+                <span style={hotspotSubLabelStyle}>{subLabel}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -170,4 +204,39 @@ const hotspotSubLabelStyle: CSSProperties = {
   overflow: "hidden",
   clip: "rect(0 0 0 0)",
   whiteSpace: "nowrap",
+};
+
+const deltaClearedBadgeStyle: CSSProperties = {
+  position: "absolute",
+  left: "50%",
+  top: "calc(50% + 23px)",
+  transform: "translateX(-50%)",
+  padding: "3px 9px",
+  borderRadius: 999,
+  border: "1px solid rgba(112, 244, 198, 0.72)",
+  background: "linear-gradient(180deg, rgba(10, 64, 56, 0.9), rgba(3, 24, 29, 0.82))",
+  color: "#baffea",
+  boxShadow: "0 0 14px rgba(99, 255, 203, 0.2)",
+  fontSize: 11,
+  lineHeight: 1,
+  fontWeight: 950,
+  whiteSpace: "nowrap",
+  textShadow: "0 1px 4px rgba(0,0,0,0.55)",
+};
+
+const hotspotBadgeStyle: CSSProperties = {
+  position: "absolute",
+  left: "calc(50% + 46px)",
+  top: "calc(50% - 25px)",
+  padding: "3px 7px",
+  borderRadius: 999,
+  border: "1px solid rgba(255, 235, 145, 0.82)",
+  background: "linear-gradient(180deg, rgba(255, 183, 72, 0.96), rgba(176, 77, 20, 0.92))",
+  color: "#fff9d8",
+  boxShadow: "0 0 14px rgba(255, 192, 72, 0.34)",
+  fontSize: 10,
+  lineHeight: 1,
+  fontWeight: 950,
+  whiteSpace: "nowrap",
+  textShadow: "0 1px 4px rgba(0,0,0,0.45)",
 };
