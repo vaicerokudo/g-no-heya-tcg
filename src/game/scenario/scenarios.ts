@@ -12,6 +12,7 @@ export type ScenarioId =
   | "scenario8"
   | "scenario9"
   | "scenario10"
+  | "scenario11"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -392,6 +393,57 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "Deli", text: "少し休ませてください……！" },
         { speaker: "Player", text: "Deliさん、大丈夫ですか？" },
         { speaker: "Deli", text: "大丈夫です……たぶん……。" },
+      ],
+    },
+  },
+  scenario11: {
+    id: "scenario11",
+    title: "第11話 ブラックノイズ",
+    stageName: "研究施設デルタ",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-delta.png",
+    returnScene: "delta",
+    placements: [
+      { unitId: "DELI", side: "south", r: 5, c: 2, instanceId: "SC11-DELI" },
+      { unitId: "PLAYER", side: "south", r: 5, c: 3, instanceId: "SC11-PLAYER" },
+      { unitId: "ROKUDO", side: "south", r: 5, c: 4, instanceId: "SC11-ROKUDO" },
+      { unitId: "BLACK_NOISE_ROKU", side: "north", r: 2, c: 2, instanceId: "SC11-BLACK-NOISE-ROKU-1", form: "g", hp: 5 },
+      { unitId: "BLACK_NOISE_ROKU", side: "north", r: 1, c: 3, instanceId: "SC11-BLACK-NOISE-ROKU-2", form: "g", hp: 5 },
+      { unitId: "BLACK_NOISE_ROKU", side: "north", r: 2, c: 4, instanceId: "SC11-BLACK-NOISE-ROKU-3", form: "g", hp: 5 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "Deli", text: "隔離ゲート、開きましたね……。" },
+        { speaker: "Player", text: "この先、何かいます。" },
+        { speaker: "ロク", text: "ロクだよ～♪ ……あれ？" },
+        { speaker: "Deli", text: "ロクさん？" },
+        { speaker: "Player", text: "……危ない！" },
+        { speaker: "ロク", text: "…………。" },
+        { speaker: "ロク", text: "ロクだよ～♪ ……コワレロ。" },
+        { speaker: "Deli", text: "えっ！？" },
+        { speaker: "Deli", text: "分身まで！？ なんなんですかこれ！" },
+        { speaker: "ROKUDO", text: "……いやな予感したんだよね。" },
+        { speaker: "Deli", text: "ROKUDOさん！" },
+        { speaker: "ROKUDO", text: "そこは、似なくいいのに・・。" },
+        { speaker: "Player", text: "……かっこいい。" },
+        { speaker: "Deli", text: "いまは感心してる場合じゃありません！" },
+      ],
+      victory: [
+        { speaker: "ロク", text: "……ロク、だよ～……？" },
+        { speaker: "Deli", text: "戻った……？" },
+        { speaker: "Player", text: "大丈夫そうです。" },
+        { speaker: "ROKUDO", text: "……間に合ったね。" },
+        { speaker: "Deli", text: "この黒いモヤが、ブラックノイズ……。" },
+        { speaker: "ROKUDO", text: "これも必要な存在なんだよね・・。" },
+        { speaker: "ロク", text: "ごめんね～……。" },
+        { speaker: "Deli", text: "いえ、ロクさんのせいじゃありません。" },
+        { speaker: "Player", text: "Deliさん、かっこいいです。" },
+        { speaker: "Deli", text: "ありがとうございます。……でも本当に疲れました。" },
+      ],
+      defeat: [
+        { speaker: "ROKUDO", text: "つよいね……。" },
+        { speaker: "Deli", text: "このままじゃ、ロクさんが……！" },
+        { speaker: "Player", text: "立て直しましょう。" },
       ],
     },
   },

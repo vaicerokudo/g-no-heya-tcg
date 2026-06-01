@@ -70,6 +70,7 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
   const hasPart9 = collectedPartIds.has(9);
   const scenario9Unlocked = clearedScenarioIds.includes("scenario8");
   const scenario10Unlocked = clearedScenarioIds.includes("scenario9");
+  const scenario11Cleared = clearedScenarioIds.includes("scenario11");
 
   const runAfterRokuMove = (targetId: DeltaMoveTargetId, action: () => void) => {
     if (isMoving) return;
@@ -353,7 +354,14 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
                     パーツ9を取り外す
                   </button>
                 ) : null}
-                {machineComplete ? <div style={deltaEventNoticeStyle}>ブラックノイズ戦は準備中</div> : null}
+                {machineComplete && !scenario11Cleared ? (
+                  <button type="button" onClick={() => onStartScenario("scenario11")} style={deltaEventButtonStyle}>
+                    ブラックノイズ戦へ
+                  </button>
+                ) : null}
+                {machineComplete && scenario11Cleared ? (
+                  <div style={deltaEventNoticeStyle}>ブラックノイズ制圧済み</div>
+                ) : null}
               </div>
             ) : null}
             <p style={dialogTextStyle}>{getAreaDialogText(activeArea, machineComplete)}</p>

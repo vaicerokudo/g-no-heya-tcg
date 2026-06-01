@@ -1,8 +1,15 @@
 export const DELTA_EVENT_FLAGS_STORAGE_KEY = "gnoheya_tcg_delta_event_flags";
 
-export type DeltaEventFlag = "part5_heard_from_7171";
+export type DeltaEventFlag =
+  | "part5_heard_from_7171"
+  | "delta_chapter_cleared"
+  | "deli_metal_machine_unlocked";
 
-const KNOWN_DELTA_EVENT_FLAGS: DeltaEventFlag[] = ["part5_heard_from_7171"];
+const KNOWN_DELTA_EVENT_FLAGS: DeltaEventFlag[] = [
+  "part5_heard_from_7171",
+  "delta_chapter_cleared",
+  "deli_metal_machine_unlocked",
+];
 
 function isDeltaEventFlag(value: unknown): value is DeltaEventFlag {
   return typeof value === "string" && KNOWN_DELTA_EVENT_FLAGS.includes(value as DeltaEventFlag);

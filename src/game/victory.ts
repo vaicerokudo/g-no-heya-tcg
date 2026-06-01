@@ -48,6 +48,20 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side; pos?: { r: number; c: number } }>
 ): Victory | null {
+  if (scenarioId === "scenario11") {
+    const blackNoiseAlive = instances.some((u) => u.unitId === "BLACK_NOISE_ROKU" && u.side === "north");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!blackNoiseAlive) {
+      return { winner: "south", detail: "Scenario 11 clear: all BLACK_NOISE_ROKU units were defeated." };
+    }
+    if (!southAlive) {
+      return { winner: "north", detail: "Scenario 11 failed: all allies were defeated." };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario10") {
     const cloneAlive = instances.some((u) => u.unitId === "ROKU_CLONE" && u.side === "north");
     const southAlive = instances.some((u) => u.side === "south");

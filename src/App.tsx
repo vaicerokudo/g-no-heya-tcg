@@ -70,6 +70,7 @@ import {
 } from "./assets/imagePaths";
 import { isSkinUnlocked, readUnlockedSkins } from "./assets/skinUnlocks";
 import { readClearedScenarios, writeClearedScenarios } from "./game/scenario/progress";
+import { addDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
 import {
   markHiddenHintFlag,
@@ -306,6 +307,9 @@ export default function App() {
       passive.stunImmune = true;
       passive.extraActionsPerTurn = 1;
       passive.authorDamageTakenThisTurn = 0;
+    }
+    if (opts.unitId === "BLACK_NOISE_ROKU") {
+      passive.stunImmune = true;
     }
 
     const form = opts.form ?? "base";
@@ -692,6 +696,10 @@ export default function App() {
       }
       if (activeScenarioId === "scenario10") {
         addDeltaMachinePart(7);
+      }
+      if (activeScenarioId === "scenario11") {
+        addDeltaEventFlag("delta_chapter_cleared");
+        addDeltaEventFlag("deli_metal_machine_unlocked");
       }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
