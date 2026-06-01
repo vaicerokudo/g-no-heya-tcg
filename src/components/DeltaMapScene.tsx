@@ -28,7 +28,7 @@ type DeltaArea = {
 };
 
 const AREAS: DeltaArea[] = [
-  { id: "control", label: "管制室", subLabel: "シナリオ選択予定", icon: "CTRL", x: 35, y: 10, w: 30, h: 10 },
+  { id: "control", label: "管制室", subLabel: "MISSION SELECT", icon: "CTRL", x: 35, y: 10, w: 30, h: 10 },
   { id: "archive", label: "資料室", subLabel: "完成図パズル", icon: "DATA", x: 9, y: 44, w: 26, h: 11 },
   { id: "quarantine", label: "隔離ゲート", subLabel: "ロック中", icon: "LOCK", x: 65, y: 44, w: 26, h: 11 },
   { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", icon: "EXIT", x: 38, y: 84, w: 24, h: 9 },
@@ -409,22 +409,22 @@ function getAreaTitle(areaId: DeltaAreaId) {
 }
 
 function getAreaDialogTitle(areaId: DeltaAreaId, machineComplete: boolean) {
-  if (areaId === "control") return "デルタ編シナリオ選択予定";
+  if (areaId === "control") return "デルタ任務を選択";
   if (areaId === "archive") return "メタルマシーン完成図";
   return machineComplete ? "ロック解除" : "ロック中";
 }
 
 function getAreaDialogText(areaId: DeltaAreaId, machineComplete: boolean) {
   if (areaId === "control") {
-    return "管制室はまだ準備中です。ここからデルタ編の物語へ入る予定です。";
+    return "管制室では、第8話から第11話までのデルタ任務を開始できます。";
   }
   if (areaId === "archive") {
-    return "資料室には9つの空枠があります。完成図の欠片を集める場所として、次工程以降で保存ロジックを追加します。";
+    return "資料室では、集めたメタルマシーン完成図パーツを確認できます。9パーツが揃うと隔離ゲートが起動します。";
   }
   if (machineComplete) {
-    return "9パーツが揃い、隔離ゲートは起動可能になりました。ブラックノイズ戦はまだ準備中です。";
+    return "9パーツが揃い、隔離ゲートは起動可能になりました。ブラックノイズ戦へ進めます。";
   }
-  return "隔離ゲートは9パーツ完成後に開く予定です。奥にはBOSSブラックノイズの反応があります。";
+  return "隔離ゲートは9パーツ完成後に開きます。奥にはBOSSブラックノイズの反応があります。";
 }
 
 const sceneStyle: CSSProperties = {
