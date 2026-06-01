@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import rokuSpriteSheet from "../assets/pets/roku/spritesheet.webp";
+import { hasDeltaEventFlag } from "../game/delta/eventFlags";
 import { addDeltaMachinePart, getDeltaMachineParts } from "../game/delta/progress";
 import type { ScenarioId } from "../game/scenario/scenarios";
 
@@ -60,6 +61,12 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
   const [facing, setFacing] = useState<Facing>("right");
   const [isMoving, setIsMoving] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
+  const [deltaChapterCleared, setDeltaChapterCleared] = useState(() =>
+    hasDeltaEventFlag("delta_chapter_cleared")
+  );
+  const [deliMetalMachineUnlocked, setDeliMetalMachineUnlocked] = useState(() =>
+    hasDeltaEventFlag("deli_metal_machine_unlocked")
+  );
   const moveTimerRef = useRef<number | null>(null);
   const collectedPartIds = new Set(machineParts);
   const collectedPartCount = machineParts.length;
@@ -71,6 +78,7 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
   const scenario9Unlocked = clearedScenarioIds.includes("scenario8");
   const scenario10Unlocked = clearedScenarioIds.includes("scenario9");
   const scenario11Cleared = clearedScenarioIds.includes("scenario11");
+  const deltaClearComplete = deltaChapterCleared || scenario11Cleared;
 
   const runAfterRokuMove = (targetId: DeltaMoveTargetId, action: () => void) => {
     if (isMoving) return;
@@ -150,6 +158,17 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
     };
   }, []);
 
+  useEffect(() => {
+    const refreshDeltaClearState = () => {
+      setDeltaChapterCleared(hasDeltaEventFlag("delta_chapter_cleared"));
+      setDeliMetalMachineUnlocked(hasDeltaEventFlag("deli_metal_machine_unlocked"));
+    };
+
+    refreshDeltaClearState();
+    window.addEventListener("storage", refreshDeltaClearState);
+    return () => window.removeEventListener("storage", refreshDeltaClearState);
+  }, []);
+
   return (
     <div style={sceneStyle}>
       <div style={shellStyle}>
@@ -158,6 +177,14 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
             <div style={eyebrowStyle}>DELTA FACILITY</div>
             <h1 style={titleStyle}>研究施設デルタ</h1>
             <p style={leadStyle}>地下区画の管制端末から、次章の調査準備を進められます。</p>
+            {deltaClearComplete ? (
+              <div style={deltaClearBadgeStyle}>
+                <span style={deltaClearBadgeMainStyle}>BLACK NOISE SUPPRESSED</span>
+                <span style={deltaClearBadgeSubStyle}>
+                  デルタ調査完了 / Deliメタルマシーン{deliMetalMachineUnlocked ? "解放済み" : "確認中"}
+                </span>
+              </div>
+            ) : null}
           </div>
           <button type="button" onClick={onReturnContinent} style={returnButtonStyle}>
             大陸MAPへ
@@ -168,7 +195,7 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
           <div style={scanlineStyle} />
           <div style={facilityCoreStyle}>
             <div style={coreTitleStyle}>DELTA CORE</div>
-            <div style={coreStatusStyle}>STANDBY</div>
+            <div style={coreStatusStyle}>{deltaClearComplete ? "STABILIZED" : "STANDBY"}</div>
           </div>
           <div style={walkwayVerticalStyle} />
           <div style={walkwayHorizontalStyle} />
@@ -446,6 +473,31 @@ const leadStyle: CSSProperties = {
   color: "rgba(234,247,255,0.72)",
   fontSize: 13,
   lineHeight: 1.45,
+};
+
+const deltaClearBadgeStyle: CSSProperties = {
+  marginTop: 8,
+  display: "inline-flex",
+  flexDirection: "column",
+  gap: 2,
+  padding: "7px 10px",
+  borderRadius: 12,
+  border: "1px solid rgba(125,231,255,0.38)",
+  background: "linear-gradient(135deg, rgba(16,46,67,0.72), rgba(7,18,27,0.58))",
+  boxShadow: "0 0 18px rgba(125,231,255,0.14), inset 0 0 18px rgba(125,231,255,0.08)",
+};
+
+const deltaClearBadgeMainStyle: CSSProperties = {
+  color: "#7de7ff",
+  fontSize: 11,
+  fontWeight: 950,
+  letterSpacing: 0,
+};
+
+const deltaClearBadgeSubStyle: CSSProperties = {
+  color: "rgba(255,244,205,0.92)",
+  fontSize: 11,
+  fontWeight: 850,
 };
 
 const returnButtonStyle: CSSProperties = {

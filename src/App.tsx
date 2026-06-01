@@ -1452,6 +1452,15 @@ const reinforceSet = useMemo(() => {
         restartLabel={gameMode === "scenario" && activeScenarioId ? "街へ戻る" : undefined}
         onScenarioSelect={gameMode === "scenario" && activeScenarioId ? openScenarioSelect : undefined}
         onRetryScenario={gameMode === "scenario" && activeScenarioId ? retryActiveScenario : undefined}
+        deltaClearRewardImageSrc={
+          gameMode === "scenario" &&
+          activeScenarioId === "scenario11" &&
+          victory?.winner === "south"
+            ? southSkin === "comic"
+              ? "/portraits/south/comic/metal/deli.png"
+              : "/portraits/south/default/metal/deli.png"
+            : undefined
+        }
       />
 
       <ScenarioSelectDialog
