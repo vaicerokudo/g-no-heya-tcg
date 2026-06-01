@@ -66,6 +66,7 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
   const machineComplete = collectedPartCount === 9;
   const hasPart2 = collectedPartIds.has(2);
   const scenario9Unlocked = clearedScenarioIds.includes("scenario8");
+  const scenario10Unlocked = clearedScenarioIds.includes("scenario9");
 
   const runAfterRokuMove = (targetId: DeltaMoveTargetId, action: () => void) => {
     if (isMoving) return;
@@ -258,6 +259,28 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
                     disabled={!scenario9Unlocked}
                   >
                     {scenario9Unlocked ? "開始" : "LOCK"}
+                  </button>
+                </div>
+                <div style={scenarioEntryStyle}>
+                  <div>
+                    <div style={scenarioEntryTitleStyle}>第10話 ROKUDOとロク</div>
+                    <div style={scenarioEntryTextStyle}>
+                      {scenario10Unlocked
+                        ? "DeliとPlayerが、ロクの分身たちと稽古します。"
+                        : "第9話クリアで解放"}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onStartScenario("scenario10")}
+                    style={{
+                      ...scenarioStartButtonStyle,
+                      opacity: scenario10Unlocked ? 1 : 0.52,
+                      cursor: scenario10Unlocked ? "pointer" : "not-allowed",
+                    }}
+                    disabled={!scenario10Unlocked}
+                  >
+                    {scenario10Unlocked ? "開始" : "LOCK"}
                   </button>
                 </div>
               </div>

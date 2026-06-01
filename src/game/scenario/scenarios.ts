@@ -11,6 +11,7 @@ export type ScenarioId =
   | "scenario7"
   | "scenario8"
   | "scenario9"
+  | "scenario10"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -350,6 +351,47 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "Player", text: "Deliさん、下がってください。" },
         { speaker: "ジーマ", text: "こりゃ一回逃げた方がよさそうだな！" },
         { speaker: "Deli", text: "最初に逃げた人が言わないでください！" },
+      ],
+    },
+  },
+  scenario10: {
+    id: "scenario10",
+    title: "第10話 ROKUDOとロク",
+    stageName: "研究施設デルタ",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-delta.png",
+    returnScene: "delta",
+    placements: [
+      { unitId: "DELI", side: "south", r: 5, c: 2, instanceId: "SC10-DELI" },
+      { unitId: "PLAYER", side: "south", r: 5, c: 4, instanceId: "SC10-PLAYER" },
+      { unitId: "ROKU_CLONE", side: "north", r: 2, c: 2, instanceId: "SC10-ROKU-CLONE-1", hp: 2 },
+      { unitId: "ROKU_CLONE", side: "north", r: 1, c: 3, instanceId: "SC10-ROKU-CLONE-2", hp: 2 },
+      { unitId: "ROKU_CLONE", side: "north", r: 2, c: 4, instanceId: "SC10-ROKU-CLONE-3", hp: 2 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "Deli", text: "あれ？ ROKUDOさん？" },
+        { speaker: "ロク", text: "ロクだよ～♪ 特技は、分身の術。" },
+        { speaker: "Deli", text: "？？？" },
+        { speaker: "ロク", text: "ROKUDOが、稽古つけてあげてって言ってたから。いくよ～！" },
+        { speaker: "Deli", text: "えええ～～！" },
+        { speaker: "Player", text: "ロクさん……かっこいい……。" },
+        { speaker: "Deli", text: "Playerさん！？今そこに感心するところですか！？" },
+      ],
+      victory: [
+        { speaker: "ロク", text: "おお～。Deli、強くなってるね～♪" },
+        { speaker: "Deli", text: "はぁ……はぁ……分身3体は反則じゃないですか……？" },
+        { speaker: "Player", text: "Deliさん、かっこよかったです。" },
+        { speaker: "Deli", text: "ありがとうございます……でも、もう少し普通の稽古がよかったです。" },
+        { speaker: "ロク", text: "ROKUDOから預かってたやつ、渡すね～♪" },
+        { speaker: "Deli", text: "これは……完成図のパーツ？" },
+        { speaker: "ロク", text: "ロクだよ～♪" },
+      ],
+      defeat: [
+        { speaker: "ロク", text: "まだまだだね～♪ もう一回いく？" },
+        { speaker: "Deli", text: "少し休ませてください……！" },
+        { speaker: "Player", text: "Deliさん、大丈夫ですか？" },
+        { speaker: "Deli", text: "大丈夫です……たぶん……。" },
       ],
     },
   },

@@ -690,6 +690,9 @@ export default function App() {
       if (activeScenarioId === "scenario9") {
         addDeltaMachinePart(3);
       }
+      if (activeScenarioId === "scenario10") {
+        addDeltaMachinePart(7);
+      }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
       }

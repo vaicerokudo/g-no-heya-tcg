@@ -67,6 +67,31 @@ export const PROTO_ROBOT_UNIT_DEF: UnitDef = {
   },
 };
 
+export const ROKU_CLONE_UNIT_DEF: UnitDef = {
+  id: "ROKU_CLONE",
+  name: "ロク",
+  enemyOnly: true,
+  hiddenFromCatalog: true,
+  base: {
+    atk: 4,
+    hp: 2,
+    movePattern: {
+      type: "teleportFixed",
+      destinationsRelative: [
+        { dx: 2, dy: 0 },
+        { dx: -2, dy: 0 },
+        { dx: 0, dy: 2 },
+        { dx: 0, dy: -2 },
+        { dx: 2, dy: 2 },
+        { dx: 2, dy: -2 },
+        { dx: -2, dy: 2 },
+        { dx: -2, dy: -2 },
+      ],
+      canPassThroughUnits: true,
+    },
+  },
+};
+
 export const HIDDEN_MYOUOU_UNIT_DEF: UnitDef = {
   id: "HIDDEN_MYOUOU",
   name: "明王・試練",
@@ -109,6 +134,7 @@ export const scenarioEnemyUnits: UnitDef[] = [
   BEAR_UNIT_DEF,
   ZIMA_UNIT_DEF,
   PROTO_ROBOT_UNIT_DEF,
+  ROKU_CLONE_UNIT_DEF,
   HIDDEN_MYOUOU_UNIT_DEF,
   MONTEN_UNIT_DEF,
   ROKUDO_AUTHOR_UNIT_DEF,
