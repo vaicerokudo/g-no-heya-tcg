@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import rokuSpriteSheet from "../assets/pets/roku/spritesheet.webp";
+import { addDeltaMachinePart, hasDeltaMachinePart } from "../game/delta/progress";
+import type { ScenarioId } from "../game/scenario/scenarios";
 
 type AstoriaMapSceneProps = {
   onEnterLobby: () => void;
@@ -7,6 +9,7 @@ type AstoriaMapSceneProps = {
   onStartMontenTrial?: () => void;
   continentUnlocked?: boolean;
   onEnterContinent?: () => void;
+  clearedScenarioIds?: ScenarioId[];
 };
 
 type HotspotId = "gRoom" | "blacksmith" | "generalStore" | "plaza" | "gate";
@@ -170,6 +173,7 @@ export function AstoriaMapScene({
   onStartMontenTrial,
   continentUnlocked = false,
   onEnterContinent,
+  clearedScenarioIds = [],
 }: AstoriaMapSceneProps) {
   const [activeDialog, setActiveDialog] = useState<DialogId | null>(null);
   const [failedPortraits, setFailedPortraits] = useState<Set<string>>(() => new Set());
@@ -177,8 +181,10 @@ export function AstoriaMapScene({
   const [facing, setFacing] = useState<Facing>("right");
   const [isMoving, setIsMoving] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
+  const [hasPart4, setHasPart4] = useState(() => hasDeltaMachinePart(4));
   const moveTimerRef = useRef<number | null>(null);
   const dialog = activeDialog ? DIALOGS[activeDialog] : null;
+  const part4Unlocked = clearedScenarioIds.includes("scenario8");
 
   const handleHotspot = (id: HotspotId) => {
     if (isMoving) return;
@@ -217,6 +223,11 @@ export function AstoriaMapScene({
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  const receivePart4 = () => {
+    addDeltaMachinePart(4);
+    setHasPart4(true);
+  };
+
   const spriteState: SpriteState = isMoving
     ? facing === "left"
       ? "running-left"
@@ -232,6 +243,12 @@ export function AstoriaMapScene({
 
     return () => window.clearInterval(timerId);
   }, [spriteAnim.frames, spriteAnim.intervalMs, spriteState]);
+
+  useEffect(() => {
+    if (activeDialog === "plaza") {
+      setHasPart4(hasDeltaMachinePart(4));
+    }
+  }, [activeDialog]);
 
   useEffect(() => {
     return () => {
@@ -347,6 +364,22 @@ export function AstoriaMapScene({
             ) : null}
 
             {dialog.disabledReason ? <div style={disabledNoteStyle}>{dialog.disabledReason}</div> : null}
+
+            {activeDialog === "plaza" && part4Unlocked ? (
+              <div style={partGiftStyle(hasPart4)}>
+                <div style={partGiftSpeakerStyle}>門天</div>
+                <div style={partGiftTextStyle}>
+                  {hasPart4
+                    ? "あの変な部品なら、もう渡しただろ。ちゃんと保管しとけよ。"
+                    : "おう、そういや噴水んとこで変な部品拾ったぞ。俺にはいらねぇからやるよ。"}
+                </div>
+                {!hasPart4 ? (
+                  <button type="button" onClick={receivePart4} style={partGiftButtonStyle}>
+                    受け取る
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
 
             {activeDialog === "plaza" ? (
               <div style={plazaActionsStyle}>
@@ -623,6 +656,45 @@ const plazaActionsStyle: CSSProperties = {
   alignItems: "center",
   gap: 10,
   flexWrap: "wrap",
+};
+
+function partGiftStyle(received: boolean): CSSProperties {
+  return {
+    marginTop: 16,
+    padding: 12,
+    borderRadius: 14,
+    border: received ? "1px solid rgba(255,232,180,0.26)" : "1px solid rgba(125,231,255,0.48)",
+    background: received
+      ? "linear-gradient(180deg, rgba(255,241,204,0.08), rgba(24,18,16,0.42))"
+      : "linear-gradient(180deg, rgba(125,231,255,0.12), rgba(22,25,32,0.62))",
+    boxShadow: received ? undefined : "0 0 22px rgba(125,231,255,0.14), inset 0 0 18px rgba(125,231,255,0.08)",
+  };
+}
+
+const partGiftSpeakerStyle: CSSProperties = {
+  color: "#7de7ff",
+  fontSize: 12,
+  fontWeight: 950,
+};
+
+const partGiftTextStyle: CSSProperties = {
+  marginTop: 6,
+  color: "#fff6df",
+  fontSize: 14,
+  lineHeight: 1.6,
+};
+
+const partGiftButtonStyle: CSSProperties = {
+  marginTop: 10,
+  minHeight: 38,
+  padding: "0 14px",
+  borderRadius: 12,
+  border: "1px solid rgba(125,231,255,0.72)",
+  background: "linear-gradient(180deg, #7de7ff, #388aa8)",
+  color: "#061018",
+  fontWeight: 950,
+  touchAction: "manipulation",
+  cursor: "pointer",
 };
 
 const plazaCancelButtonStyle: CSSProperties = {

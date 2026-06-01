@@ -761,7 +761,9 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     resetGame();
   }
 
-  function returnToAstoriaFromScenario() {
+  function returnFromScenario() {
+    const returnScene = activeScenarioId ? (getScenarioConfig(activeScenarioId)?.returnScene ?? "astoria") : "astoria";
+
     setScenarioSelectOpen(false);
     setScenarioDialog(null);
     setScenarioResultDialogShown(false);
@@ -770,7 +772,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     setVictory(null);
     setSelectedId(null);
     setSkillMode(null);
-    setScene("astoria");
+    setScene(returnScene);
   }
 
   function openScenarioSelect() {
@@ -1340,6 +1342,7 @@ const reinforceSet = useMemo(() => {
           onStartMontenTrial={handleStartMontenTrial}
           continentUnlocked={continentUnlocked}
           onEnterContinent={() => setScene("continent")}
+          clearedScenarioIds={clearedScenarioIds}
         />
         <ScenarioSelectDialog
           open={scenarioSelectOpen}
@@ -1414,7 +1417,7 @@ const reinforceSet = useMemo(() => {
 
       <VictoryModal
         victory={scenarioDialogOpen ? null : victory}
-        onRestart={gameMode === "scenario" && activeScenarioId ? returnToAstoriaFromScenario : resetGame}
+        onRestart={gameMode === "scenario" && activeScenarioId ? returnFromScenario : resetGame}
         restartLabel={gameMode === "scenario" && activeScenarioId ? "街へ戻る" : undefined}
         onScenarioSelect={gameMode === "scenario" && activeScenarioId ? openScenarioSelect : undefined}
         onRetryScenario={gameMode === "scenario" && activeScenarioId ? retryActiveScenario : undefined}
@@ -1464,7 +1467,7 @@ const reinforceSet = useMemo(() => {
       <SelectedUnitStatus selected={selected} unitsById={unitsById} perUnitTurn={perUnitTurn} />
 
       <button
-        onClick={gameMode === "scenario" && activeScenarioId ? returnToAstoriaFromScenario : () => setScene("town")}
+        onClick={gameMode === "scenario" && activeScenarioId ? returnFromScenario : () => setScene("town")}
         style={{
           position: "fixed",
           right: 12,

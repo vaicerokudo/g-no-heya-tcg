@@ -15,6 +15,7 @@ export type ScenarioId =
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
+export type ScenarioReturnScene = "astoria" | "delta";
 
 export type ScenarioLine = {
   speaker: string;
@@ -37,6 +38,7 @@ export type ScenarioConfig = {
   stageName: string;
   boardSizeMode: BoardSizeMode;
   backgroundUrl?: string;
+  returnScene?: ScenarioReturnScene;
   placements: ScenarioUnitPlacement[];
   dialogs: Record<ScenarioDialogKind, ScenarioLine[]>;
 };
@@ -277,6 +279,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     stageName: "研究施設デルタ",
     boardSizeMode: "starter7",
     backgroundUrl: "/backgrounds/scenario-delta.png",
+    returnScene: "delta",
     placements: [
       { unitId: "DELI", side: "south", r: 5, c: 3, instanceId: "SC8-DELI" },
       { unitId: "ZIMA", side: "north", r: 1, c: 3, instanceId: "SC8-ZIMA", hp: 5 },
@@ -311,6 +314,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     stageName: "研究施設デルタ",
     boardSizeMode: "starter7",
     backgroundUrl: "/backgrounds/scenario-delta.png",
+    returnScene: "delta",
     placements: [
       { unitId: "DELI", side: "south", r: 5, c: 2, instanceId: "SC9-DELI" },
       { unitId: "PLAYER", side: "south", r: 5, c: 4, instanceId: "SC9-PLAYER" },
