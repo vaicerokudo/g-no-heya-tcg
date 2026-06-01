@@ -66,11 +66,12 @@ import {
   getPortrait as getPortraitPath,
   cardCandidates,
   portraitThumbCandidates,
+  type Form,
   type Skin,
 } from "./assets/imagePaths";
 import { isSkinUnlocked, readUnlockedSkins } from "./assets/skinUnlocks";
 import { readClearedScenarios, writeClearedScenarios } from "./game/scenario/progress";
-import { addDeltaEventFlag } from "./game/delta/eventFlags";
+import { addDeltaEventFlag, hasDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
 import {
   markHiddenHintFlag,
@@ -187,6 +188,9 @@ export default function App() {
   const [southSkin, setSouthSkin] = useState<Skin>("default");
   const [northSkin, setNorthSkin] = useState<Skin>("default");
   const [unlockedSkins, setUnlockedSkins] = useState<Skin[]>(() => readUnlockedSkins());
+  const [deliMetalMachineUnlocked, setDeliMetalMachineUnlocked] = useState(() =>
+    hasDeltaEventFlag("deli_metal_machine_unlocked")
+  );
   const [scene, setScene] = useState<Scene>("astoria");
 
   const [popupId, setPopupId] = useState<string | null>(null);
@@ -680,6 +684,15 @@ export default function App() {
   }, [boardSizeMode, gameMode]);
 
   useEffect(() => {
+    const refreshDeliMetalMachineUnlock = () =>
+      setDeliMetalMachineUnlocked(hasDeltaEventFlag("deli_metal_machine_unlocked"));
+
+    refreshDeliMetalMachineUnlock();
+    window.addEventListener("storage", refreshDeliMetalMachineUnlock);
+    return () => window.removeEventListener("storage", refreshDeliMetalMachineUnlock);
+  }, []);
+
+  useEffect(() => {
     if (gameMode !== "scenario") return;
     if (!activeScenarioId) return;
     if (!victory) return;
@@ -700,6 +713,7 @@ export default function App() {
       if (activeScenarioId === "scenario11") {
         addDeltaEventFlag("delta_chapter_cleared");
         addDeltaEventFlag("deli_metal_machine_unlocked");
+        setDeliMetalMachineUnlocked(true);
       }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
@@ -1298,6 +1312,11 @@ const reinforceSet = useMemo(() => {
     return side === "south" ? southSkin : northSkin;
   }
 
+  function getDisplayFormForImage(unitId: string, side: Side, form: Form = "base"): Form {
+    if (deliMetalMachineUnlocked && side === "south" && unitId === "DELI") return "metal";
+    return form;
+  }
+
   function handleSouthSkinChange(nextSkin: Skin) {
     if (!isSkinUnlocked(nextSkin, unlockedSkins)) {
       setSouthSkin("default");
@@ -1412,7 +1431,7 @@ const reinforceSet = useMemo(() => {
         usedSkills={usedSkills}
         onClose={() => setPopupId(null)}
         getCardCandidates={(unitId: string, side: "south" | "north", form?: "base" | "g") =>
-          cardCandidates(unitId, side, form ?? "base", getSkinForSide(side))
+          cardCandidates(unitId, side, getDisplayFormForImage(unitId, side, form ?? "base"), getSkinForSide(side))
         }
       />
 
@@ -1536,9 +1555,16 @@ const reinforceSet = useMemo(() => {
         skillTargetSet={skillTargetSet}
         debugTargetId={null}
         onShiftEnemyPick={() => {}}
-        getPortrait={(unitId, side, form) => getPortraitPath(unitId, side, form ?? "base", getSkinForSide(side))}
+        getPortrait={(unitId, side, form) =>
+          getPortraitPath(unitId, side, getDisplayFormForImage(unitId, side, form ?? "base"), getSkinForSide(side))
+        }
         getPortraitCandidates={(unitId, side, form) =>
-          portraitThumbCandidates(unitId, side, form ?? "base", getSkinForSide(side))
+          portraitThumbCandidates(
+            unitId,
+            side,
+            getDisplayFormForImage(unitId, side, form ?? "base"),
+            getSkinForSide(side)
+          )
         }
         posKey={posKey}
         canSelect={canSelect}
