@@ -163,6 +163,7 @@ export default function App() {
   const [scenarioDialog, setScenarioDialog] = useState<null | { kind: ScenarioDialogKind; index: number }>(null);
   const [scenarioResultDialogShown, setScenarioResultDialogShown] = useState(false);
   const activeScenario = gameMode === "scenario" && activeScenarioId ? getScenarioConfig(activeScenarioId) : null;
+  const [activeScenarioReturnScene, setActiveScenarioReturnScene] = useState<ScenarioReturnScene>("astoria");
   const [scenarioSelectOpen, setScenarioSelectOpen] = useState(false);
   const [clearedScenarioIds, setClearedScenarioIds] = useState<ScenarioId[]>(() => readClearedScenarios());
   const [hiddenHintFlags, setHiddenHintFlags] = useState<HiddenHintFlag[]>(() => readHiddenHintFlags());
@@ -373,6 +374,7 @@ export default function App() {
   function resetSetupState() {
     setGameMode("versus");
     setActiveScenarioId(null);
+    setActiveScenarioReturnScene("astoria");
     setScenarioDialog(null);
     setScenarioResultDialogShown(false);
     setVictory(null);
@@ -397,8 +399,10 @@ export default function App() {
   }
 
   function resetBattleStateForScenario(scenarioId: ScenarioId) {
+    const returnScene = getScenarioConfig(scenarioId)?.returnScene ?? "astoria";
     setGameMode("scenario");
     setActiveScenarioId(scenarioId);
+    setActiveScenarioReturnScene(returnScene);
     setScenarioDialog({ kind: "intro", index: 0 });
     setScenarioResultDialogShown(false);
     setVictory(null);
@@ -788,8 +792,14 @@ const deploySouthReinforceAt = (r: number, c: number) => {
   }
 
   function getScenarioReturnScene(scenarioId: ScenarioId | null): ScenarioReturnScene {
-    if (!scenarioId) return "astoria";
+    if (!scenarioId) return activeScenarioReturnScene;
     return getScenarioConfig(scenarioId)?.returnScene ?? "astoria";
+  }
+
+  function getScenarioReturnLabel() {
+    const returnScene = getScenarioReturnScene(activeScenarioId);
+    if (returnScene === "delta") return "デルタへ戻る";
+    return "街へ戻る";
   }
 
   function returnFromScenario() {
@@ -799,6 +809,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     setScenarioDialog(null);
     setScenarioResultDialogShown(false);
     setActiveScenarioId(null);
+    setActiveScenarioReturnScene("astoria");
     setGameMode("versus");
     setVictory(null);
     setSelectedId(null);
@@ -1454,8 +1465,8 @@ const reinforceSet = useMemo(() => {
 
       <VictoryModal
         victory={scenarioDialogOpen ? null : victory}
-        onRestart={gameMode === "scenario" && activeScenarioId ? returnFromScenario : resetGame}
-        restartLabel={gameMode === "scenario" && activeScenarioId ? "街へ戻る" : undefined}
+        onRestart={gameMode === "scenario" ? returnFromScenario : resetGame}
+        restartLabel={gameMode === "scenario" ? getScenarioReturnLabel() : undefined}
         onScenarioSelect={gameMode === "scenario" && activeScenarioId ? openScenarioSelect : undefined}
         onRetryScenario={gameMode === "scenario" && activeScenarioId ? retryActiveScenario : undefined}
         deltaClearRewardImageSrc={
@@ -1513,7 +1524,7 @@ const reinforceSet = useMemo(() => {
       <SelectedUnitStatus selected={selected} unitsById={unitsById} perUnitTurn={perUnitTurn} />
 
       <button
-        onClick={gameMode === "scenario" && activeScenarioId ? returnFromScenario : () => setScene("town")}
+        onClick={gameMode === "scenario" ? returnFromScenario : () => setScene("town")}
         style={{
           position: "fixed",
           right: 12,
@@ -1528,7 +1539,7 @@ const reinforceSet = useMemo(() => {
           cursor: "pointer",
         }}
       >
-        街へ戻る
+        {gameMode === "scenario" ? getScenarioReturnLabel() : "街へ戻る"}
       </button>
 
       <GameBoardArea
