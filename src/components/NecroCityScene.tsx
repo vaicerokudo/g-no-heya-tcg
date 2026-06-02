@@ -136,10 +136,11 @@ function getKruitzHint(partsSet: Set<ShipPartId>, flags: BlackNoiseBayEventFlag[
 export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
   const [progress, setProgress] = useState(() => readShipProgress());
   const [activeDistrict, setActiveDistrict] = useState<DistrictId>("plaza");
+  const [isKruitzModalOpen, setIsKruitzModalOpen] = useState(false);
   const [isNarrow, setIsNarrow] = useState(() => (typeof window === "undefined" ? false : window.innerWidth < 820));
   const [message, setMessage] = useState<DetailMessage>({
     title: "中央広場",
-    lines: ["クロイツが、霧の中で小さく尻尾を揺らしている。", "相談すると、次に探すべき地区を思い出してくれる。"],
+    lines: ["廃都の中心に残された広場。", "クロイツがこの街の記憶をたどり、船の部材の手がかりを教えてくれる。"],
   });
 
   const partsSet = useMemo(() => new Set(progress.parts), [progress.parts]);
@@ -166,6 +167,15 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  useEffect(() => {
+    if (!isKruitzModalOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsKruitzModalOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isKruitzModalOpen]);
+
   const refreshProgress = () => setProgress(readShipProgress());
 
   const collectPart = (partId: ShipPartId) => {
@@ -187,11 +197,11 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
     }
 
     setActiveDistrict(district.id);
+    setIsKruitzModalOpen(false);
     if (district.id === "plaza") {
       setMessage({
         title: "中央広場",
-        lines: ["クロイツに相談できます。", getKruitzHint(partsSet, flags)],
-        tone: allPartsReady ? "complete" : "hint",
+        lines: ["廃都の中心に残された広場。", "クロイツに相談すると、次に探すべき地区を思い出してくれる。"],
       });
       return;
     }
@@ -228,11 +238,7 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
 
   const runAction = (action: DistrictAction) => {
     if (action.id === "consultKruitz") {
-      setMessage({
-        title: "クロイツ",
-        lines: ["この街、まだ少しだけ覚えてるにゃ。", getKruitzHint(partsSet, flags)],
-        tone: allPartsReady ? "complete" : "hint",
-      });
+      setIsKruitzModalOpen(true);
       return;
     }
 
@@ -371,20 +377,20 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
     }
   };
 
-  const getKruitzExpression = (): KruitzExpression => {
+  const getKruitzExpression = (isConsulting = false): KruitzExpression => {
     if (shipBuilt) return "satisfied";
     if (allPartsReady) return "happy";
     if (message.tone === "blocked") return "trouble";
     if (message.tone === "success") return "idea";
     if (partsSet.size >= 4) return "idea";
-    if (message.tone === "hint") return "think";
+    if (isConsulting || message.tone === "hint") return "think";
     return "normal";
   };
 
   const districtActions =
     activeDistrict === "entrance" ? [] : DISTRICT_ACTIONS[activeDistrict as Exclude<DistrictId, "entrance">];
-  const isCentralPlaza = activeDistrict === "plaza";
-  const kruitzExpression = getKruitzExpression();
+  const kruitzExpression = getKruitzExpression(isKruitzModalOpen);
+  const kruitzHint = getKruitzHint(partsSet, flags);
 
   return (
     <div style={sceneStyle}>
@@ -443,19 +449,6 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
               </div>
             </div>
 
-            {isCentralPlaza ? (
-              <div style={kruitzPanelStyle}>
-                <div style={kruitzFrameStyle}>
-                  <img src={KRUitz_IMAGES[kruitzExpression]} alt="クロイツ" style={kruitzImageStyle} />
-                </div>
-                <div style={kruitzTextStyle}>
-                  <strong>クロイツ</strong>
-                  <span>{message.lines[0]}</span>
-                  <span>{message.lines[1] ?? getKruitzHint(partsSet, flags)}</span>
-                </div>
-              </div>
-            ) : null}
-
             {districtActions.length ? (
               <div style={actionListStyle}>
                 {districtActions.map((action) => {
@@ -488,10 +481,44 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
               {message.lines.map((line) => (
                 <span key={line}>{line}</span>
               ))}
+              {activeDistrict === "plaza" ? <span>船の部材：{progress.parts.length} / {SHIP_PART_IDS.length}</span> : null}
             </div>
           </section>
         </main>
       </div>
+
+      {isKruitzModalOpen ? (
+        <div style={modalOverlayStyle} role="dialog" aria-modal="true" aria-label="クロイツ相談" onClick={() => setIsKruitzModalOpen(false)}>
+          <div style={{ ...kruitzModalStyle, ...(isNarrow ? kruitzModalNarrowStyle : null) }} onClick={(event) => event.stopPropagation()}>
+            <div style={modalHeaderStyle}>
+              <div>
+                <div style={detailEyebrowStyle}>CENTRAL PLAZA GUIDE</div>
+                <h2 style={detailTitleStyle}>クロイツに相談</h2>
+              </div>
+              <button type="button" onClick={() => setIsKruitzModalOpen(false)} style={modalCloseButtonStyle}>
+                閉じる
+              </button>
+            </div>
+
+            <div style={{ ...kruitzPanelStyle, ...(isNarrow ? kruitzPanelNarrowStyle : null) }}>
+              <div style={{ ...kruitzFrameStyle, ...(isNarrow ? kruitzFrameNarrowStyle : null) }}>
+                <img src={KRUitz_IMAGES[kruitzExpression]} alt="クロイツ" style={kruitzImageStyle} />
+              </div>
+              <div style={kruitzTextStyle}>
+                <strong>クロイツ</strong>
+                <span>この街、まだ少しだけ覚えてるにゃ。</span>
+                <span>{kruitzHint}</span>
+              </div>
+            </div>
+
+            <div style={messageBoxStyle}>
+              <div style={messageTitleStyle}>探索状況</div>
+              <span>船の部材：{progress.parts.length} / {SHIP_PART_IDS.length}</span>
+              <span>{shipBuilt ? "船は完成しているにゃ。湾へ戻るにゃ。" : allPartsReady ? "部材は揃ったにゃ。造船区へ行くにゃ。" : "まだ街のどこかに部材が残っているにゃ。"}</span>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -532,7 +559,9 @@ const detailEyebrowStyle: CSSProperties = { color: "#a9d7ff", fontSize: 10, font
 const detailTitleStyle: CSSProperties = { margin: "3px 0 0", color: "#ffe0a3", fontSize: 20 };
 const detailSubStyle: CSSProperties = { marginTop: 4, color: "rgba(237,247,255,0.7)", fontSize: 12, fontWeight: 850 };
 const kruitzPanelStyle: CSSProperties = { display: "grid", gridTemplateColumns: "88px 1fr", gap: 12, alignItems: "center", minHeight: 126, padding: 12, boxSizing: "border-box", borderRadius: 12, border: "1px solid rgba(185,160,255,0.26)", background: "rgba(30, 20, 52, 0.56)" };
+const kruitzPanelNarrowStyle: CSSProperties = { gridTemplateColumns: "1fr", justifyItems: "center" };
 const kruitzFrameStyle: CSSProperties = { width: 82, height: 82, borderRadius: 14, display: "grid", placeItems: "center", background: "radial-gradient(circle, rgba(137,95,255,0.18), rgba(0,0,0,0.14))", border: "1px solid rgba(185,160,255,0.28)", overflow: "hidden" };
+const kruitzFrameNarrowStyle: CSSProperties = { width: 72, height: 72 };
 const kruitzImageStyle: CSSProperties = { width: "118%", height: "118%", objectFit: "contain" };
 const kruitzTextStyle: CSSProperties = { display: "grid", gap: 5, color: "rgba(237,247,255,0.9)", fontSize: 13, lineHeight: 1.55, fontWeight: 850 };
 const actionListStyle: CSSProperties = { display: "grid", gap: 8, gridAutoRows: "minmax(76px, auto)" };
@@ -544,3 +573,8 @@ const actionTitleStyle: CSSProperties = { fontWeight: 950, fontSize: 13 };
 const actionSubStyle: CSSProperties = { color: "rgba(237,247,255,0.67)", fontSize: 12 };
 const messageBoxStyle: CSSProperties = { display: "grid", gap: 7, minHeight: 128, padding: 12, boxSizing: "border-box", borderRadius: 12, border: "1px solid rgba(210,232,255,0.16)", background: "rgba(0,0,0,0.22)", color: "rgba(237,247,255,0.9)", fontSize: 13, lineHeight: 1.6, fontWeight: 850, alignContent: "start" };
 const messageTitleStyle: CSSProperties = { color: "#ffe0a3", fontWeight: 950, fontSize: 14 };
+const modalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 40, display: "grid", placeItems: "center", padding: 12, boxSizing: "border-box", background: "rgba(3, 5, 9, 0.72)", backdropFilter: "blur(3px)" };
+const kruitzModalStyle: CSSProperties = { width: "min(560px, 100%)", maxHeight: "min(82dvh, 560px)", overflowX: "hidden", overflowY: "auto", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.26)", background: "linear-gradient(180deg, rgba(13, 16, 24, 0.96), rgba(6, 8, 13, 0.96))", boxShadow: "0 24px 72px rgba(0,0,0,0.62)", display: "grid", gap: 12 };
+const kruitzModalNarrowStyle: CSSProperties = { maxHeight: "86dvh", padding: 12 };
+const modalHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "start", gap: 12 };
+const modalCloseButtonStyle: CSSProperties = { minHeight: 36, padding: "0 12px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(255,255,255,0.08)", color: "#edf7ff", fontWeight: 950, cursor: "pointer" };
