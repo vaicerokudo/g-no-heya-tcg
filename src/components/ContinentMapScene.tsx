@@ -21,9 +21,9 @@ type Hotspot = {
 };
 
 const HOTSPOTS: Hotspot[] = [
-  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 61, y: 57, w: 28, h: 9 },
-  { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 33, y: 74, w: 34, h: 10 },
-  { id: "dustWasteland", label: "砂塵の荒野", subLabel: "新たな調査地点", badge: "NEW", x: 12, y: 43, w: 34, h: 10 },
+  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 76, y: 78, w: 28, h: 9 },
+  { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 50, y: 88, w: 34, h: 10 },
+  { id: "dustWasteland", label: "砂塵の荒野", subLabel: "新たな調査地点", badge: "NEW", x: 52, y: 43, w: 34, h: 10 },
 ];
 
 export function ContinentMapScene({
@@ -57,38 +57,44 @@ export function ContinentMapScene({
           </button>
         </header>
 
-        <div style={mapStyle}>
-          {HOTSPOTS.map((spot) => {
-            const deltaCleared = spot.id === "delta" && deltaChapterCleared;
-            const subLabel = deltaCleared ? "クリア済み" : spot.subLabel;
-            const handleClick =
-              spot.id === "astoria"
-                ? onReturnAstoria
-                : spot.id === "delta"
-                  ? onEnterDelta
-                  : onEnterDustWasteland;
+        <div style={mapFrameStyle}>
+          <img src={CONTINENT_MAP_IMAGE_URL} alt="" aria-hidden="true" style={mapImageStyle} />
+          <div style={hotspotLayerStyle}>
+            {HOTSPOTS.map((spot) => {
+              const deltaCleared = spot.id === "delta" && deltaChapterCleared;
+              const subLabel = deltaCleared ? "クリア済み" : spot.subLabel;
+              const handleClick =
+                spot.id === "astoria"
+                  ? onReturnAstoria
+                  : spot.id === "delta"
+                    ? onEnterDelta
+                    : onEnterDustWasteland;
 
-            return (
-              <button
-                key={spot.id}
-                type="button"
-                onClick={handleClick}
-                title={`${spot.label}: ${subLabel}`}
-                style={{
-                  ...hotspotStyle,
-                  left: `${spot.x}%`,
-                  top: `${spot.y}%`,
-                  width: `${spot.w}%`,
-                  height: `${spot.h}%`,
-                }}
-              >
-                <span style={hotspotLabelStyle}>{spot.label}</span>
-                {deltaCleared ? <span style={deltaClearedBadgeStyle}>クリア済み</span> : null}
-                {spot.badge ? <span style={hotspotBadgeStyle}>{spot.badge}</span> : null}
-                <span style={hotspotSubLabelStyle}>{subLabel}</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={spot.id}
+                  type="button"
+                  onClick={handleClick}
+                  title={`${spot.label}: ${subLabel}`}
+                  style={{
+                    ...hotspotStyle,
+                    left: `${spot.x}%`,
+                    top: `${spot.y}%`,
+                    width: `${spot.w}%`,
+                  }}
+                >
+                  <span style={hotspotLabelStyle}>{spot.label}</span>
+                  {deltaCleared || spot.badge ? (
+                    <span style={hotspotBadgeRowStyle}>
+                      {deltaCleared ? <span style={deltaClearedBadgeStyle}>クリア済み</span> : null}
+                      {spot.badge ? <span style={hotspotBadgeStyle}>{spot.badge}</span> : null}
+                    </span>
+                  ) : null}
+                  <span style={hotspotSubLabelStyle}>{subLabel}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
@@ -146,35 +152,45 @@ const returnButtonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-const mapStyle: CSSProperties = {
+const mapFrameStyle: CSSProperties = {
   position: "relative",
   width: "clamp(320px, 96vw, 640px)",
   maxWidth: "100%",
-  aspectRatio: "941 / 1672",
-  minHeight: 0,
   margin: "0 auto",
   overflow: "hidden",
   borderRadius: 18,
   border: "1px solid rgba(255,229,172,0.25)",
-  background:
-    `linear-gradient(180deg, rgba(10,12,18,0.04), rgba(20,14,10,0.14)), url(${CONTINENT_MAP_IMAGE_URL}), linear-gradient(180deg, rgba(78,101,122,0.86), rgba(42,33,24,0.92) 100%)`,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
+  background: "linear-gradient(180deg, rgba(78,101,122,0.86), rgba(42,33,24,0.92) 100%)",
   boxShadow: "0 22px 60px rgba(0,0,0,0.48), inset 0 0 62px rgba(0,0,0,0.20)",
+};
+
+const mapImageStyle: CSSProperties = {
+  display: "block",
+  width: "100%",
+  height: "auto",
+};
+
+const hotspotLayerStyle: CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  pointerEvents: "none",
 };
 
 const hotspotStyle: CSSProperties = {
   position: "absolute",
   display: "flex",
+  flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
+  gap: 4,
   padding: 0,
   border: 0,
   background: "transparent",
   color: "#fff1cc",
   touchAction: "manipulation",
   cursor: "pointer",
+  transform: "translate(-50%, -50%)",
+  pointerEvents: "auto",
 };
 
 const hotspotLabelStyle: CSSProperties = {
@@ -190,7 +206,7 @@ const hotspotLabelStyle: CSSProperties = {
   background: "linear-gradient(180deg, rgba(58,39,25,0.86), rgba(23,17,14,0.74))",
   color: "#fff1cc",
   boxShadow: "0 8px 18px rgba(0,0,0,0.28), 0 0 12px rgba(255,214,109,0.18)",
-  fontSize: 13,
+  fontSize: 12,
   lineHeight: 1.1,
   fontWeight: 950,
   textAlign: "center",
@@ -207,10 +223,7 @@ const hotspotSubLabelStyle: CSSProperties = {
 };
 
 const deltaClearedBadgeStyle: CSSProperties = {
-  position: "absolute",
-  left: "50%",
-  top: "calc(50% + 23px)",
-  transform: "translateX(-50%)",
+  display: "inline-flex",
   padding: "3px 9px",
   borderRadius: 999,
   border: "1px solid rgba(112, 244, 198, 0.72)",
@@ -224,10 +237,17 @@ const deltaClearedBadgeStyle: CSSProperties = {
   textShadow: "0 1px 4px rgba(0,0,0,0.55)",
 };
 
+const hotspotBadgeRowStyle: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 5,
+  maxWidth: "100%",
+  pointerEvents: "none",
+};
+
 const hotspotBadgeStyle: CSSProperties = {
-  position: "absolute",
-  left: "calc(50% + 46px)",
-  top: "calc(50% - 25px)",
+  display: "inline-flex",
   padding: "3px 7px",
   borderRadius: 999,
   border: "1px solid rgba(255, 235, 145, 0.82)",
