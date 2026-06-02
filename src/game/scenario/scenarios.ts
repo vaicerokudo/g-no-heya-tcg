@@ -460,7 +460,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第12話 荒野の入口",
     stageName: "砂塵の荒野",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/dust-wasteland-map.png",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
     returnScene: "dustWasteland",
     placements: [
       { unitId: "TSUTSU", side: "south", r: 5, c: 2, instanceId: "SC12-TSUTSU" },
@@ -492,7 +492,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第13話 流砂地帯",
     stageName: "砂塵の荒野・流砂地帯",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/dust-wasteland-map.png",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
     returnScene: "dustWasteland",
     terrain: {
       quicksand: ["C3", "D4", "E5"],
@@ -530,7 +530,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第14話 砂嵐の抜け道",
     stageName: "砂塵の荒野・砂嵐の抜け道",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/dust-wasteland-map.png",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
     returnScene: "dustWasteland",
     terrain: {
       quicksand: ["B4", "F4"],
@@ -568,7 +568,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第15話 荒野の奥地",
     stageName: "砂塵の荒野・奥地",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/dust-wasteland-map.png",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
     returnScene: "dustWasteland",
     terrain: {
       quicksand: ["C4", "D3", "E4"],
