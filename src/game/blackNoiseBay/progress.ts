@@ -5,13 +5,19 @@ export type ShipPartId =
   | "sailcloth"
   | "helm"
   | "waterproof_material"
-  | "hull_reinforcement";
+  | "hull_reinforcement"
+  | "anchor_chain"
+  | "compass"
+  | "lantern";
 
 export type BlackNoiseBayEventFlag =
   | "black_noise_bay_front_cleared"
   | "ship_required_discovered"
   | "ship_built"
-  | "black_noise_bay_ship_ready";
+  | "black_noise_bay_ship_ready"
+  | "necro_market_record_found"
+  | "necro_clock_mechanism_found"
+  | "necro_tavern_route_found";
 
 export type ShipProgress = {
   parts: ShipPartId[];
@@ -24,6 +30,9 @@ export const SHIP_PART_LABELS: Record<ShipPartId, string> = {
   helm: "舵輪",
   waterproof_material: "防水材",
   hull_reinforcement: "船底補強材",
+  anchor_chain: "錨鎖",
+  compass: "羅針盤",
+  lantern: "航海灯",
 };
 
 export const SHIP_PART_IDS: ShipPartId[] = [
@@ -32,6 +41,9 @@ export const SHIP_PART_IDS: ShipPartId[] = [
   "helm",
   "waterproof_material",
   "hull_reinforcement",
+  "anchor_chain",
+  "compass",
+  "lantern",
 ];
 
 const KNOWN_FLAGS: BlackNoiseBayEventFlag[] = [
@@ -39,6 +51,9 @@ const KNOWN_FLAGS: BlackNoiseBayEventFlag[] = [
   "ship_required_discovered",
   "ship_built",
   "black_noise_bay_ship_ready",
+  "necro_market_record_found",
+  "necro_clock_mechanism_found",
+  "necro_tavern_route_found",
 ];
 
 function isShipPartId(value: unknown): value is ShipPartId {
