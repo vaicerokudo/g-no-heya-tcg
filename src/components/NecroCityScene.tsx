@@ -15,6 +15,7 @@ type NecroCitySceneProps = {
 
 type DistrictId = "entrance" | "plaza" | "market" | "clock" | "waterfront" | "residential" | "shipyard";
 type ActionId =
+  | "returnContinent"
   | "consultKruitz"
   | "inspectMarket"
   | "inspectTavern"
@@ -33,6 +34,7 @@ type District = {
   id: DistrictId;
   label: string;
   subLabel: string;
+  backgroundUrl: string;
   x: number;
   y: number;
 };
@@ -60,16 +62,17 @@ const KRUitz_IMAGES: Record<KruitzExpression, string> = {
 };
 
 const DISTRICTS: District[] = [
-  { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", x: 50, y: 88 },
-  { id: "plaza", label: "中央広場", subLabel: "クロイツに相談", x: 50, y: 52 },
-  { id: "market", label: "港湾市場区", subLabel: "帆布の手がかり", x: 23, y: 44 },
-  { id: "clock", label: "時計塔周辺", subLabel: "舵輪と羅針盤", x: 72, y: 31 },
-  { id: "waterfront", label: "水辺区画", subLabel: "倉庫と灯台", x: 73, y: 68 },
-  { id: "residential", label: "市街跡", subLabel: "記録と手記", x: 33, y: 73 },
-  { id: "shipyard", label: "造船区", subLabel: "補強材と造船", x: 52, y: 17 },
+  { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", backgroundUrl: "/backgrounds/necro-city/entrance.png", x: 50, y: 88 },
+  { id: "plaza", label: "中央広場", subLabel: "クロイツに相談", backgroundUrl: "/backgrounds/necro-city/central-plaza.png", x: 50, y: 52 },
+  { id: "market", label: "港湾市場区", subLabel: "帆布の手がかり", backgroundUrl: "/backgrounds/necro-city/harbor-market.png", x: 23, y: 44 },
+  { id: "clock", label: "時計塔周辺", subLabel: "舵輪と羅針盤", backgroundUrl: "/backgrounds/necro-city/clocktower-area.png", x: 72, y: 31 },
+  { id: "waterfront", label: "水辺区画", subLabel: "倉庫と灯台", backgroundUrl: "/backgrounds/necro-city/waterfront-area.png", x: 73, y: 68 },
+  { id: "residential", label: "市街跡", subLabel: "記録と手記", backgroundUrl: "/backgrounds/necro-city/residential-ruins.png", x: 33, y: 73 },
+  { id: "shipyard", label: "造船区", subLabel: "補強材と造船", backgroundUrl: "/backgrounds/necro-city/shipyard-area.png", x: 52, y: 17 },
 ];
 
-const DISTRICT_ACTIONS: Record<Exclude<DistrictId, "entrance">, DistrictAction[]> = {
+const DISTRICT_ACTIONS: Record<DistrictId, DistrictAction[]> = {
+  entrance: [{ id: "returnContinent", label: "大陸MAPへ戻る", subLabel: "廃都の入口から外へ出る" }],
   plaza: [{ id: "consultKruitz", label: "クロイツに相談する", subLabel: "次の探索先を聞く" }],
   market: [
     { id: "inspectMarket", label: "廃市場を調べる", subLabel: "運搬記録を探す" },
@@ -197,11 +200,6 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   };
 
   const selectDistrict = (district: District) => {
-    if (district.id === "entrance") {
-      onReturnContinent();
-      return;
-    }
-
     setActiveDistrict(district.id);
     setIsAreaModalOpen(true);
     setIsKruitzModalOpen(false);
@@ -244,6 +242,11 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   };
 
   const runAction = (action: DistrictAction) => {
+    if (action.id === "returnContinent") {
+      onReturnContinent();
+      return;
+    }
+
     if (action.id === "consultKruitz") {
       setIsKruitzModalOpen(true);
       return;
@@ -395,7 +398,7 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   };
 
   const districtActions =
-    activeDistrict === "entrance" ? [] : DISTRICT_ACTIONS[activeDistrict as Exclude<DistrictId, "entrance">];
+    DISTRICT_ACTIONS[activeDistrict];
   const kruitzExpression = getKruitzExpression(isKruitzModalOpen);
   const kruitzHint = getKruitzHint(partsSet, flags);
 
@@ -466,6 +469,16 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
               </button>
             </div>
 
+            <div
+              style={{
+                ...areaVisualStyle,
+                backgroundImage: `linear-gradient(180deg, rgba(4,7,11,0.12), rgba(4,7,11,0.72)), url('${activeDistrictConfig.backgroundUrl}')`,
+              }}
+            >
+              <div style={areaVisualLabelStyle}>{activeDistrictConfig.label}</div>
+              <div style={areaVisualSubStyle}>{activeDistrictConfig.subLabel}</div>
+            </div>
+
             {districtActions.length ? (
               <div style={actionListStyle}>
                 {districtActions.map((action) => {
@@ -484,7 +497,7 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
                         ...(locked ? actionLockedStyle : null),
                       }}
                     >
-                      <span style={actionBadgeStyle}>{partCollected ? "GET" : locked ? "LOCK" : "調べる"}</span>
+                      <span style={actionBadgeStyle}>{partCollected ? "GET" : locked ? "LOCK" : action.id === "returnContinent" ? "BACK" : "調べる"}</span>
                       <span style={actionTitleStyle}>{action.label}</span>
                       <span style={actionSubStyle}>{action.subLabel}</span>
                     </button>
@@ -574,6 +587,9 @@ const detailHeaderStyle: CSSProperties = { display: "flex", justifyContent: "spa
 const detailEyebrowStyle: CSSProperties = { color: "#a9d7ff", fontSize: 10, fontWeight: 950 };
 const detailTitleStyle: CSSProperties = { margin: "3px 0 0", color: "#ffe0a3", fontSize: 20 };
 const detailSubStyle: CSSProperties = { marginTop: 4, color: "rgba(237,247,255,0.7)", fontSize: 12, fontWeight: 850 };
+const areaVisualStyle: CSSProperties = { minHeight: 150, borderRadius: 12, border: "1px solid rgba(210,232,255,0.2)", backgroundPosition: "center", backgroundSize: "cover", backgroundRepeat: "no-repeat", boxShadow: "inset 0 -56px 68px rgba(0,0,0,0.72), inset 0 0 70px rgba(0,0,0,0.4)", display: "flex", flexDirection: "column", justifyContent: "end", gap: 4, padding: 12, boxSizing: "border-box", overflow: "hidden" };
+const areaVisualLabelStyle: CSSProperties = { width: "fit-content", maxWidth: "100%", padding: "4px 9px", borderRadius: 999, border: "1px solid rgba(255,224,163,0.58)", background: "rgba(5,8,13,0.68)", color: "#ffe0a3", fontSize: 13, fontWeight: 950, textShadow: "0 1px 4px rgba(0,0,0,0.82)" };
+const areaVisualSubStyle: CSSProperties = { width: "fit-content", maxWidth: "100%", padding: "3px 8px", borderRadius: 999, background: "rgba(5,8,13,0.62)", color: "rgba(237,247,255,0.86)", fontSize: 11, fontWeight: 900, textShadow: "0 1px 4px rgba(0,0,0,0.82)" };
 const kruitzPanelStyle: CSSProperties = { display: "grid", gridTemplateColumns: "88px 1fr", gap: 12, alignItems: "center", minHeight: 126, padding: 12, boxSizing: "border-box", borderRadius: 12, border: "1px solid rgba(185,160,255,0.26)", background: "rgba(30, 20, 52, 0.56)" };
 const kruitzPanelNarrowStyle: CSSProperties = { gridTemplateColumns: "1fr", justifyItems: "center" };
 const kruitzFrameStyle: CSSProperties = { width: 82, height: 82, borderRadius: 14, display: "grid", placeItems: "center", background: "radial-gradient(circle, rgba(137,95,255,0.18), rgba(0,0,0,0.14))", border: "1px solid rgba(185,160,255,0.28)", overflow: "hidden" };
