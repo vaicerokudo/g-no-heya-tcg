@@ -48,7 +48,7 @@ export function checkScenarioVictory(
   scenarioId: ScenarioId,
   instances: Array<{ unitId: string; side: Side; pos?: { r: number; c: number }; hp?: number }>
 ): Victory | null {
-  if (["scenario16", "scenario17"].includes(scenarioId)) {
+  if (["scenario16", "scenario17", "scenario19"].includes(scenarioId)) {
     const northAlive = instances.some((u) => u.side === "north");
     const southAlive = instances.some((u) => u.side === "south");
 
@@ -57,6 +57,27 @@ export function checkScenarioVictory(
     }
     if (!southAlive) {
       return { winner: "north", detail: `${scenarioId} failed: all allies were defeated.` };
+    }
+
+    return null;
+  }
+
+  if (scenarioId === "scenario20") {
+    const ushimaru = instances.find((u) => u.unitId === "USHIMARU" && u.side === "south");
+    const southAlive = instances.some((u) => u.side === "south");
+    const northAlive = instances.some((u) => u.side === "north");
+
+    if (!southAlive) {
+      return { winner: "north", detail: "Scenario 20 failed: the fishing team was defeated." };
+    }
+    if (ushimaru?.pos?.r === 0 && ushimaru.pos.c === 3) {
+      return {
+        winner: "south",
+        detail: "釣り上げ成功：うしまるが湾中央の釣り場でリヴァイアサンの気配を捉えた！",
+      };
+    }
+    if (!northAlive) {
+      return { winner: "south", detail: "Scenario 20 clear: the fishing route was secured." };
     }
 
     return null;

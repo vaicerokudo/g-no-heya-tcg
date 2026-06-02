@@ -16,6 +16,7 @@ export type BlackNoiseBayEventFlag =
   | "ship_built"
   | "black_noise_bay_ship_ready"
   | "black_noise_bay_departed"
+  | "black_noise_bay_leviathan_hooked"
   | "necro_market_record_found"
   | "necro_clock_mechanism_found"
   | "necro_tavern_route_found";
@@ -53,6 +54,7 @@ const KNOWN_FLAGS: BlackNoiseBayEventFlag[] = [
   "ship_built",
   "black_noise_bay_ship_ready",
   "black_noise_bay_departed",
+  "black_noise_bay_leviathan_hooked",
   "necro_market_record_found",
   "necro_clock_mechanism_found",
   "necro_tavern_route_found",

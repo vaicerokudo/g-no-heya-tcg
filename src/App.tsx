@@ -770,6 +770,9 @@ export default function App() {
       if (activeScenarioId === "scenario19") {
         addBlackNoiseBayEventFlag("black_noise_bay_departed");
       }
+      if (activeScenarioId === "scenario20") {
+        addBlackNoiseBayEventFlag("black_noise_bay_leviathan_hooked");
+      }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
       }
