@@ -136,6 +136,7 @@ function getKruitzHint(partsSet: Set<ShipPartId>, flags: BlackNoiseBayEventFlag[
 export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
   const [progress, setProgress] = useState(() => readShipProgress());
   const [activeDistrict, setActiveDistrict] = useState<DistrictId>("plaza");
+  const [isAreaModalOpen, setIsAreaModalOpen] = useState(false);
   const [isKruitzModalOpen, setIsKruitzModalOpen] = useState(false);
   const [isNarrow, setIsNarrow] = useState(() => (typeof window === "undefined" ? false : window.innerWidth < 820));
   const [message, setMessage] = useState<DetailMessage>({
@@ -168,13 +169,18 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
   }, []);
 
   useEffect(() => {
-    if (!isKruitzModalOpen) return;
+    if (!isAreaModalOpen && !isKruitzModalOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsKruitzModalOpen(false);
+      if (event.key !== "Escape") return;
+      if (isKruitzModalOpen) {
+        setIsKruitzModalOpen(false);
+        return;
+      }
+      setIsAreaModalOpen(false);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isKruitzModalOpen]);
+  }, [isAreaModalOpen, isKruitzModalOpen]);
 
   const refreshProgress = () => setProgress(readShipProgress());
 
@@ -197,6 +203,7 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
     }
 
     setActiveDistrict(district.id);
+    setIsAreaModalOpen(true);
     setIsKruitzModalOpen(false);
     if (district.id === "plaza") {
       setMessage({
@@ -411,7 +418,7 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
           <span>{shipBuilt ? "船 完成" : allPartsReady ? "造船可能" : "地区探索中"}</span>
         </div>
 
-        <main style={{ ...layoutStyle, ...(isNarrow ? layoutNarrowStyle : null) }}>
+        <main style={layoutStyle}>
           <section style={{ ...mapStyle, ...(isNarrow ? mapNarrowStyle : null) }} aria-label="廃都ネクロシティ地区MAP">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={routeSvgStyle} aria-hidden="true">
               <polyline points="50,88 33,73 23,44 50,52 72,31 73,68 52,17" style={routeLineStyle} />
@@ -439,14 +446,24 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
               </button>
             ))}
           </section>
+        </main>
+      </div>
 
-          <section style={{ ...detailPanelStyle, ...(isNarrow ? detailPanelNarrowStyle : null) }}>
+      {isAreaModalOpen ? (
+        <div style={areaModalOverlayStyle} role="dialog" aria-modal="true" aria-label={`${activeDistrictConfig.label} 詳細`} onClick={() => setIsAreaModalOpen(false)}>
+          <section
+            style={{ ...detailPanelStyle, ...(isNarrow ? detailPanelNarrowStyle : null) }}
+            onClick={(event) => event.stopPropagation()}
+          >
             <div style={detailHeaderStyle}>
               <div>
-                <div style={detailEyebrowStyle}>SELECTED AREA</div>
+                <div style={detailEyebrowStyle}>AREA DETAIL</div>
                 <h2 style={detailTitleStyle}>{activeDistrictConfig.label}</h2>
                 <div style={detailSubStyle}>{activeDistrictConfig.subLabel}</div>
               </div>
+              <button type="button" onClick={() => setIsAreaModalOpen(false)} style={modalCloseButtonStyle}>
+                閉じる
+              </button>
             </div>
 
             {districtActions.length ? (
@@ -484,8 +501,8 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
               {activeDistrict === "plaza" ? <span>船の部材：{progress.parts.length} / {SHIP_PART_IDS.length}</span> : null}
             </div>
           </section>
-        </main>
-      </div>
+        </div>
+      ) : null}
 
       {isKruitzModalOpen ? (
         <div style={modalOverlayStyle} role="dialog" aria-modal="true" aria-label="クロイツ相談" onClick={() => setIsKruitzModalOpen(false)}>
@@ -539,9 +556,8 @@ const titleStyle: CSSProperties = { margin: "4px 0 0", color: "#f0f6ff", fontSiz
 const subtitleStyle: CSSProperties = { marginTop: 4, color: "rgba(237,247,255,0.72)", fontSize: 13, fontWeight: 850 };
 const returnButtonStyle: CSSProperties = { minHeight: 38, padding: "0 14px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(255,255,255,0.08)", color: "#edf7ff", fontWeight: 950, cursor: "pointer" };
 const progressStripStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 10, padding: "9px 12px", borderRadius: 12, border: "1px solid rgba(210,232,255,0.18)", background: "rgba(7, 10, 15, 0.74)", color: "#dff2ff", fontSize: 13, fontWeight: 950 };
-const layoutStyle: CSSProperties = { display: "grid", gridTemplateColumns: "minmax(0, 1.15fr) minmax(320px, 0.85fr)", gap: 12, alignItems: "stretch" };
-const layoutNarrowStyle: CSSProperties = { gridTemplateColumns: "1fr" };
-const mapStyle: CSSProperties = { position: "relative", minHeight: 580, overflow: "hidden", borderRadius: 16, border: "1px solid rgba(210,232,255,0.24)", background: "linear-gradient(180deg, rgba(8, 12, 18, 0.22), rgba(4, 7, 11, 0.5)), url('/backgrounds/necro-city-map.png') center / cover no-repeat, linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.5), inset 0 0 80px rgba(0,0,0,0.42)" };
+const layoutStyle: CSSProperties = { display: "block" };
+const mapStyle: CSSProperties = { position: "relative", minHeight: 640, overflow: "hidden", borderRadius: 16, border: "1px solid rgba(210,232,255,0.24)", background: "linear-gradient(180deg, rgba(8, 12, 18, 0.22), rgba(4, 7, 11, 0.5)), url('/backgrounds/necro-city-map.png') center / cover no-repeat, linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.5), inset 0 0 80px rgba(0,0,0,0.42)" };
 const mapNarrowStyle: CSSProperties = { minHeight: 500 };
 const routeSvgStyle: CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", opacity: 0.78 };
 const routeLineStyle: CSSProperties = { fill: "none", stroke: "rgba(255,224,163,0.34)", strokeWidth: 0.75, strokeDasharray: "2 2", filter: "drop-shadow(0 0 3px rgba(255,224,163,0.35))" };
@@ -552,8 +568,8 @@ const districtActiveStyle: CSSProperties = { borderColor: "rgba(255,224,163,0.78
 const plazaDistrictStyle: CSSProperties = { borderColor: "rgba(185,160,255,0.64)", background: "linear-gradient(180deg, rgba(48, 38, 78, 0.95), rgba(16, 14, 28, 0.9))" };
 const shipyardDistrictStyle: CSSProperties = { borderColor: "rgba(255,224,163,0.62)", background: "linear-gradient(180deg, rgba(72, 50, 24, 0.95), rgba(22, 16, 12, 0.9))" };
 const districtBadgeStyle: CSSProperties = { justifySelf: "start", padding: "2px 6px", borderRadius: 999, background: "rgba(169,215,255,0.16)", color: "#cfeaff", fontSize: 10 };
-const detailPanelStyle: CSSProperties = { minHeight: 580, maxHeight: 580, padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.2)", background: "rgba(7, 10, 15, 0.84)", boxShadow: "0 18px 42px rgba(0,0,0,0.42)", backdropFilter: "blur(2px)", display: "flex", flexDirection: "column", gap: 12, overflowX: "hidden", overflowY: "auto" };
-const detailPanelNarrowStyle: CSSProperties = { minHeight: 360 };
+const detailPanelStyle: CSSProperties = { width: "min(560px, 100%)", minHeight: 430, maxHeight: "min(82dvh, 580px)", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.2)", background: "rgba(7, 10, 15, 0.9)", boxShadow: "0 18px 42px rgba(0,0,0,0.42)", backdropFilter: "blur(2px)", display: "flex", flexDirection: "column", gap: 12, overflowX: "hidden", overflowY: "auto" };
+const detailPanelNarrowStyle: CSSProperties = { minHeight: 340, maxHeight: "84dvh" };
 const detailHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10 };
 const detailEyebrowStyle: CSSProperties = { color: "#a9d7ff", fontSize: 10, fontWeight: 950 };
 const detailTitleStyle: CSSProperties = { margin: "3px 0 0", color: "#ffe0a3", fontSize: 20 };
@@ -573,7 +589,8 @@ const actionTitleStyle: CSSProperties = { fontWeight: 950, fontSize: 13 };
 const actionSubStyle: CSSProperties = { color: "rgba(237,247,255,0.67)", fontSize: 12 };
 const messageBoxStyle: CSSProperties = { display: "grid", gap: 7, minHeight: 128, padding: 12, boxSizing: "border-box", borderRadius: 12, border: "1px solid rgba(210,232,255,0.16)", background: "rgba(0,0,0,0.22)", color: "rgba(237,247,255,0.9)", fontSize: 13, lineHeight: 1.6, fontWeight: 850, alignContent: "start" };
 const messageTitleStyle: CSSProperties = { color: "#ffe0a3", fontWeight: 950, fontSize: 14 };
-const modalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 40, display: "grid", placeItems: "center", padding: 12, boxSizing: "border-box", background: "rgba(3, 5, 9, 0.72)", backdropFilter: "blur(3px)" };
+const areaModalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 40, display: "grid", placeItems: "center", padding: 12, boxSizing: "border-box", background: "rgba(3, 5, 9, 0.58)", backdropFilter: "blur(2px)" };
+const modalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 50, display: "grid", placeItems: "center", padding: 12, boxSizing: "border-box", background: "rgba(3, 5, 9, 0.72)", backdropFilter: "blur(3px)" };
 const kruitzModalStyle: CSSProperties = { width: "min(560px, 100%)", maxHeight: "min(82dvh, 560px)", overflowX: "hidden", overflowY: "auto", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.26)", background: "linear-gradient(180deg, rgba(13, 16, 24, 0.96), rgba(6, 8, 13, 0.96))", boxShadow: "0 24px 72px rgba(0,0,0,0.62)", display: "grid", gap: 12 };
 const kruitzModalNarrowStyle: CSSProperties = { maxHeight: "86dvh", padding: 12 };
 const modalHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "start", gap: 12 };
