@@ -54,6 +54,7 @@ import { DustWastelandScene } from "./components/DustWastelandScene";
 import { FortressZeroScene } from "./components/FortressZeroScene";
 import { BlackNoiseBayScene } from "./components/BlackNoiseBayScene";
 import { NecroCityScene } from "./components/NecroCityScene";
+import { IsolationZoneScene } from "./components/IsolationZoneScene";
 import { TownScene } from "./components/TownScene";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
@@ -80,6 +81,10 @@ import { addDeltaEventFlag, hasDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
 import { markWastelandScenarioCleared } from "./game/wasteland/progress";
 import { addBlackNoiseBayEventFlag, addShipPart } from "./game/blackNoiseBay/progress";
+import {
+  markIsolationDuelCleared,
+  unlockDarkSkinIfIsolationComplete,
+} from "./game/isolation/progress";
 import {
   markHiddenHintFlag,
   readHiddenHintFlags,
@@ -130,6 +135,7 @@ type Scene =
   | "fortressZero"
   | "blackNoiseBay"
   | "necroCity"
+  | "isolationZone"
   | "town"
   | "tcg";
 type BoardPreviewMode = "move" | "attack";
@@ -843,6 +849,12 @@ export default function App() {
       if (activeScenarioId === "scenario21") {
         addBlackNoiseBayEventFlag("black_noise_bay_chapter_cleared");
       }
+      if (activeScenarioId === "scenario22") {
+        const isolationProgress = markIsolationDuelCleared("ushimaru");
+        if (unlockDarkSkinIfIsolationComplete(isolationProgress)) {
+          setUnlockedSkins(readUnlockedSkins());
+        }
+      }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
       }
@@ -938,6 +950,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     if (returnScene === "dustWasteland") return "荒野へ戻る";
     if (returnScene === "delta") return "デルタへ戻る";
     if (returnScene === "blackNoiseBay") return "湾へ戻る";
+    if (returnScene === "isolationZone") return "隔離区域へ戻る";
     return "街へ戻る";
   }
 
@@ -1577,6 +1590,7 @@ const reinforceSet = useMemo(() => {
         onEnterFortressZero={() => setScene("fortressZero")}
         onEnterBlackNoiseBay={() => setScene("blackNoiseBay")}
         onEnterNecroCity={() => setScene("necroCity")}
+        onEnterIsolationZone={() => setScene("isolationZone")}
       />
     );
   }
@@ -1616,6 +1630,15 @@ const reinforceSet = useMemo(() => {
 
   if (scene === "necroCity") {
     return <NecroCityScene onReturnContinent={() => setScene("continent")} />;
+  }
+
+  if (scene === "isolationZone") {
+    return (
+      <IsolationZoneScene
+        onReturnContinent={() => setScene("continent")}
+        onStartScenario={startScenario}
+      />
+    );
   }
 
   if (scene === "town") {

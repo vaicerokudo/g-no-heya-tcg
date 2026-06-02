@@ -97,6 +97,20 @@ export function checkScenarioVictory(
     return null;
   }
 
+  if (scenarioId === "scenario22") {
+    const darkUshimaruAlive = instances.some((u) => u.unitId === "DARK_USHIMARU" && u.side === "north");
+    const ushimaruAlive = instances.some((u) => u.unitId === "USHIMARU" && u.side === "south");
+
+    if (!ushimaruAlive) {
+      return { winner: "north", detail: "Scenario 22 failed: USHIMARU was defeated by his shadow." };
+    }
+    if (!darkUshimaruAlive) {
+      return { winner: "south", detail: "Scenario 22 clear: DARK_USHIMARU was defeated." };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario18") {
     const leviathan = instances.find((u) => u.unitId === "MIST_LEVIATHAN" && u.side === "north");
     const southAlive = instances.some((u) => u.side === "south");

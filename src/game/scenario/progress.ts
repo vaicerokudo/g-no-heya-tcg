@@ -24,6 +24,7 @@ const SCENARIO_IDS: ScenarioId[] = [
   "scenario19",
   "scenario20",
   "scenario21",
+  "scenario22",
   "scenario_plaza_monten",
   "scenario_hidden_myouou",
   "scenario_hidden_author",

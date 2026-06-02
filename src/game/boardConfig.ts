@@ -1,6 +1,6 @@
 import type { Side } from "./types";
 
-export type BoardSizeMode = "starter7" | "intermediate9";
+export type BoardSizeMode = "starter7" | "intermediate9" | "advanced11";
 
 export type BoardSizeConfig = {
   mode: BoardSizeMode;
@@ -26,6 +26,14 @@ export const BOARD_SIZE_OPTIONS: BoardSizeConfig[] = [
     rows: 9,
     cols: 9,
     initialDeployCount: 4,
+    initialHandSize: 5,
+  },
+  {
+    mode: "advanced11",
+    label: "隔離区域 11x11",
+    rows: 11,
+    cols: 11,
+    initialDeployCount: 1,
     initialHandSize: 5,
   },
 ];
@@ -66,5 +74,6 @@ export function getSouthReinforceStartRow(rows: number) {
 
 export function getInitialDeployCandidateCols(cols: number) {
   if (cols === 9) return [2, 3, 4, 5, 6];
+  if (cols === 11) return [3, 4, 5, 6, 7];
   return Array.from({ length: cols }, (_, index) => index);
 }

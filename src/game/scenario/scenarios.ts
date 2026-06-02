@@ -23,11 +23,12 @@ export type ScenarioId =
   | "scenario19"
   | "scenario20"
   | "scenario21"
+  | "scenario22"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
-export type ScenarioReturnScene = "astoria" | "delta" | "dustWasteland" | "blackNoiseBay";
+export type ScenarioReturnScene = "astoria" | "delta" | "dustWasteland" | "blackNoiseBay" | "isolationZone";
 
 export type ScenarioLine = {
   speaker: string;
@@ -855,6 +856,36 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       defeat: [
         { speaker: "ROKUDO", text: "黒潮の圧が強すぎます。立て直して、リヴァイアサンだけを狙いましょう。" },
         { speaker: "hibiki", text: "撤退ではない。盾を構え直すだけだ。" },
+      ],
+    },
+  },
+  scenario22: {
+    id: "scenario22",
+    title: "第22話 影のうしまる",
+    stageName: "隔離区域・うしまるの影",
+    boardSizeMode: "advanced11",
+    backgroundUrl: "/backgrounds/scenario-isolation-zone.png",
+    returnScene: "isolationZone",
+    placements: [
+      { unitId: "USHIMARU", side: "south", r: 10, c: 5, instanceId: "SC22-USHIMARU" },
+      { unitId: "DARK_USHIMARU", side: "north", r: 0, c: 5, instanceId: "SC22-DARK-USHIMARU", hp: 8 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "うしまる", text: "ここが隔離区域っすか……空気が重いっすね。" },
+        { speaker: "闇落ちうしまる", text: "釣り上げたもの全部、背負えると思ってるっすか？" },
+        { speaker: "うしまる", text: "……自分の声なのに、ぜんぜん落ち着かないっす。" },
+        { speaker: "闇落ちうしまる", text: "明るくしてれば、怖くないふりができるっすもんね。" },
+        { speaker: "うしまる", text: "それでも、前に進むっす。怖いものがあっても、逃げっぱなしにはしないっす。" },
+      ],
+      victory: [
+        { speaker: "うしまる", text: "……怖くないわけじゃないっす。でも、怖いままでも進めるっす。" },
+        { speaker: "闇落ちうしまる", text: "……それなら、行くといいっす。" },
+        { speaker: "うしまる", text: "ありがとうっす。これも、自分なんすね。" },
+      ],
+      defeat: [
+        { speaker: "闇落ちうしまる", text: "まだ、背負うには重すぎるっすね。" },
+        { speaker: "うしまる", text: "……もう一回っす。逃げっぱなしにはしないっす。" },
       ],
     },
   },

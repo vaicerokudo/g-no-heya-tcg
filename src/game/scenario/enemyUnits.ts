@@ -242,6 +242,18 @@ export const LEVIATHAN_UNIT_DEF: UnitDef = {
   },
 };
 
+export const DARK_USHIMARU_UNIT_DEF: UnitDef = {
+  id: "DARK_USHIMARU",
+  name: "闇落ちうしまる",
+  enemyOnly: true,
+  hiddenFromCatalog: true,
+  base: {
+    atk: 3,
+    hp: 8,
+    movePattern: { type: "orthogonal", range: 2, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
 export const scenarioEnemyUnits: UnitDef[] = [
   BOAR_UNIT_DEF,
   LESSER_WYVERN_UNIT_DEF,
@@ -262,6 +274,7 @@ export const scenarioEnemyUnits: UnitDef[] = [
   KRAKEN_UNIT_DEF,
   MIST_LEVIATHAN_UNIT_DEF,
   LEVIATHAN_UNIT_DEF,
+  DARK_USHIMARU_UNIT_DEF,
 ];
 
 export function getScenarioEnemyUnit(unitId: string) {
