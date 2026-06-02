@@ -535,7 +535,7 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
                 <img src={KRUitz_IMAGES[kruitzExpression]} alt="クロイツ" style={kruitzImageStyle} />
               </div>
               <div style={kruitzTextStyle}>
-                <strong>クロイツ</strong>
+                <strong style={kruitzNameStyle}>クロイツ</strong>
                 <span>この街、まだ少しだけ覚えてるにゃ。</span>
                 <span>{kruitzHint}</span>
               </div>
@@ -590,12 +590,13 @@ const detailSubStyle: CSSProperties = { marginTop: 4, color: "rgba(237,247,255,0
 const areaVisualStyle: CSSProperties = { minHeight: 150, borderRadius: 12, border: "1px solid rgba(210,232,255,0.2)", backgroundPosition: "center", backgroundSize: "cover", backgroundRepeat: "no-repeat", boxShadow: "inset 0 -56px 68px rgba(0,0,0,0.72), inset 0 0 70px rgba(0,0,0,0.4)", display: "flex", flexDirection: "column", justifyContent: "end", gap: 4, padding: 12, boxSizing: "border-box", overflow: "hidden" };
 const areaVisualLabelStyle: CSSProperties = { width: "fit-content", maxWidth: "100%", padding: "4px 9px", borderRadius: 999, border: "1px solid rgba(255,224,163,0.58)", background: "rgba(5,8,13,0.68)", color: "#ffe0a3", fontSize: 13, fontWeight: 950, textShadow: "0 1px 4px rgba(0,0,0,0.82)" };
 const areaVisualSubStyle: CSSProperties = { width: "fit-content", maxWidth: "100%", padding: "3px 8px", borderRadius: 999, background: "rgba(5,8,13,0.62)", color: "rgba(237,247,255,0.86)", fontSize: 11, fontWeight: 900, textShadow: "0 1px 4px rgba(0,0,0,0.82)" };
-const kruitzPanelStyle: CSSProperties = { display: "grid", gridTemplateColumns: "88px 1fr", gap: 12, alignItems: "center", minHeight: 126, padding: 12, boxSizing: "border-box", borderRadius: 12, border: "1px solid rgba(185,160,255,0.26)", background: "rgba(30, 20, 52, 0.56)" };
-const kruitzPanelNarrowStyle: CSSProperties = { gridTemplateColumns: "1fr", justifyItems: "center" };
-const kruitzFrameStyle: CSSProperties = { width: 82, height: 82, borderRadius: 14, display: "grid", placeItems: "center", background: "radial-gradient(circle, rgba(137,95,255,0.18), rgba(0,0,0,0.14))", border: "1px solid rgba(185,160,255,0.28)", overflow: "hidden" };
-const kruitzFrameNarrowStyle: CSSProperties = { width: 72, height: 72 };
-const kruitzImageStyle: CSSProperties = { width: "118%", height: "118%", objectFit: "contain" };
-const kruitzTextStyle: CSSProperties = { display: "grid", gap: 5, color: "rgba(237,247,255,0.9)", fontSize: 13, lineHeight: 1.55, fontWeight: 850 };
+const kruitzPanelStyle: CSSProperties = { display: "grid", gridTemplateColumns: "132px 1fr", gap: 16, alignItems: "center", minHeight: 176, padding: 14, boxSizing: "border-box", borderRadius: 14, border: "1px solid rgba(185,160,255,0.32)", background: "linear-gradient(135deg, rgba(52, 36, 82, 0.68), rgba(12, 18, 28, 0.64))", boxShadow: "inset 0 0 34px rgba(137,95,255,0.12)" };
+const kruitzPanelNarrowStyle: CSSProperties = { gridTemplateColumns: "1fr", justifyItems: "center", textAlign: "center", gap: 10 };
+const kruitzFrameStyle: CSSProperties = { width: 128, height: 128, borderRadius: 18, display: "grid", placeItems: "center", background: "radial-gradient(circle, rgba(185,160,255,0.26), rgba(10,14,24,0.2))", border: "1px solid rgba(185,160,255,0.38)", boxShadow: "0 0 24px rgba(137,95,255,0.24), inset 0 0 22px rgba(0,0,0,0.28)", overflow: "hidden" };
+const kruitzFrameNarrowStyle: CSSProperties = { width: 104, height: 104 };
+const kruitzImageStyle: CSSProperties = { width: "132%", height: "132%", objectFit: "contain" };
+const kruitzTextStyle: CSSProperties = { display: "grid", alignContent: "center", gap: 6, color: "rgba(237,247,255,0.9)", fontSize: 14, lineHeight: 1.6, fontWeight: 850 };
+const kruitzNameStyle: CSSProperties = { color: "#ffe0a3", fontSize: 16, letterSpacing: 0, textShadow: "0 0 14px rgba(255,214,150,0.24)" };
 const actionListStyle: CSSProperties = { display: "grid", gap: 8, gridAutoRows: "minmax(76px, auto)" };
 const actionButtonStyle: CSSProperties = { width: "100%", minHeight: 76, padding: 11, boxSizing: "border-box", borderRadius: 10, border: "1px solid rgba(210,232,255,0.22)", background: "linear-gradient(180deg, rgba(31, 44, 54, 0.92), rgba(10, 14, 20, 0.88))", color: "#edf7ff", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4, textAlign: "left", cursor: "pointer", lineHeight: 1.25 };
 const actionDoneStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.64)" };
@@ -607,7 +608,7 @@ const messageBoxStyle: CSSProperties = { display: "grid", gap: 7, minHeight: 128
 const messageTitleStyle: CSSProperties = { color: "#ffe0a3", fontWeight: 950, fontSize: 14 };
 const areaModalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 40, display: "grid", placeItems: "center", padding: 12, boxSizing: "border-box", background: "rgba(3, 5, 9, 0.58)", backdropFilter: "blur(2px)" };
 const modalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 50, display: "grid", placeItems: "center", padding: 12, boxSizing: "border-box", background: "rgba(3, 5, 9, 0.72)", backdropFilter: "blur(3px)" };
-const kruitzModalStyle: CSSProperties = { width: "min(560px, 100%)", maxHeight: "min(82dvh, 560px)", overflowX: "hidden", overflowY: "auto", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.26)", background: "linear-gradient(180deg, rgba(13, 16, 24, 0.96), rgba(6, 8, 13, 0.96))", boxShadow: "0 24px 72px rgba(0,0,0,0.62)", display: "grid", gap: 12 };
+const kruitzModalStyle: CSSProperties = { width: "min(640px, 100%)", maxHeight: "min(82dvh, 560px)", overflowX: "hidden", overflowY: "auto", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.26)", background: "linear-gradient(180deg, rgba(13, 16, 24, 0.96), rgba(6, 8, 13, 0.96))", boxShadow: "0 24px 72px rgba(0,0,0,0.62)", display: "grid", gap: 12 };
 const kruitzModalNarrowStyle: CSSProperties = { maxHeight: "86dvh", padding: 12 };
 const modalHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "start", gap: 12 };
 const modalCloseButtonStyle: CSSProperties = { minHeight: 36, padding: "0 12px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(255,255,255,0.08)", color: "#edf7ff", fontWeight: 950, cursor: "pointer" };
