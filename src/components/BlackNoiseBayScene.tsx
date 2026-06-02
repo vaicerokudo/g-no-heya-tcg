@@ -142,10 +142,10 @@ export function BlackNoiseBayScene({
                 (mission.id === "hook" && leviathanHooked) ||
                 (mission.id === "final" && chapterCleared);
               const unlocked =
-                (mission.id === "departure" && shipReady) ||
-                (mission.id === "hook" && departed) ||
-                (mission.id === "final" && leviathanHooked);
-              const disabled = !unlocked || cleared;
+                (mission.id === "departure" && (shipReady || departed || chapterCleared)) ||
+                (mission.id === "hook" && (departed || leviathanHooked || chapterCleared)) ||
+                (mission.id === "final" && (leviathanHooked || chapterCleared));
+              const disabled = !unlocked;
               const badge = cleared ? "CLEAR" : !unlocked ? "LOCK" : "NEXT";
 
               return (
