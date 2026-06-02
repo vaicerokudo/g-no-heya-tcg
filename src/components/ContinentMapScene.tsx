@@ -26,9 +26,9 @@ type DebugPoint = {
 };
 
 const HOTSPOTS: Hotspot[] = [
-  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 76, y: 62, w: 28, h: 9 },
-  { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 50, y: 76, w: 34, h: 10 },
-  { id: "dustWasteland", label: "砂塵の荒野", subLabel: "新たな調査地点", badge: "NEW", x: 52, y: 50, w: 34, h: 10 },
+  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 77, y: 65, w: 28, h: 9 },
+  { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 59, y: 79, w: 34, h: 10 },
+  { id: "dustWasteland", label: "砂塵の荒野", subLabel: "新たな調査地点", badge: "NEW", x: 50, y: 61, w: 34, h: 10 },
 ];
 
 export function ContinentMapScene({
