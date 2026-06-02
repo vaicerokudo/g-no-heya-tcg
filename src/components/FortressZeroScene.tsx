@@ -6,6 +6,7 @@ type FortressZeroSceneProps = {
 
 const MEMORY_CITY_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSdstxjL-kygkAcjePKf3fpLFtdBUxOK17kM_QnYPJ6mdF5zNA/viewform";
+const GATEKEEPER_MEMO_IMAGE_URL = "/ui/fortress-zero/gatekeeper-memo.png";
 
 export function FortressZeroScene({ onReturnContinent }: FortressZeroSceneProps) {
   const openMemoryCity = () => {
@@ -26,6 +27,11 @@ export function FortressZeroScene({ onReturnContinent }: FortressZeroSceneProps)
             この先には、Gの部屋の外側に残された「記憶の街」への入口があります。
           </p>
           <p style={paragraphStyle}>準備ができたら、記録領域へ進んでください。</p>
+        </div>
+
+        <div style={memoPanelStyle}>
+          <div style={memoLabelStyle}>門番のメモ</div>
+          <img src={GATEKEEPER_MEMO_IMAGE_URL} alt="門番のメモ" style={memoImageStyle} />
         </div>
 
         <div style={noticeStyle}>この先は、Gの部屋の外側に残された記録領域です。</div>
@@ -117,6 +123,35 @@ const noticeStyle: CSSProperties = {
   fontSize: 12,
   lineHeight: 1.55,
   fontWeight: 850,
+};
+
+const memoPanelStyle: CSSProperties = {
+  marginTop: 16,
+  padding: 12,
+  borderRadius: 12,
+  border: "1px solid rgba(255, 232, 181, 0.22)",
+  background:
+    "linear-gradient(180deg, rgba(255, 240, 205, 0.08), rgba(0, 0, 0, 0.22))",
+  boxShadow: "inset 0 0 28px rgba(255, 214, 128, 0.06), 0 14px 30px rgba(0,0,0,0.26)",
+};
+
+const memoLabelStyle: CSSProperties = {
+  marginBottom: 8,
+  color: "#ffd783",
+  fontSize: 12,
+  fontWeight: 950,
+};
+
+const memoImageStyle: CSSProperties = {
+  display: "block",
+  width: "100%",
+  maxWidth: 430,
+  maxHeight: 420,
+  margin: "0 auto",
+  objectFit: "contain",
+  borderRadius: 10,
+  border: "1px solid rgba(255, 232, 181, 0.24)",
+  boxShadow: "0 12px 26px rgba(0,0,0,0.35)",
 };
 
 const actionsStyle: CSSProperties = {
