@@ -16,6 +16,7 @@ export type EvalCtx = {
   unitsById: Record<string, any>;
   instances: any[];
   actorId: string;
+  scenarioType?: "standard" | "isolationDuel";
 
   // 任意：危険セルやゲート（今は未使用でもOK）
   dangerCells?: Set<string>;
@@ -40,9 +41,11 @@ export function manhattan(a: { r: number; c: number }, b: { r: number; c: number
 export function scoreCandidate(ctx: EvalCtx, cand: { action: CpuAction; nextInstances: any[] }) {
   const { action, nextInstances } = cand;
 
-  // まず勝てる手は最優先（あなたのcpuStep内の方針を移植）
-  const v = checkVictory(ctx.rows, ctx.cols, nextInstances as any);
-  if (v && v.winner === ctx.side) return 1_000_000;
+  // 通常戦ではゲート到達も勝ち筋として評価する。隔離区域の一騎打ちでは撃破だけを見る。
+  if (ctx.scenarioType !== "isolationDuel") {
+    const v = checkVictory(ctx.rows, ctx.cols, nextInstances as any);
+    if (v && v.winner === ctx.side) return 1_000_000;
+  }
 
   let s = 0;
 
@@ -85,23 +88,24 @@ export function scoreCandidate(ctx: EvalCtx, cand: { action: CpuAction; nextInst
       s -= 120; // ←ここを調整するだけで難易度が変わる
     }
 
-    // 前進（ざっくり）
     const actor = ctx.instances.find((u) => u.instanceId === ctx.actorId);
     if (actor) {
-      const forward = ctx.side === "south" ? -1 : 1;
-      s += (action.r - actor.pos.r) * forward * 10;
+      if (ctx.scenarioType !== "isolationDuel") {
+        const forward = ctx.side === "south" ? -1 : 1;
+        s += (action.r - actor.pos.r) * forward * 10;
+      }
 
       // 敵に近づく
       const enemies = ctx.instances.filter((u) => u.side !== ctx.side);
       if (enemies.length) {
         const curDist = Math.min(...enemies.map((e) => manhattan(actor.pos, e.pos)));
         const nextDist = Math.min(...enemies.map((e) => manhattan({ r: action.r, c: action.c }, e.pos)));
-        s += (curDist - nextDist) * 15;
+        s += (curDist - nextDist) * (ctx.scenarioType === "isolationDuel" ? 80 : 15);
       }
     }
 
     // ゲートが渡されてたら、近いほど少し加点（今は未使用でもOK）
-    if (ctx.gateCells && ctx.gateCells.size) {
+    if (ctx.scenarioType !== "isolationDuel" && ctx.gateCells && ctx.gateCells.size) {
       const gates = Array.from(ctx.gateCells).map((k) => {
         const [rr, cc] = k.split(",").map(Number);
         return { r: rr, c: cc };

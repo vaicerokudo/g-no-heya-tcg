@@ -1423,6 +1423,7 @@ const reinforceSet = useMemo(() => {
     rows,
     cols,
     unitsById,
+    scenarioType: activeScenario?.scenarioType ?? "standard",
     gameIdRef,
     turnRef,
     phaseRef,
@@ -1501,6 +1502,16 @@ const reinforceSet = useMemo(() => {
 
   function getSkinForSide(side: Side) {
     return side === "south" ? southSkin : northSkin;
+  }
+
+  function getVisualUnitIdForImage(unitId: string) {
+    if (unitId.startsWith("DARK_")) return unitId.slice("DARK_".length);
+    return unitId;
+  }
+
+  function getSkinForUnitImage(unitId: string, side: Side) {
+    if (side === "north" && unitId.startsWith("DARK_")) return "dark";
+    return getSkinForSide(side);
   }
 
   function getDisplayFormForImage(unitId: string, side: Side, form: Form = "base"): Form {
@@ -1668,7 +1679,12 @@ const reinforceSet = useMemo(() => {
         usedSkills={usedSkills}
         onClose={() => setPopupId(null)}
         getCardCandidates={(unitId: string, side: "south" | "north", form?: "base" | "g") =>
-          cardCandidates(unitId, side, getDisplayFormForImage(unitId, side, form ?? "base"), getSkinForSide(side))
+          cardCandidates(
+            getVisualUnitIdForImage(unitId),
+            side,
+            getDisplayFormForImage(unitId, side, form ?? "base"),
+            getSkinForUnitImage(unitId, side)
+          )
         }
       />
 
@@ -1829,14 +1845,19 @@ const reinforceSet = useMemo(() => {
         debugTargetId={null}
         onShiftEnemyPick={() => {}}
         getPortrait={(unitId, side, form) =>
-          getPortraitPath(unitId, side, getDisplayFormForImage(unitId, side, form ?? "base"), getSkinForSide(side))
+          getPortraitPath(
+            getVisualUnitIdForImage(unitId),
+            side,
+            getDisplayFormForImage(unitId, side, form ?? "base"),
+            getSkinForUnitImage(unitId, side)
+          )
         }
         getPortraitCandidates={(unitId, side, form) =>
           portraitThumbCandidates(
-            unitId,
+            getVisualUnitIdForImage(unitId),
             side,
             getDisplayFormForImage(unitId, side, form ?? "base"),
-            getSkinForSide(side)
+            getSkinForUnitImage(unitId, side)
           )
         }
         posKey={posKey}

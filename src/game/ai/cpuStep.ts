@@ -87,8 +87,9 @@ export function cpuStepV1(opts: {
   unitsById: Record<string, any>;
   instances: any[];
   actorId: string;
+  scenarioType?: "standard" | "isolationDuel";
 }): { nextInstances: any[]; action: CpuAction } {
-  const { side, rows, cols, unitsById, instances, actorId } = opts;
+  const { side, rows, cols, unitsById, instances, actorId, scenarioType } = opts;
 
   const actor = instances.find((u) => u.instanceId === actorId);
   if (!actor) {
@@ -101,7 +102,7 @@ export function cpuStepV1(opts: {
     return { nextInstances: instances, action: { kind: "skip", actorId, reason: "stunned" } };
   }
 
-  const ctx: EvalCtx = { side, rows, cols, unitsById, instances, actorId };
+  const ctx: EvalCtx = { side, rows, cols, unitsById, instances, actorId, scenarioType };
 
   const candidates: Array<{ action: CpuAction; nextInstances: any[] }> = [];
 

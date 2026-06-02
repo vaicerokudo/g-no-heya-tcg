@@ -22,6 +22,7 @@ type UseCpuTurnArgs = {
   rows: number;
   cols: number;
   unitsById: GameState["unitsById"];
+  scenarioType?: "standard" | "isolationDuel";
   gameIdRef: CurrentRef<string>;
   turnRef: CurrentRef<Side>;
   phaseRef: CurrentRef<Phase>;
@@ -42,6 +43,7 @@ export function useCpuTurn({
   rows,
   cols,
   unitsById,
+  scenarioType,
   gameIdRef,
   turnRef,
   phaseRef,
@@ -138,6 +140,7 @@ export function useCpuTurn({
         unitsById,
         instances: curInstances,
         actorId,
+        scenarioType,
       });
 
       applyNextInstancesRef.current(nextInstances);
@@ -154,6 +157,7 @@ export function useCpuTurn({
     instancesRef,
     phaseRef,
     rows,
+    scenarioType,
     stopCpuLoopNorth,
     turnRef,
     turnSeq,

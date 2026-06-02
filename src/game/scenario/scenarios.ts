@@ -29,6 +29,7 @@ export type ScenarioId =
   | "scenario_hidden_author";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
 export type ScenarioReturnScene = "astoria" | "delta" | "dustWasteland" | "blackNoiseBay" | "isolationZone";
+export type ScenarioType = "standard" | "isolationDuel";
 
 export type ScenarioLine = {
   speaker: string;
@@ -50,6 +51,7 @@ export type ScenarioConfig = {
   title: string;
   stageName: string;
   boardSizeMode: BoardSizeMode;
+  scenarioType?: ScenarioType;
   backgroundUrl?: string;
   returnScene?: ScenarioReturnScene;
   terrain?: {
@@ -864,6 +866,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第22話 影のうしまる",
     stageName: "隔離区域・うしまるの影",
     boardSizeMode: "advanced11",
+    scenarioType: "isolationDuel",
     backgroundUrl: "/backgrounds/scenario-isolation-zone.png",
     returnScene: "isolationZone",
     placements: [

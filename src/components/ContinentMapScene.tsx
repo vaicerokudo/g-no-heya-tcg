@@ -38,7 +38,7 @@ const HOTSPOTS: Hotspot[] = [
   { id: "fortressZero", label: "FORTRESS ZERO", subLabel: "記憶の街", badge: "ARG", x: 24, y: 49, w: 34, h: 10 },
   { id: "blackNoiseBay", label: "ブラックノイズ湾", subLabel: "黒い潮の調査地点", badge: "NEW", x: 52, y: 36, w: 36, h: 10 },
   { id: "necroCity", label: "廃都ネクロシティ", subLabel: "部材探索中", badge: "NEW", x: 40, y: 25, w: 36, h: 10 },
-  { id: "isolationZone", label: "隔離区域", subLabel: "己の影と向き合う場所", badge: "FINAL", x: 78, y: 28, w: 30, h: 10 },
+  { id: "isolationZone", label: "隔離区域", subLabel: "己の影と向き合う場所", badge: "FINAL", x: 83, y: 33, w: 30, h: 10 },
 ];
 
 export function ContinentMapScene({
