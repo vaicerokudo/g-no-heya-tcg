@@ -576,11 +576,11 @@ export const SKILLS: Record<SkillId, SkillDef> = {
   "7171_gaze": defineChooseFront3Cells({
     id: "7171_gaze",
     label: "凝視",
-    desc: "前方3マスの敵にスタン(1)",
+    desc: "前方3マスの敵にスタン(2)",
     unitId: "7171",
     oncePerMatch: true,
     damage: 0,
-    stunTurns: 1,
+    stunTurns: 2,
     execute: ({ stateLike, casterId, stunTurns }) => {
       const inst = stateLike.instances;
       const casterSnap = inst.find((u) => u.instanceId === casterId);
@@ -599,7 +599,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
         if (!caster || !t) continue;
         if (t.side === caster.side) continue;
 
-        next = addStun(next, t.instanceId, stunTurns ?? 1);
+        next = addStun(next, t.instanceId, stunTurns ?? 2);
       }
 
       return next;
@@ -609,7 +609,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
   "7171_shisen_no_ori_g": defineInstant({
     id: "7171_shisen_no_ori_g",
     label: "(G) 視線の檻",
-    desc: "7171の視線（8方向直線・遮蔽あり）内の敵をスタン(1)する",
+    desc: "7171の視線（8方向直線・遮蔽あり）内の敵をスタン(2)する",
     unitId: "7171",
     requiresForm: "g",
     oncePerMatch: true,
@@ -621,7 +621,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
 
     // メタ情報
     range: 3,
-    stunTurns: 1,
+    stunTurns: 2,
 
     execute: ({ stateLike, casterId, range, stunTurns }) => {
       const inst = stateLike.instances as any[];
@@ -659,7 +659,7 @@ export const SKILLS: Record<SkillId, SkillDef> = {
         // 味方が最初に当たった場合は遮蔽のみ（スタンしない）
         if (first.side === caster.side) continue;
 
-        next = addStun(next, first.instanceId, stunTurns ?? 1);
+        next = addStun(next, first.instanceId, stunTurns ?? 2);
       }
 
       next = removeDead(next);

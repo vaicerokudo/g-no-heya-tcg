@@ -40,6 +40,7 @@ import {
   type BoardSizeMode,
 } from "./game/boardConfig";
 import { buildInitialHandsAndDecks } from "./game/handDeck";
+import { consumeStunAction } from "./game/statusEffects";
 
 import { BottomBar } from "./components/BottomBar";
 import { GameBoardArea } from "./components/GameBoardArea";
@@ -1040,17 +1041,28 @@ const deploySouthReinforceAt = (r: number, c: number) => {
   });
 
   function compilerSafeResetPerUnitTurn() {
+    const turnSide = turnRef.current;
+    const currentInstances = instancesRef.current as any[];
+    const pendingIds = quicksandStunPendingIdsRef.current;
+    const stunnedIds =
+      turnSide === "south"
+        ? new Set(
+            currentInstances
+              .filter((unit) => unit.side === turnSide && ((unit.stun ?? 0) > 0 || pendingIds.has(unit.instanceId)))
+              .map((unit) => unit.instanceId),
+          )
+        : new Set<string>();
+
     setPerUnitTurn(() => {
       const next = buildTurnStartPerUnitTurn({
-        instances: instancesRef.current as any,
-        turn: turnRef.current,
+        instances: currentInstances as any,
+        turn: turnSide,
       });
 
-      const pendingIds = quicksandStunPendingIdsRef.current;
       if (pendingIds.size === 0) return next;
 
-      for (const unit of instancesRef.current as any[]) {
-        if (unit.side !== turnRef.current) continue;
+      for (const unit of currentInstances) {
+        if (unit.side !== turnSide) continue;
         if (!pendingIds.has(unit.instanceId)) continue;
 
         next[unit.instanceId] = { moved: false, attacked: false, done: true };
@@ -1059,6 +1071,12 @@ const deploySouthReinforceAt = (r: number, c: number) => {
 
       return next;
     });
+
+    if (stunnedIds.size > 0) {
+      setInstancesAndRef((prev) =>
+        (prev as any[]).map((unit) => (stunnedIds.has(unit.instanceId) ? consumeStunAction(unit) : unit)) as any,
+      );
+    }
   }
 
   function applyNextInstances(next: typeof instances) {

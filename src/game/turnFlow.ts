@@ -79,17 +79,11 @@ export function buildEndTurnInstances({
     .map((u) => {
       if (u.side !== currentSide) return u;
 
-      const stun = u.stun ?? 0;
-      const nextStun = stun > 0 ? Math.max(0, stun - 1) : 0;
-
       const burn = u.burn ?? 0;
       const burnDamage = burn > 0 ? 1 : 0;
       const nextBurn = burn > 0 ? Math.max(0, burn - 1) : 0;
 
       const next = { ...u, hp: u.hp - burnDamage };
-
-      if (nextStun > 0) next.stun = nextStun;
-      else delete next.stun;
 
       if (nextBurn > 0) next.burn = nextBurn;
       else delete next.burn;

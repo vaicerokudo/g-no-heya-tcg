@@ -7,6 +7,7 @@ import { isAtOrBeyondEvolveRow } from "../boardConfig";
 import { getAvailableSkillsForUnit, type SkillDef } from "../skills/registry";
 import { executeSkillToInstances } from "../skills/execution";
 import { createSkillExecutionContext } from "../skills/executionContext";
+import { consumeStunAction } from "../statusEffects";
 
 import { pickBest, type CpuAction, type EvalCtx } from "./eval";
 
@@ -99,7 +100,10 @@ export function cpuStepV1(opts: {
     return { nextInstances: instances, action: { kind: "skip", actorId, reason: "not-my-side" } };
   }
   if ((actor.stun ?? 0) > 0) {
-    return { nextInstances: instances, action: { kind: "skip", actorId, reason: "stunned" } };
+    const nextInstances = instances.map((unit) =>
+      unit.instanceId === actor.instanceId ? consumeStunAction(unit) : unit
+    );
+    return { nextInstances, action: { kind: "skip", actorId, reason: "stunned" } };
   }
 
   const ctx: EvalCtx = { side, rows, cols, unitsById, instances, actorId, scenarioType };

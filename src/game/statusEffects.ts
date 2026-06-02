@@ -7,6 +7,16 @@ export function applyStun(inst: UnitInstance, turns: number): UnitInstance {
   return { ...inst, stun: Math.max(cur, turns) };
 }
 
+export function consumeStunAction<T extends UnitInstance>(inst: T): T {
+  const stun = inst.stun ?? 0;
+  if (stun <= 0) return inst;
+
+  const next = { ...inst };
+  if (stun > 1) next.stun = stun - 1;
+  else delete next.stun;
+  return next;
+}
+
 export function applyBurn(inst: UnitInstance, ticks: number): UnitInstance {
   if (!ticks || ticks <= 0) return inst;
   const cur = inst.burn ?? 0;
@@ -36,22 +46,17 @@ export function tickStartOfSide(
 
     let hp = u.hp;
     let burn = u.burn;
-    let stun = u.stun;
 
     if (burn && burn > 0) {
       hp -= burnDamagePerTick;
       burn = decOrUndef(burn);
     }
 
-    if (stun && stun > 0) {
-      stun = decOrUndef(stun);
-    }
-
     return {
       ...withoutStatusCounters(u),
       hp,
       ...(burn ? { burn } : {}),
-      ...(stun ? { stun } : {}),
+      ...(u.stun ? { stun: u.stun } : {}),
     };
   });
 
