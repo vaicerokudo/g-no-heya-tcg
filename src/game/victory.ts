@@ -5,18 +5,18 @@ import type { ScenarioId } from "./scenario/scenarios";
 
 export type Victory = { winner: Side; detail: string };
 
-const ISOLATION_DUEL_MATCHUPS: Partial<Record<ScenarioId, { allyUnitId: string; darkUnitId: string }>> = {
-  scenario22: { allyUnitId: "USHIMARU", darkUnitId: "DARK_USHIMARU" },
-  scenario23: { allyUnitId: "SOCHO", darkUnitId: "DARK_SOCHO" },
-  scenario24: { allyUnitId: "TSUTSU", darkUnitId: "DARK_TSUTSU" },
-  scenario25: { allyUnitId: "ROKUDO", darkUnitId: "DARK_ROKUDO" },
-  scenario26: { allyUnitId: "7171", darkUnitId: "DARK_7171" },
-  scenario27: { allyUnitId: "MYOUOU", darkUnitId: "DARK_MYOUOU" },
-  scenario28: { allyUnitId: "HIBIKI", darkUnitId: "DARK_HIBIKI" },
-  scenario29: { allyUnitId: "DELI", darkUnitId: "DARK_DELI" },
-  scenario30: { allyUnitId: "YABUKO_NORMAL", darkUnitId: "DARK_YABUKO" },
-  scenario31: { allyUnitId: "ROCKEL", darkUnitId: "DARK_ROCKEL" },
-  scenario32: { allyUnitId: "PLAYER", darkUnitId: "DARK_PLAYER" },
+const ISOLATION_DUEL_MATCHUPS: Partial<Record<ScenarioId, { allyUnitIds: string[]; darkUnitId: string }>> = {
+  scenario22: { allyUnitIds: ["USHIMARU"], darkUnitId: "DARK_USHIMARU" },
+  scenario23: { allyUnitIds: ["SOCHO"], darkUnitId: "DARK_SOCHO" },
+  scenario24: { allyUnitIds: ["TSUTSU"], darkUnitId: "DARK_TSUTSU" },
+  scenario25: { allyUnitIds: ["ROKUDO"], darkUnitId: "DARK_ROKUDO" },
+  scenario26: { allyUnitIds: ["7171"], darkUnitId: "DARK_7171" },
+  scenario27: { allyUnitIds: ["MYOUOU"], darkUnitId: "DARK_MYOUOU" },
+  scenario28: { allyUnitIds: ["HIBIKI"], darkUnitId: "DARK_HIBIKI" },
+  scenario29: { allyUnitIds: ["DELI"], darkUnitId: "DARK_DELI" },
+  scenario30: { allyUnitIds: ["YABUKO_NORMAL", "YABUKO_FM"], darkUnitId: "DARK_YABUKO" },
+  scenario31: { allyUnitIds: ["ROCKEL"], darkUnitId: "DARK_ROCKEL" },
+  scenario32: { allyUnitIds: ["PLAYER"], darkUnitId: "DARK_PLAYER" },
 };
 
 export function checkVictory(
@@ -114,7 +114,9 @@ export function checkScenarioVictory(
   const isolationDuel = ISOLATION_DUEL_MATCHUPS[scenarioId];
   if (isolationDuel) {
     const darkAlive = instances.some((u) => u.unitId === isolationDuel.darkUnitId && u.side === "north");
-    const allyAlive = instances.some((u) => u.unitId === isolationDuel.allyUnitId && u.side === "south");
+    const allyAlive = instances.some(
+      (u) => isolationDuel.allyUnitIds.includes(u.unitId) && u.side === "south",
+    );
 
     if (!allyAlive) {
       return { winner: "north", detail: `${scenarioId} failed: the isolation duel was lost.` };

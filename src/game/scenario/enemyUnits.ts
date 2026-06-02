@@ -259,7 +259,7 @@ function createDarkDuelUnitDef(id: string, name: string, hp: number, atk: number
 export const DARK_SOCHO_UNIT_DEF = createDarkDuelUnitDef("DARK_SOCHO", "闇落ち総長", 6, 4, 2);
 export const DARK_TSUTSU_UNIT_DEF = createDarkDuelUnitDef("DARK_TSUTSU", "闇落ちつつ", 6, 3, 2);
 export const DARK_ROKUDO_UNIT_DEF = createDarkDuelUnitDef("DARK_ROKUDO", "闇落ちROKUDO", 5, 5, 2);
-export const DARK_7171_UNIT_DEF = createDarkDuelUnitDef("DARK_7171", "闇落ち7171", 6, 3, 2);
+export const DARK_7171_UNIT_DEF = createDarkDuelUnitDef("DARK_7171", "闇落ち7171", 6, 2, 2);
 export const DARK_MYOUOU_UNIT_DEF = createDarkDuelUnitDef("DARK_MYOUOU", "闇落ち明王", 8, 4, 1);
 export const DARK_HIBIKI_UNIT_DEF = createDarkDuelUnitDef("DARK_HIBIKI", "闇落ちhibiki", 8, 3, 1);
 export const DARK_USHIMARU_UNIT_DEF = createDarkDuelUnitDef("DARK_USHIMARU", "闇落ちうしまる", 8, 3, 2);
