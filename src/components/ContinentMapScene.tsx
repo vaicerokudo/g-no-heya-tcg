@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import { hasDeltaEventFlag } from "../game/delta/eventFlags";
 
 type ContinentMapSceneProps = {
@@ -20,10 +20,15 @@ type Hotspot = {
   h: number;
 };
 
+type DebugPoint = {
+  x: number;
+  y: number;
+};
+
 const HOTSPOTS: Hotspot[] = [
-  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 76, y: 78, w: 28, h: 9 },
-  { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 50, y: 88, w: 34, h: 10 },
-  { id: "dustWasteland", label: "砂塵の荒野", subLabel: "新たな調査地点", badge: "NEW", x: 52, y: 43, w: 34, h: 10 },
+  { id: "astoria", label: "アストリア", subLabel: "戻る", x: 76, y: 62, w: 28, h: 9 },
+  { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 50, y: 76, w: 34, h: 10 },
+  { id: "dustWasteland", label: "砂塵の荒野", subLabel: "新たな調査地点", badge: "NEW", x: 52, y: 50, w: 34, h: 10 },
 ];
 
 export function ContinentMapScene({
@@ -34,6 +39,11 @@ export function ContinentMapScene({
   const [deltaChapterCleared, setDeltaChapterCleared] = useState(() =>
     hasDeltaEventFlag("delta_chapter_cleared")
   );
+  const [isDebugMap] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("debugMap") === "1";
+  });
+  const [debugPoint, setDebugPoint] = useState<DebugPoint | null>(null);
 
   useEffect(() => {
     const refreshDeltaClearStatus = () =>
@@ -43,6 +53,18 @@ export function ContinentMapScene({
     window.addEventListener("storage", refreshDeltaClearStatus);
     return () => window.removeEventListener("storage", refreshDeltaClearStatus);
   }, []);
+
+  const handleMapClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (!isDebugMap) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    const nextPoint = { x, y };
+
+    setDebugPoint(nextPoint);
+    console.log(`map position: left: ${x.toFixed(1)}%, top: ${y.toFixed(1)}%`);
+  };
 
   return (
     <div style={sceneStyle}>
@@ -57,7 +79,7 @@ export function ContinentMapScene({
           </button>
         </header>
 
-        <div style={mapFrameStyle}>
+        <div style={mapFrameStyle} onClick={handleMapClick}>
           <img src={CONTINENT_MAP_IMAGE_URL} alt="" aria-hidden="true" style={mapImageStyle} />
           <div style={hotspotLayerStyle}>
             {HOTSPOTS.map((spot) => {
@@ -95,6 +117,22 @@ export function ContinentMapScene({
               );
             })}
           </div>
+          {isDebugMap && debugPoint ? (
+            <>
+              <div
+                aria-hidden="true"
+                style={{
+                  ...debugMarkerStyle,
+                  left: `${debugPoint.x}%`,
+                  top: `${debugPoint.y}%`,
+                }}
+              />
+              <div style={debugReadoutStyle}>
+                <div>x: {debugPoint.x.toFixed(1)}%</div>
+                <div>y: {debugPoint.y.toFixed(1)}%</div>
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </div>
@@ -259,4 +297,35 @@ const hotspotBadgeStyle: CSSProperties = {
   fontWeight: 950,
   whiteSpace: "nowrap",
   textShadow: "0 1px 4px rgba(0,0,0,0.45)",
+};
+
+const debugMarkerStyle: CSSProperties = {
+  position: "absolute",
+  width: 20,
+  height: 20,
+  transform: "translate(-50%, -50%)",
+  pointerEvents: "none",
+  zIndex: 8,
+  borderRadius: 999,
+  border: "1px solid rgba(255,255,255,0.92)",
+  boxShadow: "0 0 0 2px rgba(255, 45, 45, 0.58), 0 0 14px rgba(255,45,45,0.7)",
+  background:
+    "linear-gradient(90deg, transparent calc(50% - 1px), rgba(255,45,45,0.95) calc(50% - 1px), rgba(255,45,45,0.95) calc(50% + 1px), transparent calc(50% + 1px)), linear-gradient(0deg, transparent calc(50% - 1px), rgba(255,45,45,0.95) calc(50% - 1px), rgba(255,45,45,0.95) calc(50% + 1px), transparent calc(50% + 1px))",
+};
+
+const debugReadoutStyle: CSSProperties = {
+  position: "absolute",
+  left: 10,
+  bottom: 10,
+  zIndex: 9,
+  padding: "7px 9px",
+  borderRadius: 8,
+  border: "1px solid rgba(255,255,255,0.35)",
+  background: "rgba(0,0,0,0.7)",
+  color: "#fff",
+  fontSize: 12,
+  lineHeight: 1.45,
+  fontWeight: 900,
+  pointerEvents: "none",
+  textShadow: "0 1px 2px rgba(0,0,0,0.7)",
 };
