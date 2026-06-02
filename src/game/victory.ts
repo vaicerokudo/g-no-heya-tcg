@@ -83,6 +83,20 @@ export function checkScenarioVictory(
     return null;
   }
 
+  if (scenarioId === "scenario21") {
+    const leviathanAlive = instances.some((u) => u.unitId === "LEVIATHAN" && u.side === "north");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!southAlive) {
+      return { winner: "north", detail: "Scenario 21 failed: the leviathan battle team was defeated." };
+    }
+    if (!leviathanAlive) {
+      return { winner: "south", detail: "Scenario 21 clear: LEVIATHAN was defeated." };
+    }
+
+    return null;
+  }
+
   if (scenarioId === "scenario18") {
     const leviathan = instances.find((u) => u.unitId === "MIST_LEVIATHAN" && u.side === "north");
     const southAlive = instances.some((u) => u.side === "south");

@@ -22,6 +22,7 @@ export type ScenarioId =
   | "scenario18"
   | "scenario19"
   | "scenario20"
+  | "scenario21"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -811,6 +812,49 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       defeat: [
         { speaker: "ROKUDO", text: "潮目まで届きませんでした。敵影を退けて、もう一度進みましょう。" },
         { speaker: "うしまる", text: "引きは感じたっす。次は針を落とす場所まで行くっす。" },
+      ],
+    },
+  },
+  scenario21: {
+    id: "scenario21",
+    title: "第21話 黒潮の主",
+    stageName: "ブラックノイズ湾・黒潮の主",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
+    returnScene: "blackNoiseBay",
+    placements: [
+      { unitId: "USHIMARU", side: "south", r: 5, c: 1, instanceId: "SC21-USHIMARU" },
+      { unitId: "HIBIKI", side: "south", r: 5, c: 2, instanceId: "SC21-HIBIKI" },
+      { unitId: "ROKUDO", side: "south", r: 5, c: 4, instanceId: "SC21-ROKUDO" },
+      { unitId: "ROCKEL", side: "south", r: 5, c: 5, instanceId: "SC21-ROCKEL" },
+      { unitId: "LEVIATHAN", side: "north", r: 0, c: 3, instanceId: "SC21-LEVIATHAN-1", hp: 22 },
+      { unitId: "KILLER_FISH", side: "north", r: 1, c: 2, instanceId: "SC21-FISH-1", hp: 4 },
+      { unitId: "KILLER_FISH", side: "north", r: 1, c: 4, instanceId: "SC21-FISH-2", hp: 4 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "うしまる", text: "引き上げたっす……あれが、リヴァイアサンっすね。" },
+        { speaker: "hibiki", text: "で、でかすぎるだろ！ あんなもの、魚の範囲を超えている！" },
+        { speaker: "ROCKEL", text: "でも釣れたっす！ なら倒せるっす！" },
+        { speaker: "ROKUDO", text: "黒い潮が、あの体に集まっています。ブラックノイズの残滓を核にしていますね。" },
+        { speaker: "うしまる", text: "海を荒らしてるなら、放っておけないっす。" },
+        { speaker: "hibiki", text: "ふん。俺が前に立つ。お前たちは、好きに動け。" },
+        { speaker: "ROCKEL", text: "かっこいいっすね！" },
+        { speaker: "hibiki", text: "べ、別に怖くないからな！" },
+        { speaker: "ROKUDO", text: "来ます。黒潮の主、リヴァイアサンです。" },
+      ],
+      victory: [
+        { speaker: "うしまる", text: "……潮が、静かになってきたっす。" },
+        { speaker: "ROKUDO", text: "ブラックノイズの気配も薄れています。完全ではありませんが、この湾は落ち着くはずです。" },
+        { speaker: "hibiki", text: "当然だ。俺たちが来たからな。" },
+        { speaker: "ROCKEL", text: "船も最後まで持ったっす！ 俺の木材、最高っす！" },
+        { speaker: "うしまる", text: "みんなのおかげっす。……でも、あれを釣るのは、しばらく遠慮したいっすね。" },
+        { speaker: "hibiki", text: "二度と釣るな！" },
+        { speaker: "ROKUDO", text: "帰りましょう。湾の風が、少しだけ軽くなりました。" },
+      ],
+      defeat: [
+        { speaker: "ROKUDO", text: "黒潮の圧が強すぎます。立て直して、リヴァイアサンだけを狙いましょう。" },
+        { speaker: "hibiki", text: "撤退ではない。盾を構え直すだけだ。" },
       ],
     },
   },

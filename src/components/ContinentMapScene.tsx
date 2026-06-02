@@ -59,6 +59,9 @@ export function ContinentMapScene({
   const [shipBuilt, setShipBuilt] = useState(() =>
     hasBlackNoiseBayEventFlag("ship_built") || hasBlackNoiseBayEventFlag("black_noise_bay_ship_ready")
   );
+  const [blackNoiseBayCleared, setBlackNoiseBayCleared] = useState(() =>
+    hasBlackNoiseBayEventFlag("black_noise_bay_chapter_cleared")
+  );
   const [isDebugMap] = useState(() => {
     if (typeof window === "undefined") return false;
     return new URLSearchParams(window.location.search).get("debugMap") === "1";
@@ -71,6 +74,7 @@ export function ContinentMapScene({
       setWastelandChapterCleared(hasWastelandEventFlag("wasteland_chapter_cleared"));
       setShipRequiredDiscovered(hasBlackNoiseBayEventFlag("ship_required_discovered"));
       setShipBuilt(hasBlackNoiseBayEventFlag("ship_built") || hasBlackNoiseBayEventFlag("black_noise_bay_ship_ready"));
+      setBlackNoiseBayCleared(hasBlackNoiseBayEventFlag("black_noise_bay_chapter_cleared"));
     };
 
     refreshChapterClearStatus();
@@ -112,7 +116,8 @@ export function ContinentMapScene({
               const deltaCleared = spot.id === "delta" && deltaChapterCleared;
               const wastelandCleared = spot.id === "dustWasteland" && wastelandChapterCleared;
               const necroCityCleared = spot.id === "necroCity" && shipBuilt;
-              const cleared = deltaCleared || wastelandCleared || necroCityCleared;
+              const bayCleared = spot.id === "blackNoiseBay" && blackNoiseBayCleared;
+              const cleared = deltaCleared || wastelandCleared || necroCityCleared || bayCleared;
               const subLabel = cleared ? (spot.id === "necroCity" ? "探索完了" : "クリア済み") : spot.subLabel;
               const handleClick =
                 spot.id === "astoria"

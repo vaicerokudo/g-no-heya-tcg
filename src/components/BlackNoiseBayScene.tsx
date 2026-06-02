@@ -18,10 +18,10 @@ const FRONT_MISSIONS: Array<{ id: ScenarioId; title: string; subLabel: string; r
   { id: "scenario18", title: "第18話 湾の中心へ", subLabel: "巨大な影の確認", requires: "scenario17" },
 ];
 
-const BACK_MISSIONS: Array<{ id: "departure" | "hook" | "final"; scenarioId?: ScenarioId; title: string; subLabel: string }> = [
+const BACK_MISSIONS: Array<{ id: "departure" | "hook" | "final"; scenarioId: ScenarioId; title: string; subLabel: string }> = [
   { id: "departure", scenarioId: "scenario19", title: "第19話 船出", subLabel: "完成した船で出航" },
   { id: "hook", scenarioId: "scenario20", title: "第20話 リヴァイアサンを釣れ", subLabel: "湾中央の釣り場へ" },
-  { id: "final", title: "第21話 黒潮の主", subLabel: "決戦準備中" },
+  { id: "final", scenarioId: "scenario21", title: "第21話 黒潮の主", subLabel: "黒潮の主との決戦" },
 ];
 
 export function BlackNoiseBayScene({
@@ -37,6 +37,7 @@ export function BlackNoiseBayScene({
     shipProgress.flags.includes("ship_built") || shipProgress.flags.includes("black_noise_bay_ship_ready");
   const departed = shipProgress.flags.includes("black_noise_bay_departed");
   const leviathanHooked = shipProgress.flags.includes("black_noise_bay_leviathan_hooked");
+  const chapterCleared = shipProgress.flags.includes("black_noise_bay_chapter_cleared");
   const collectedPartCount = shipProgress.parts.length;
 
   useEffect(() => {
@@ -70,7 +71,13 @@ export function BlackNoiseBayScene({
             湾岸に黒い潮が流れ着いている。海辺の魔物が活性化し、湾の中心には巨大な影が見える。
           </p>
           <div style={statusBoxStyle}>
-            {leviathanHooked ? (
+            {chapterCleared ? (
+              <>
+                <strong>BLACK NOISE BAY CLEARED</strong>
+                <span>ブラックノイズ湾 調査完了</span>
+                <span>黒潮の主リヴァイアサンは制圧されました。湾に残っていたブラックノイズの残滓は、静かに薄れていきます。</span>
+              </>
+            ) : leviathanHooked ? (
               <>
                 <strong>リヴァイアサンを釣り上げました。</strong>
                 <span>黒潮の主との決戦が始まります。</span>
@@ -132,13 +139,14 @@ export function BlackNoiseBayScene({
             {BACK_MISSIONS.map((mission) => {
               const cleared =
                 (mission.id === "departure" && departed) ||
-                (mission.id === "hook" && leviathanHooked);
+                (mission.id === "hook" && leviathanHooked) ||
+                (mission.id === "final" && chapterCleared);
               const unlocked =
                 (mission.id === "departure" && shipReady) ||
                 (mission.id === "hook" && departed) ||
                 (mission.id === "final" && leviathanHooked);
-              const disabled = !unlocked || !mission.scenarioId || cleared;
-              const badge = cleared ? "CLEAR" : !unlocked ? "LOCK" : mission.scenarioId ? "NEXT" : "準備中";
+              const disabled = !unlocked || cleared;
+              const badge = cleared ? "CLEAR" : !unlocked ? "LOCK" : "NEXT";
 
               return (
                 <button

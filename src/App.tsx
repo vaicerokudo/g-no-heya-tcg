@@ -187,6 +187,7 @@ export default function App() {
   const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId | null>(null);
   const [scenarioDialog, setScenarioDialog] = useState<null | { kind: ScenarioDialogKind; index: number }>(null);
   const [scenarioResultDialogShown, setScenarioResultDialogShown] = useState(false);
+  const [battleNotice, setBattleNotice] = useState<string | null>(null);
   const activeScenario = gameMode === "scenario" && activeScenarioId ? getScenarioConfig(activeScenarioId) : null;
   const [activeScenarioReturnScene, setActiveScenarioReturnScene] = useState<ScenarioReturnScene>("astoria");
   const [scenarioSelectOpen, setScenarioSelectOpen] = useState(false);
@@ -261,6 +262,7 @@ export default function App() {
   const endTurnTickLockRef = useRef(false);
 
   const quicksandStunPendingIdsRef = useRef<Set<string>>(new Set());
+  const scenario21ReinforcementSpawnedRef = useRef(false);
 
   // Tracks phase transitions into battle.
   const prevPhaseRef = useRef<Phase>("setup_draw");
@@ -359,6 +361,65 @@ export default function App() {
     };
   }
 
+  function findScenarioSpawnCell(
+    preferred: { r: number; c: number },
+    currentInstances: typeof instances,
+    candidates: Array<{ r: number; c: number }>
+  ) {
+    const occupied = new Set(currentInstances.map((unit) => `${unit.pos.r},${unit.pos.c}`));
+    const allCandidates = [preferred, ...candidates];
+    return allCandidates.find((cell) => {
+      if (cell.r < 0 || cell.r >= rows || cell.c < 0 || cell.c >= cols) return false;
+      return !occupied.has(`${cell.r},${cell.c}`);
+    }) ?? null;
+  }
+
+  function spawnScenario21Reinforcements() {
+    setInstancesAndRef((prev) => {
+      const krakenCell = findScenarioSpawnCell({ r: 0, c: 1 }, prev, [
+        { r: 1, c: 1 },
+        { r: 0, c: 0 },
+        { r: 1, c: 0 },
+        { r: 0, c: 2 },
+      ]);
+      const withKraken = krakenCell
+        ? [
+            ...prev,
+            spawnUnit({
+              unitId: "KRAKEN",
+              side: "north",
+              r: krakenCell.r,
+              c: krakenCell.c,
+              instanceId: `SC21-REINFORCE-KRAKEN-${Date.now()}`,
+              hp: 16,
+            }),
+          ].filter((unit): unit is NonNullable<typeof unit> => unit !== null)
+        : prev;
+      const octopusCell = findScenarioSpawnCell({ r: 0, c: 5 }, withKraken, [
+        { r: 1, c: 5 },
+        { r: 0, c: 6 },
+        { r: 1, c: 6 },
+        { r: 0, c: 4 },
+      ]);
+      return octopusCell
+        ? [
+            ...withKraken,
+            spawnUnit({
+              unitId: "OCTOPUS",
+              side: "north",
+              r: octopusCell.r,
+              c: octopusCell.c,
+              instanceId: `SC21-REINFORCE-OCTOPUS-${Date.now()}`,
+              hp: 8,
+            }),
+          ].filter((unit): unit is NonNullable<typeof unit> => unit !== null)
+        : withKraken;
+    });
+
+    setBattleNotice("黒潮がうねり、海中から新たな影が現れた！ KRAKEN と OCTOPUS が増援として出現！");
+    window.setTimeout(() => setBattleNotice(null), 4200);
+  }
+
   function resetGuards() {
     lastDrawKeyRef.current = "";
     lastTurnStartKeyRef.current = "";
@@ -433,6 +494,7 @@ export default function App() {
     setActiveScenarioReturnScene(returnScene);
     setScenarioDialog({ kind: "intro", index: 0 });
     setScenarioResultDialogShown(false);
+    setBattleNotice(null);
     setVictory(null);
     setSkillMode(null);
     setUsedSkills({});
@@ -443,6 +505,7 @@ export default function App() {
     setImpactFxEvents([]);
     setSkillImpactFxEvents([]);
     quicksandStunPendingIdsRef.current.clear();
+    scenario21ReinforcementSpawnedRef.current = false;
     setShowEndTurnConfirm(false);
     setBattleDeployUsed(true);
     setDeployPlaced(0);
@@ -773,6 +836,9 @@ export default function App() {
       if (activeScenarioId === "scenario20") {
         addBlackNoiseBayEventFlag("black_noise_bay_leviathan_hooked");
       }
+      if (activeScenarioId === "scenario21") {
+        addBlackNoiseBayEventFlag("black_noise_bay_chapter_cleared");
+      }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
       }
@@ -796,6 +862,20 @@ export default function App() {
       spawnUnit,
     });
   }, [turnSeq, cols, initialDeployCandidateCols]);
+
+  useEffect(() => {
+    if (gameMode !== "scenario") return;
+    if (activeScenarioId !== "scenario21") return;
+    if (phase !== "battle") return;
+    if (turn !== "south") return;
+    if (turnSeq < 5) return;
+    if (scenario21ReinforcementSpawnedRef.current) return;
+    if (victory) return;
+
+    scenario21ReinforcementSpawnedRef.current = true;
+    spawnScenario21Reinforcements();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeScenarioId, gameMode, phase, turn, turnSeq, victory]);
 
   const deploySouthAt = (r: number, c: number) => {
     trySouthDeploy({
@@ -1614,6 +1694,32 @@ const reinforceSet = useMemo(() => {
           onNext={advanceScenarioDialog}
         />
       )}
+
+      {battleNotice ? (
+        <div
+          style={{
+            position: "fixed",
+            left: "50%",
+            top: 86,
+            transform: "translateX(-50%)",
+            zIndex: 48,
+            width: "min(520px, calc(100vw - 24px))",
+            padding: "10px 14px",
+            borderRadius: 12,
+            border: "1px solid rgba(143,215,255,0.42)",
+            background: "linear-gradient(180deg, rgba(8, 34, 54, 0.94), rgba(4, 10, 18, 0.94))",
+            color: "#e8f8ff",
+            boxShadow: "0 14px 36px rgba(0,0,0,0.38)",
+            fontSize: 13,
+            fontWeight: 900,
+            lineHeight: 1.55,
+            textAlign: "center",
+            pointerEvents: "none",
+          }}
+        >
+          {battleNotice}
+        </div>
+      ) : null}
 
       <SkillModeBanner
         skillMode={skillMode}

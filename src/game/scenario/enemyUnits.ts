@@ -230,6 +230,18 @@ export const MIST_LEVIATHAN_UNIT_DEF: UnitDef = {
   },
 };
 
+export const LEVIATHAN_UNIT_DEF: UnitDef = {
+  id: "LEVIATHAN",
+  name: "リヴァイアサン",
+  enemyOnly: true,
+  hiddenFromCatalog: false,
+  base: {
+    atk: 4,
+    hp: 22,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
 export const scenarioEnemyUnits: UnitDef[] = [
   BOAR_UNIT_DEF,
   LESSER_WYVERN_UNIT_DEF,
@@ -249,6 +261,7 @@ export const scenarioEnemyUnits: UnitDef[] = [
   OCTOPUS_UNIT_DEF,
   KRAKEN_UNIT_DEF,
   MIST_LEVIATHAN_UNIT_DEF,
+  LEVIATHAN_UNIT_DEF,
 ];
 
 export function getScenarioEnemyUnit(unitId: string) {
