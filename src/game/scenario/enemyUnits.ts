@@ -152,8 +152,8 @@ export const ROKUDO_AUTHOR_UNIT_DEF: UnitDef = {
   },
 };
 
-export const WASTELAND_SCORPION_UNIT_DEF: UnitDef = {
-  id: "WASTELAND_SCORPION",
+export const SCORPION_UNIT_DEF: UnitDef = {
+  id: "SCORPION",
   name: "スコーピオン",
   enemyOnly: true,
   base: {
@@ -197,7 +197,7 @@ export const scenarioEnemyUnits: UnitDef[] = [
   HIDDEN_MYOUOU_UNIT_DEF,
   MONTEN_UNIT_DEF,
   ROKUDO_AUTHOR_UNIT_DEF,
-  WASTELAND_SCORPION_UNIT_DEF,
+  SCORPION_UNIT_DEF,
   ROCK_GOLEM_UNIT_DEF,
   GIANT_SCORPION_UNIT_DEF,
 ];
