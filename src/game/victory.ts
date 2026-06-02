@@ -46,8 +46,36 @@ export function checkVictory(
 
 export function checkScenarioVictory(
   scenarioId: ScenarioId,
-  instances: Array<{ unitId: string; side: Side; pos?: { r: number; c: number } }>
+  instances: Array<{ unitId: string; side: Side; pos?: { r: number; c: number }; hp?: number }>
 ): Victory | null {
+  if (["scenario16", "scenario17"].includes(scenarioId)) {
+    const northAlive = instances.some((u) => u.side === "north");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!northAlive) {
+      return { winner: "south", detail: `${scenarioId} clear: the bay monsters were defeated.` };
+    }
+    if (!southAlive) {
+      return { winner: "north", detail: `${scenarioId} failed: all allies were defeated.` };
+    }
+
+    return null;
+  }
+
+  if (scenarioId === "scenario18") {
+    const leviathan = instances.find((u) => u.unitId === "MIST_LEVIATHAN" && u.side === "north");
+    const southAlive = instances.some((u) => u.side === "south");
+
+    if (!southAlive) {
+      return { winner: "north", detail: "Scenario 18 failed: the survey team was defeated." };
+    }
+    if (!leviathan || (leviathan.hp ?? 0) <= 12) {
+      return { winner: "south", detail: "Scenario 18 clear: enough data was gathered from the mist leviathan." };
+    }
+
+    return null;
+  }
+
   if (["scenario12", "scenario13", "scenario14", "scenario15"].includes(scenarioId)) {
     const northAlive = instances.some((u) => u.side === "north");
     const southAlive = instances.some((u) => u.side === "south");

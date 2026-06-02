@@ -185,6 +185,51 @@ export const GIANT_SCORPION_UNIT_DEF: UnitDef = {
   },
 };
 
+export const KILLER_FISH_UNIT_DEF: UnitDef = {
+  id: "KILLER_FISH",
+  name: "キラーフィッシュ",
+  enemyOnly: true,
+  base: {
+    atk: 2,
+    hp: 4,
+    movePattern: { type: "orthogonal", range: 2, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
+export const OCTOPUS_UNIT_DEF: UnitDef = {
+  id: "OCTOPUS",
+  name: "オクトパス",
+  enemyOnly: true,
+  base: {
+    atk: 2,
+    hp: 8,
+    movePattern: { type: "orthogonal", range: 1, diagonal: true, canPassThroughUnits: false },
+  },
+};
+
+export const KRAKEN_UNIT_DEF: UnitDef = {
+  id: "KRAKEN",
+  name: "クラーケン",
+  enemyOnly: true,
+  base: {
+    atk: 3,
+    hp: 16,
+    movePattern: { type: "orthogonal", range: 1, diagonal: true, canPassThroughUnits: false },
+  },
+};
+
+export const MIST_LEVIATHAN_UNIT_DEF: UnitDef = {
+  id: "MIST_LEVIATHAN",
+  name: "霧のリヴァイアサン",
+  enemyOnly: true,
+  hiddenFromCatalog: true,
+  base: {
+    atk: 4,
+    hp: 24,
+    movePattern: { type: "orthogonal", range: 1, diagonal: false, canPassThroughUnits: false },
+  },
+};
+
 export const scenarioEnemyUnits: UnitDef[] = [
   BOAR_UNIT_DEF,
   LESSER_WYVERN_UNIT_DEF,
@@ -200,6 +245,10 @@ export const scenarioEnemyUnits: UnitDef[] = [
   SCORPION_UNIT_DEF,
   ROCK_GOLEM_UNIT_DEF,
   GIANT_SCORPION_UNIT_DEF,
+  KILLER_FISH_UNIT_DEF,
+  OCTOPUS_UNIT_DEF,
+  KRAKEN_UNIT_DEF,
+  MIST_LEVIATHAN_UNIT_DEF,
 ];
 
 export function getScenarioEnemyUnit(unitId: string) {
