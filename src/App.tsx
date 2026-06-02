@@ -52,6 +52,8 @@ import { ContinentMapScene } from "./components/ContinentMapScene";
 import { DeltaMapScene } from "./components/DeltaMapScene";
 import { DustWastelandScene } from "./components/DustWastelandScene";
 import { FortressZeroScene } from "./components/FortressZeroScene";
+import { BlackNoiseBayScene } from "./components/BlackNoiseBayScene";
+import { NecroCityScene } from "./components/NecroCityScene";
 import { TownScene } from "./components/TownScene";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
@@ -77,6 +79,7 @@ import { readClearedScenarios, writeClearedScenarios } from "./game/scenario/pro
 import { addDeltaEventFlag, hasDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
 import { markWastelandScenarioCleared } from "./game/wasteland/progress";
+import { addBlackNoiseBayEventFlag, addShipPart } from "./game/blackNoiseBay/progress";
 import {
   markHiddenHintFlag,
   readHiddenHintFlags,
@@ -119,7 +122,16 @@ type SkillMotionEvent = { id: string; instanceId: string };
 type AttackMotionEvent = { id: string; instanceId: string; dr: number; dc: number };
 type MoveMotionEvent = { id: string; instanceId: string };
 type ImpactFxEvent = { id: string; targetId: string; r: number; c: number };
-type Scene = "astoria" | "continent" | "delta" | "dustWasteland" | "fortressZero" | "town" | "tcg";
+type Scene =
+  | "astoria"
+  | "continent"
+  | "delta"
+  | "dustWasteland"
+  | "fortressZero"
+  | "blackNoiseBay"
+  | "necroCity"
+  | "town"
+  | "tcg";
 type BoardPreviewMode = "move" | "attack";
 type SkillImpactFxEvent = {
   id: string;
@@ -750,6 +762,11 @@ export default function App() {
       if (["scenario12", "scenario13", "scenario14", "scenario15"].includes(activeScenarioId)) {
         markWastelandScenarioCleared(activeScenarioId);
       }
+      if (activeScenarioId === "scenario18") {
+        addBlackNoiseBayEventFlag("black_noise_bay_front_cleared");
+        addBlackNoiseBayEventFlag("ship_required_discovered");
+        addShipPart("wood");
+      }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
       }
@@ -830,6 +847,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     const returnScene = getScenarioReturnScene(activeScenarioId);
     if (returnScene === "dustWasteland") return "荒野へ戻る";
     if (returnScene === "delta") return "デルタへ戻る";
+    if (returnScene === "blackNoiseBay") return "湾へ戻る";
     return "街へ戻る";
   }
 
@@ -1467,6 +1485,7 @@ const reinforceSet = useMemo(() => {
         onEnterDelta={() => setScene("delta")}
         onEnterDustWasteland={() => setScene("dustWasteland")}
         onEnterFortressZero={() => setScene("fortressZero")}
+        onEnterBlackNoiseBay={() => setScene("blackNoiseBay")}
       />
     );
   }
@@ -1492,6 +1511,21 @@ const reinforceSet = useMemo(() => {
 
   if (scene === "fortressZero") {
     return <FortressZeroScene onReturnContinent={() => setScene("continent")} />;
+  }
+
+  if (scene === "blackNoiseBay") {
+    return (
+      <BlackNoiseBayScene
+        clearedScenarioIds={clearedScenarioIds}
+        onReturnContinent={() => setScene("continent")}
+        onEnterNecroCity={() => setScene("necroCity")}
+        onStartScenario={handleScenarioSelectStart}
+      />
+    );
+  }
+
+  if (scene === "necroCity") {
+    return <NecroCityScene onReturnBlackNoiseBay={() => setScene("blackNoiseBay")} />;
   }
 
   if (scene === "town") {

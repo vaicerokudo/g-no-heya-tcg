@@ -17,11 +17,14 @@ export type ScenarioId =
   | "scenario13"
   | "scenario14"
   | "scenario15"
+  | "scenario16"
+  | "scenario17"
+  | "scenario18"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
-export type ScenarioReturnScene = "astoria" | "delta" | "dustWasteland";
+export type ScenarioReturnScene = "astoria" | "delta" | "dustWasteland" | "blackNoiseBay";
 
 export type ScenarioLine = {
   speaker: string;
@@ -605,6 +608,99 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       defeat: [
         { speaker: "つつ", text: "奥地は簡単じゃねぇ。進路を読み直すぞ。" },
         { speaker: "7171", text: "撤退も立派な足元確認にゃ。" },
+      ],
+    },
+  },
+  scenario16: {
+    id: "scenario16",
+    title: "第16話 黒い潮",
+    stageName: "ブラックノイズ湾・湾岸",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    returnScene: "blackNoiseBay",
+    placements: [
+      { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC16-USHIMARU" },
+      { unitId: "HIBIKI", side: "south", r: 5, c: 3, instanceId: "SC16-HIBIKI" },
+      { unitId: "ROKUDO", side: "south", r: 5, c: 4, instanceId: "SC16-ROKUDO" },
+      { unitId: "GOBLIN", side: "north", r: 2, c: 2, instanceId: "SC16-GOBLIN-1", hp: 4 },
+      { unitId: "BOAR", side: "north", r: 2, c: 4, instanceId: "SC16-BOAR-1", hp: 7 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "うしまる", text: "海が黒いっすね……魚の気配まで変っす。" },
+        { speaker: "hibiki", text: "ふん、この程度の潮など俺が見極めてやる。……近づきすぎるなよ？" },
+        { speaker: "ROKUDO", text: "黒いノイズの気配が混ざっています。まずは湾岸の魔物を抑えましょう。" },
+      ],
+      victory: [
+        { speaker: "ROKUDO", text: "湾岸の異変は確認できました。奥に、もっと大きな気配があります。" },
+        { speaker: "うしまる", text: "釣り場としては最悪っす。でも、奥の影は気になるっす。" },
+      ],
+      defeat: [
+        { speaker: "hibiki", text: "撤退ではない。これは潮の様子を見るための高度な判断だ。" },
+        { speaker: "ROKUDO", text: "立て直しましょう。黒い潮に長く触れるのは危険です。" },
+      ],
+    },
+  },
+  scenario17: {
+    id: "scenario17",
+    title: "第17話 漂着する影",
+    stageName: "ブラックノイズ湾・漂着地",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    returnScene: "blackNoiseBay",
+    placements: [
+      { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC17-USHIMARU" },
+      { unitId: "HIBIKI", side: "south", r: 5, c: 3, instanceId: "SC17-HIBIKI" },
+      { unitId: "ROKUDO", side: "south", r: 5, c: 4, instanceId: "SC17-ROKUDO" },
+      { unitId: "SCORPION", side: "north", r: 2, c: 1, instanceId: "SC17-SCORPION-1", hp: 5 },
+      { unitId: "GOBLIN", side: "north", r: 2, c: 3, instanceId: "SC17-GOBLIN-1", hp: 4 },
+      { unitId: "LESSER_WYVERN", side: "north", r: 1, c: 4, instanceId: "SC17-WYVERN-1", hp: 7 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "うしまる", text: "漂着物に黒いモヤが絡んでるっす。普通の海じゃないっすね。" },
+        { speaker: "hibiki", text: "俺は別に怖くない。でかい影が動いたように見えただけだ。" },
+        { speaker: "ROKUDO", text: "魔物がノイズに侵されています。倒して、気配の流れを追いましょう。" },
+      ],
+      victory: [
+        { speaker: "ROKUDO", text: "黒い潮は湾の中心へ向かっています。" },
+        { speaker: "hibiki", text: "中心だと？ つまり一番危ない場所ではないか。" },
+        { speaker: "うしまる", text: "危ないなら、準備して行くっす。" },
+      ],
+      defeat: [
+        { speaker: "うしまる", text: "潮の流れが読みにくいっす。もう一回、岸から見直すっす。" },
+      ],
+    },
+  },
+  scenario18: {
+    id: "scenario18",
+    title: "第18話 湾の中心へ",
+    stageName: "ブラックノイズ湾・中心遠望",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    returnScene: "blackNoiseBay",
+    placements: [
+      { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC18-USHIMARU" },
+      { unitId: "HIBIKI", side: "south", r: 5, c: 3, instanceId: "SC18-HIBIKI" },
+      { unitId: "ROKUDO", side: "south", r: 5, c: 4, instanceId: "SC18-ROKUDO" },
+      { unitId: "BOAR", side: "north", r: 2, c: 1, instanceId: "SC18-BOAR-1", hp: 7 },
+      { unitId: "LESSER_WYVERN", side: "north", r: 1, c: 3, instanceId: "SC18-WYVERN-1", hp: 7 },
+      { unitId: "GOBLIN", side: "north", r: 2, c: 5, instanceId: "SC18-GOBLIN-1", hp: 4 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "ROKUDO", text: "湾の中心に巨大な影があります。ブラックノイズの核に近い反応です。" },
+        { speaker: "うしまる", text: "あのサイズ……釣るなら船がいるっす。" },
+        { speaker: "hibiki", text: "釣る前提なのか！？ いや、俺もそう思っていたがな。" },
+      ],
+      victory: [
+        { speaker: "ROKUDO", text: "影の名は、おそらくリヴァイアサン。今の装備では近づけません。" },
+        { speaker: "うしまる", text: "船を作るっす。湾の中心まで行ける、でっかいやつっす。" },
+        { speaker: "ROCKEL", text: "木材なら任せるっす！でっかいの持ってくるっす！" },
+      ],
+      defeat: [
+        { speaker: "hibiki", text: "巨大な影を見たのは作戦上の収穫だ。撤退も作戦のうちだ。" },
+        { speaker: "ROKUDO", text: "もう一度、湾岸から気配を追いましょう。" },
       ],
     },
   },

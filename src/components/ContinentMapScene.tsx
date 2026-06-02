@@ -7,12 +7,13 @@ type ContinentMapSceneProps = {
   onEnterDelta: () => void;
   onEnterDustWasteland: () => void;
   onEnterFortressZero: () => void;
+  onEnterBlackNoiseBay: () => void;
 };
 
 const CONTINENT_MAP_IMAGE_URL = "/backgrounds/continent-map.png";
 
 type Hotspot = {
-  id: "astoria" | "delta" | "dustWasteland" | "fortressZero";
+  id: "astoria" | "delta" | "dustWasteland" | "fortressZero" | "blackNoiseBay";
   label: string;
   subLabel: string;
   badge?: string;
@@ -32,6 +33,7 @@ const HOTSPOTS: Hotspot[] = [
   { id: "delta", label: "研究施設デルタ", subLabel: "入る", x: 59, y: 79, w: 34, h: 10 },
   { id: "dustWasteland", label: "砂塵の荒野", subLabel: "新たな調査地点", badge: "NEW", x: 50, y: 61, w: 34, h: 10 },
   { id: "fortressZero", label: "FORTRESS ZERO", subLabel: "記憶の街", badge: "ARG", x: 24, y: 49, w: 34, h: 10 },
+  { id: "blackNoiseBay", label: "ブラックノイズ湾", subLabel: "黒い潮の調査地点", badge: "NEW", x: 52, y: 36, w: 36, h: 10 },
 ];
 
 export function ContinentMapScene({
@@ -39,6 +41,7 @@ export function ContinentMapScene({
   onEnterDelta,
   onEnterDustWasteland,
   onEnterFortressZero,
+  onEnterBlackNoiseBay,
 }: ContinentMapSceneProps) {
   const [deltaChapterCleared, setDeltaChapterCleared] = useState(() =>
     hasDeltaEventFlag("delta_chapter_cleared")
@@ -103,7 +106,9 @@ export function ContinentMapScene({
                     ? onEnterDelta
                     : spot.id === "dustWasteland"
                       ? onEnterDustWasteland
-                      : onEnterFortressZero;
+                      : spot.id === "fortressZero"
+                        ? onEnterFortressZero
+                        : onEnterBlackNoiseBay;
 
               return (
                 <button
