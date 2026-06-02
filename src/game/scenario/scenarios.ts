@@ -20,6 +20,7 @@ export type ScenarioId =
   | "scenario16"
   | "scenario17"
   | "scenario18"
+  | "scenario19"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -722,6 +723,48 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       defeat: [
         { speaker: "hibiki", text: "巨大な影を見たのは作戦上の収穫だ。撤退も作戦のうちだ。" },
         { speaker: "ROKUDO", text: "もう一度、湾岸から気配を追いましょう。" },
+      ],
+    },
+  },
+  scenario19: {
+    id: "scenario19",
+    title: "第19話 船出",
+    stageName: "ブラックノイズ湾・船出",
+    boardSizeMode: "starter7",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
+    returnScene: "blackNoiseBay",
+    placements: [
+      { unitId: "USHIMARU", side: "south", r: 5, c: 1, instanceId: "SC19-USHIMARU" },
+      { unitId: "HIBIKI", side: "south", r: 5, c: 2, instanceId: "SC19-HIBIKI" },
+      { unitId: "ROKUDO", side: "south", r: 5, c: 4, instanceId: "SC19-ROKUDO" },
+      { unitId: "ROCKEL", side: "south", r: 5, c: 5, instanceId: "SC19-ROCKEL" },
+      { unitId: "OCTOPUS", side: "north", r: 0, c: 3, instanceId: "SC19-OCTOPUS-1", hp: 8 },
+      { unitId: "KILLER_FISH", side: "north", r: 1, c: 1, instanceId: "SC19-FISH-1", hp: 4 },
+      { unitId: "KILLER_FISH", side: "north", r: 1, c: 3, instanceId: "SC19-FISH-2", hp: 4 },
+      { unitId: "KILLER_FISH", side: "north", r: 1, c: 5, instanceId: "SC19-FISH-3", hp: 4 },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "うしまる", text: "船、ちゃんと浮いてるっすね！ これなら湾の中心まで行けそうっす！" },
+        { speaker: "ROCKEL", text: "木材はバッチリっす！ ちょっとやそっとじゃ壊れないっす！" },
+        { speaker: "hibiki", text: "ふん。当然だ。俺が乗る船だからな。……おい、今けっこう揺れなかったか？" },
+        { speaker: "ROKUDO", text: "黒い潮の奥から、強い気配がします。ミストリヴァイアサンよりも、さらに深い場所です。" },
+        { speaker: "うしまる", text: "じゃあ、そこにいるんすね。リヴァイアサンが。" },
+        { speaker: "hibiki", text: "べ、別に怖くはないぞ。調査だ。これは冷静な調査だ。" },
+        { speaker: "ROCKEL", text: "出航っす！ 邪魔するやつはぶっ飛ばすっす！" },
+        { speaker: "ROKUDO", text: "来ます。海面の下に、敵影があります。" },
+      ],
+      victory: [
+        { speaker: "うしまる", text: "湾の奥、魚の動きが変わってきたっす。" },
+        { speaker: "ROKUDO", text: "近づいています。次は、こちらから誘い出す必要がありそうです。" },
+        { speaker: "hibiki", text: "誘い出す？ まさか、あの巨大な影をか？" },
+        { speaker: "うしまる", text: "釣るっす。" },
+        { speaker: "hibiki", text: "……釣る？" },
+        { speaker: "うしまる", text: "リヴァイアサンを、釣り上げるっす。" },
+      ],
+      defeat: [
+        { speaker: "hibiki", text: "船出で沈むわけにはいかん。これは戦略的な寄港だ。" },
+        { speaker: "ROKUDO", text: "潮の流れを読み直しましょう。船はまだ進めます。" },
       ],
     },
   },

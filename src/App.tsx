@@ -767,6 +767,9 @@ export default function App() {
         addBlackNoiseBayEventFlag("ship_required_discovered");
         addShipPart("wood");
       }
+      if (activeScenarioId === "scenario19") {
+        addBlackNoiseBayEventFlag("black_noise_bay_departed");
+      }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
       }

@@ -31,6 +31,7 @@ export function BlackNoiseBayScene({
     clearedSet.has("scenario18") || hasBlackNoiseBayEventFlag("black_noise_bay_front_cleared");
   const shipReady =
     shipProgress.flags.includes("ship_built") || shipProgress.flags.includes("black_noise_bay_ship_ready");
+  const departed = shipProgress.flags.includes("black_noise_bay_departed");
   const collectedPartCount = shipProgress.parts.length;
 
   useEffect(() => {
@@ -64,10 +65,15 @@ export function BlackNoiseBayScene({
             湾岸に黒い潮が流れ着いている。海辺の魔物が活性化し、湾の中心には巨大な影が見える。
           </p>
           <div style={statusBoxStyle}>
-            {shipReady ? (
+            {departed ? (
+              <>
+                <strong>湾の中心が目前です。</strong>
+                <span>次は、うしまるがリヴァイアサンを釣り上げる作戦です。</span>
+              </>
+            ) : shipReady ? (
               <>
                 <strong>船の準備が整いました。</strong>
-                <span>ブラックノイズ湾 後編へ進めます。</span>
+                <span>湾の中心へ向かえます。黒い潮の奥に、巨大な影が待っています。</span>
               </>
             ) : frontCleared ? (
               <>
@@ -123,8 +129,16 @@ export function BlackNoiseBayScene({
             }}>
               廃都ネクロシティへ
             </button>
-            <button type="button" disabled style={{ ...secondaryButtonStyle, ...disabledButtonStyle }}>
-              {shipReady ? "後編準備中" : "湾の中心へ：船が必要"}
+            <button
+              type="button"
+              disabled={!shipReady || departed}
+              onClick={() => onStartScenario("scenario19")}
+              style={{
+                ...(shipReady && !departed ? primaryButtonStyle : secondaryButtonStyle),
+                ...(!shipReady || departed ? disabledButtonStyle : null),
+              }}
+            >
+              {departed ? "第20話 準備中" : shipReady ? "湾中央へ向かう" : "湾の中心へ：船が必要"}
             </button>
           </div>
         </section>
