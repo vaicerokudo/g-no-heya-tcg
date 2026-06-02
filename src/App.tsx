@@ -1492,6 +1492,7 @@ const reinforceSet = useMemo(() => {
         onEnterDustWasteland={() => setScene("dustWasteland")}
         onEnterFortressZero={() => setScene("fortressZero")}
         onEnterBlackNoiseBay={() => setScene("blackNoiseBay")}
+        onEnterNecroCity={() => setScene("necroCity")}
       />
     );
   }
@@ -1524,14 +1525,13 @@ const reinforceSet = useMemo(() => {
       <BlackNoiseBayScene
         clearedScenarioIds={clearedScenarioIds}
         onReturnContinent={() => setScene("continent")}
-        onEnterNecroCity={() => setScene("necroCity")}
         onStartScenario={handleScenarioSelectStart}
       />
     );
   }
 
   if (scene === "necroCity") {
-    return <NecroCityScene onReturnBlackNoiseBay={() => setScene("blackNoiseBay")} />;
+    return <NecroCityScene onReturnContinent={() => setScene("continent")} />;
   }
 
   if (scene === "town") {

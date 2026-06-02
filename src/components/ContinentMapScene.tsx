@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import { hasDeltaEventFlag } from "../game/delta/eventFlags";
 import { hasWastelandEventFlag } from "../game/wasteland/progress";
+import { hasBlackNoiseBayEventFlag } from "../game/blackNoiseBay/progress";
 
 type ContinentMapSceneProps = {
   onReturnAstoria: () => void;
@@ -8,12 +9,13 @@ type ContinentMapSceneProps = {
   onEnterDustWasteland: () => void;
   onEnterFortressZero: () => void;
   onEnterBlackNoiseBay: () => void;
+  onEnterNecroCity: () => void;
 };
 
 const CONTINENT_MAP_IMAGE_URL = "/backgrounds/continent-map.png";
 
 type Hotspot = {
-  id: "astoria" | "delta" | "dustWasteland" | "fortressZero" | "blackNoiseBay";
+  id: "astoria" | "delta" | "dustWasteland" | "fortressZero" | "blackNoiseBay" | "necroCity";
   label: string;
   subLabel: string;
   badge?: string;
@@ -34,6 +36,7 @@ const HOTSPOTS: Hotspot[] = [
   { id: "dustWasteland", label: "砂塵の荒野", subLabel: "新たな調査地点", badge: "NEW", x: 50, y: 61, w: 34, h: 10 },
   { id: "fortressZero", label: "FORTRESS ZERO", subLabel: "記憶の街", badge: "ARG", x: 24, y: 49, w: 34, h: 10 },
   { id: "blackNoiseBay", label: "ブラックノイズ湾", subLabel: "黒い潮の調査地点", badge: "NEW", x: 52, y: 36, w: 36, h: 10 },
+  { id: "necroCity", label: "廃都ネクロシティ", subLabel: "部材探索中", badge: "NEW", x: 31, y: 35, w: 36, h: 10 },
 ];
 
 export function ContinentMapScene({
@@ -42,12 +45,19 @@ export function ContinentMapScene({
   onEnterDustWasteland,
   onEnterFortressZero,
   onEnterBlackNoiseBay,
+  onEnterNecroCity,
 }: ContinentMapSceneProps) {
   const [deltaChapterCleared, setDeltaChapterCleared] = useState(() =>
     hasDeltaEventFlag("delta_chapter_cleared")
   );
   const [wastelandChapterCleared, setWastelandChapterCleared] = useState(() =>
     hasWastelandEventFlag("wasteland_chapter_cleared")
+  );
+  const [shipRequiredDiscovered, setShipRequiredDiscovered] = useState(() =>
+    hasBlackNoiseBayEventFlag("ship_required_discovered")
+  );
+  const [shipBuilt, setShipBuilt] = useState(() =>
+    hasBlackNoiseBayEventFlag("ship_built") || hasBlackNoiseBayEventFlag("black_noise_bay_ship_ready")
   );
   const [isDebugMap] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -59,6 +69,8 @@ export function ContinentMapScene({
     const refreshChapterClearStatus = () => {
       setDeltaChapterCleared(hasDeltaEventFlag("delta_chapter_cleared"));
       setWastelandChapterCleared(hasWastelandEventFlag("wasteland_chapter_cleared"));
+      setShipRequiredDiscovered(hasBlackNoiseBayEventFlag("ship_required_discovered"));
+      setShipBuilt(hasBlackNoiseBayEventFlag("ship_built") || hasBlackNoiseBayEventFlag("black_noise_bay_ship_ready"));
     };
 
     refreshChapterClearStatus();
@@ -95,10 +107,13 @@ export function ContinentMapScene({
           <img src={CONTINENT_MAP_IMAGE_URL} alt="" aria-hidden="true" style={mapImageStyle} />
           <div style={hotspotLayerStyle}>
             {HOTSPOTS.map((spot) => {
+              if (spot.id === "necroCity" && !shipRequiredDiscovered) return null;
+
               const deltaCleared = spot.id === "delta" && deltaChapterCleared;
               const wastelandCleared = spot.id === "dustWasteland" && wastelandChapterCleared;
-              const cleared = deltaCleared || wastelandCleared;
-              const subLabel = cleared ? "クリア済み" : spot.subLabel;
+              const necroCityCleared = spot.id === "necroCity" && shipBuilt;
+              const cleared = deltaCleared || wastelandCleared || necroCityCleared;
+              const subLabel = cleared ? (spot.id === "necroCity" ? "探索完了" : "クリア済み") : spot.subLabel;
               const handleClick =
                 spot.id === "astoria"
                   ? onReturnAstoria
@@ -106,9 +121,11 @@ export function ContinentMapScene({
                     ? onEnterDelta
                     : spot.id === "dustWasteland"
                       ? onEnterDustWasteland
-                      : spot.id === "fortressZero"
-                        ? onEnterFortressZero
-                        : onEnterBlackNoiseBay;
+                    : spot.id === "fortressZero"
+                      ? onEnterFortressZero
+                      : spot.id === "blackNoiseBay"
+                        ? onEnterBlackNoiseBay
+                        : onEnterNecroCity;
 
               return (
                 <button
@@ -126,7 +143,7 @@ export function ContinentMapScene({
                   <span style={hotspotLabelStyle}>{spot.label}</span>
                   {cleared || spot.badge ? (
                     <span style={hotspotBadgeRowStyle}>
-                      {cleared ? <span style={clearedBadgeStyle}>クリア済み</span> : null}
+                      {cleared ? <span style={clearedBadgeStyle}>{spot.id === "necroCity" ? "CLEAR" : "クリア済み"}</span> : null}
                       {!cleared && spot.badge ? <span style={hotspotBadgeStyle}>{spot.badge}</span> : null}
                     </span>
                   ) : null}

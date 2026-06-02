@@ -9,7 +9,6 @@ import type { ScenarioId } from "../game/scenario/scenarios";
 type BlackNoiseBaySceneProps = {
   clearedScenarioIds: ScenarioId[];
   onReturnContinent: () => void;
-  onEnterNecroCity: () => void;
   onStartScenario: (scenarioId: ScenarioId) => void;
 };
 
@@ -19,10 +18,15 @@ const FRONT_MISSIONS: Array<{ id: ScenarioId; title: string; subLabel: string; r
   { id: "scenario18", title: "第18話 湾の中心へ", subLabel: "巨大な影の確認", requires: "scenario17" },
 ];
 
+const BACK_MISSIONS: Array<{ id: "departure" | "hook" | "final"; scenarioId?: ScenarioId; title: string; subLabel: string }> = [
+  { id: "departure", scenarioId: "scenario19", title: "第19話 船出", subLabel: "完成した船で出航" },
+  { id: "hook", scenarioId: "scenario20", title: "第20話 リヴァイアサンを釣れ", subLabel: "湾中央の釣り場へ" },
+  { id: "final", title: "第21話 黒潮の主", subLabel: "決戦準備中" },
+];
+
 export function BlackNoiseBayScene({
   clearedScenarioIds,
   onReturnContinent,
-  onEnterNecroCity,
   onStartScenario,
 }: BlackNoiseBaySceneProps) {
   const [shipProgress, setShipProgress] = useState(() => readShipProgress());
@@ -84,7 +88,7 @@ export function BlackNoiseBayScene({
             ) : frontCleared ? (
               <>
                 <strong>湾の中心へ進むには船が必要です。</strong>
-                <span>ROCKELが木材集めに向かいました。残りの部材を探すため、廃都ネクロシティへ向かいましょう。</span>
+                <span>ROCKELが木材集めに向かいました。大陸MAPから廃都ネクロシティへ向かい、残りの部材を探しましょう。</span>
               </>
             ) : (
               <>
@@ -123,35 +127,47 @@ export function BlackNoiseBayScene({
         </section>
 
         <section style={sectionStyle}>
+          <div style={sectionHeaderStyle}>後編ミッション</div>
+          <div style={missionGridStyle}>
+            {BACK_MISSIONS.map((mission) => {
+              const cleared =
+                (mission.id === "departure" && departed) ||
+                (mission.id === "hook" && leviathanHooked);
+              const unlocked =
+                (mission.id === "departure" && shipReady) ||
+                (mission.id === "hook" && departed) ||
+                (mission.id === "final" && leviathanHooked);
+              const disabled = !unlocked || !mission.scenarioId || cleared;
+              const badge = cleared ? "CLEAR" : !unlocked ? "LOCK" : mission.scenarioId ? "NEXT" : "準備中";
+
+              return (
+                <button
+                  key={mission.id}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => {
+                    if (mission.scenarioId) onStartScenario(mission.scenarioId);
+                  }}
+                  style={{
+                    ...missionButtonStyle,
+                    ...(disabled ? disabledMissionStyle : null),
+                    ...(cleared ? clearedMissionStyle : null),
+                  }}
+                >
+                  <span style={missionBadgeStyle}>{badge}</span>
+                  <span style={missionTitleStyle}>{mission.title}</span>
+                  <span style={missionSubStyle}>{mission.subLabel}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section style={sectionStyle}>
           <div style={sectionHeaderStyle}>造船状態</div>
           <div style={shipStatusStyle}>
             <span>船の部材：{collectedPartCount} / {SHIP_PART_IDS.length}</span>
-            <span>{shipReady ? "造船完了" : frontCleared ? "ネクロシティ探索可能" : "船の必要性は未確認"}</span>
-          </div>
-          <div style={actionsStyle}>
-            <button type="button" onClick={onEnterNecroCity} disabled={!frontCleared} style={{
-              ...primaryButtonStyle,
-              ...(!frontCleared ? disabledButtonStyle : null),
-            }}>
-              廃都ネクロシティへ
-            </button>
-            <button
-              type="button"
-              disabled={!shipReady || leviathanHooked}
-              onClick={() => onStartScenario(departed ? "scenario20" : "scenario19")}
-              style={{
-                ...(shipReady && !leviathanHooked ? primaryButtonStyle : secondaryButtonStyle),
-                ...(!shipReady || leviathanHooked ? disabledButtonStyle : null),
-              }}
-            >
-              {leviathanHooked
-                ? "第21話 準備中"
-                : departed
-                  ? "第20話 リヴァイアサンを釣れ"
-                  : shipReady
-                    ? "湾中央へ向かう"
-                    : "湾の中心へ：船が必要"}
-            </button>
+            <span>{shipReady ? "造船完了：湾中央への航路が開かれた" : frontCleared ? "大陸MAPから廃都ネクロシティへ向かえます" : "船の必要性は未確認"}</span>
           </div>
         </section>
 
@@ -191,9 +207,6 @@ const missionBadgeStyle: CSSProperties = { display: "inline-flex", padding: "3px
 const missionTitleStyle: CSSProperties = { display: "block", fontSize: 14, fontWeight: 950 };
 const missionSubStyle: CSSProperties = { display: "block", marginTop: 4, color: "rgba(244,250,255,0.72)", fontSize: 12, fontWeight: 800 };
 const shipStatusStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", color: "rgba(244,250,255,0.86)", fontSize: 13, fontWeight: 900 };
-const actionsStyle: CSSProperties = { display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 };
 const baseButtonStyle: CSSProperties = { minHeight: 40, padding: "0 14px", borderRadius: 10, fontWeight: 950, cursor: "pointer" };
-const primaryButtonStyle: CSSProperties = { ...baseButtonStyle, border: "1px solid rgba(255, 220, 136, 0.66)", background: "linear-gradient(180deg, #ffd979, #b87624)", color: "#22160a" };
 const secondaryButtonStyle: CSSProperties = { ...baseButtonStyle, border: "1px solid rgba(214,238,255,0.24)", background: "rgba(255,255,255,0.08)", color: "#e8f8ff" };
-const disabledButtonStyle: CSSProperties = { opacity: 0.48, cursor: "not-allowed" };
 const rockelLineStyle: CSSProperties = { marginTop: 12, color: "#ffe0a3", fontSize: 13, fontWeight: 900, lineHeight: 1.6 };

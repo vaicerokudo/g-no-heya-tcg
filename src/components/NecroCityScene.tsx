@@ -10,7 +10,7 @@ import {
 } from "../game/blackNoiseBay/progress";
 
 type NecroCitySceneProps = {
-  onReturnBlackNoiseBay: () => void;
+  onReturnContinent: () => void;
 };
 
 type DistrictId = "entrance" | "plaza" | "market" | "clock" | "waterfront" | "residential" | "shipyard";
@@ -60,7 +60,7 @@ const KRUitz_IMAGES: Record<KruitzExpression, string> = {
 };
 
 const DISTRICTS: District[] = [
-  { id: "entrance", label: "入口", subLabel: "湾へ戻る", x: 50, y: 88 },
+  { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", x: 50, y: 88 },
   { id: "plaza", label: "中央広場", subLabel: "クロイツに相談", x: 50, y: 52 },
   { id: "market", label: "港湾市場区", subLabel: "帆布の手がかり", x: 23, y: 44 },
   { id: "clock", label: "時計塔周辺", subLabel: "舵輪と羅針盤", x: 72, y: 31 },
@@ -133,7 +133,7 @@ function getKruitzHint(partsSet: Set<ShipPartId>, flags: BlackNoiseBayEventFlag[
   return "部材は揃ったにゃ。造船区の造船所へ行くにゃ。";
 }
 
-export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
+export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   const [progress, setProgress] = useState(() => readShipProgress());
   const [activeDistrict, setActiveDistrict] = useState<DistrictId>("plaza");
   const [isAreaModalOpen, setIsAreaModalOpen] = useState(false);
@@ -198,7 +198,7 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
 
   const selectDistrict = (district: District) => {
     if (district.id === "entrance") {
-      onReturnBlackNoiseBay();
+      onReturnContinent();
       return;
     }
 
@@ -408,8 +408,8 @@ export function NecroCityScene({ onReturnBlackNoiseBay }: NecroCitySceneProps) {
             <h1 style={titleStyle}>廃都ネクロシティ</h1>
             <div style={subtitleStyle}>船の部材が眠る廃都</div>
           </div>
-          <button type="button" onClick={onReturnBlackNoiseBay} style={returnButtonStyle}>
-            ブラックノイズ湾へ戻る
+          <button type="button" onClick={onReturnContinent} style={returnButtonStyle}>
+            大陸MAPへ戻る
           </button>
         </header>
 
