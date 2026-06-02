@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import playerSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import reception7171 from "../assets/town/reception-7171.png";
-import { COMIC_SKIN_ID, TRAVEL_SKIN_ID, unlockSkin } from "../assets/skinUnlocks";
+import { COMIC_SKIN_ID, unlockSkin } from "../assets/skinUnlocks";
 import { addDeltaEventFlag, hasDeltaEventFlag } from "../game/delta/eventFlags";
 import type { ScenarioId } from "../game/scenario/scenarios";
 import type { UnitDef } from "../game/types";
@@ -38,7 +38,7 @@ type TownHotspot = {
 };
 
 type PassphraseUnlock = {
-  skinId: typeof COMIC_SKIN_ID | typeof TRAVEL_SKIN_ID;
+  skinId: typeof COMIC_SKIN_ID;
   unlockedMessage: string;
   alreadyUnlockedMessage: string;
 };
@@ -51,17 +51,10 @@ const PASSPHRASE_UNLOCKS: Record<string, PassphraseUnlock> = {
     alreadyUnlockedMessage:
       "\u305d\u308c\u306f\u3082\u3046\u89e3\u653e\u6e08\u307f\u306b\u3083\u3002\n\u4e0a\u306e\u30b9\u30ad\u30f3\u9078\u629e\u304b\u3089\u3001\u3044\u3064\u3067\u3082\u9078\u3079\u308b\u306b\u3083\u3002",
   },
-  "\u30a2\u30b9\u30c8\u30ea\u30a2": {
-    skinId: TRAVEL_SKIN_ID,
-    unlockedMessage:
-      "\u2026\u2026\u30a2\u30b9\u30c8\u30ea\u30a2\u3002\n\u305d\u306e\u540d\u3092\u77e5\u3063\u3066\u308b\u306a\u3089\u3001\u901a\u3057\u3066\u3082\u3044\u3044\u306b\u3083\u3002\n\u65c5\u88c5\u3001\u89e3\u653e\u3057\u3066\u304a\u304f\u306b\u3083\u3002\n\u4e0a\u306e\u30b9\u30ad\u30f3\u9078\u629e\u304b\u3089\u4f7f\u3048\u308b\u306b\u3083\u3002",
-    alreadyUnlockedMessage:
-      "\u30a2\u30b9\u30c8\u30ea\u30a2\u306e\u8a31\u53ef\u306f\u3001\u3082\u3046\u51fa\u3066\u308b\u306b\u3083\u3002\n\u65c5\u88c5\u306f\u3044\u3064\u3067\u3082\u9078\u3079\u308b\u306b\u3083\u3002",
-  },
 };
 const PASSWORD_DIALOG = {
   label: "合言葉を伝える",
-  text: "合言葉を言うにゃ。\n……間違えても怒らないにゃ。",
+  text: "合言葉はひとつだけにゃ。\nサウンドコミックを見た者だけが知ってるにゃ。",
 };
 const PLAYER_WIDTH = 68;
 const PLAYER_HEIGHT = 74;
@@ -174,8 +167,8 @@ const RECEPTION_DIALOG: Record<Exclude<ReceptionTopic, "password">, { label: str
 };
 const RECEPTION_CHOICES: ReceptionTopic[] = ["first", "table", "skin", "password"];
 const MYOUOU_ROOM_HINTS = [
-  "ふははは、よく来たのう。\nここは、少し先の道を覗く部屋じゃ。\n\n合言葉を探しておるなら、\n街の外と、物語の記録をよく見ることじゃな。",
-  "アストリアの名を知る者には、旅装が似合う。\n記録を追う者には、サウンドコミックの扉が開くじゃろう。",
+  "ふははは、よく来たのう。\nここは、少し先の道を覗く部屋じゃ。\n\nサウンドコミックの姿を望むなら、7171に合言葉を伝えるがよい。",
+  "旅の装いは、砂塵の荒野を越えた者に開かれる。\n闇の姿は、己の影と向き合う隔離区域の先にあるじゃろう。",
 ];
 
 function clamp(value: number, min: number, max: number) {

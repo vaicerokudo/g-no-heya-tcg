@@ -74,7 +74,7 @@ import {
   type Form,
   type Skin,
 } from "./assets/imagePaths";
-import { isSkinUnlocked, readUnlockedSkins } from "./assets/skinUnlocks";
+import { isSkinUnlocked, readUnlockedSkins, TRAVEL_SKIN_ID, unlockSkin } from "./assets/skinUnlocks";
 import { readClearedScenarios, writeClearedScenarios } from "./game/scenario/progress";
 import { addDeltaEventFlag, hasDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
@@ -824,6 +824,10 @@ export default function App() {
       }
       if (["scenario12", "scenario13", "scenario14", "scenario15"].includes(activeScenarioId)) {
         markWastelandScenarioCleared(activeScenarioId);
+        if (activeScenarioId === "scenario15") {
+          unlockSkin(TRAVEL_SKIN_ID);
+          setUnlockedSkins(readUnlockedSkins());
+        }
       }
       if (activeScenarioId === "scenario18") {
         addBlackNoiseBayEventFlag("black_noise_bay_front_cleared");

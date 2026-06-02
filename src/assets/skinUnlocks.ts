@@ -5,7 +5,7 @@ export const COMIC_SKIN_ID: Skin = "comic";
 export const TRAVEL_SKIN_ID: Skin = "travel";
 
 const KNOWN_SKINS = new Set<Skin>(["default", "dark", "travel", "comic"]);
-const ALWAYS_UNLOCKED_SKINS = new Set<Skin>(["default", "dark"]);
+const ALWAYS_UNLOCKED_SKINS = new Set<Skin>(["default"]);
 
 export function readUnlockedSkins(): Skin[] {
   if (typeof window === "undefined") return [];
