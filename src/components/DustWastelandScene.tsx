@@ -16,7 +16,7 @@ type WastelandNode = {
   requires?: ScenarioId;
 };
 
-const DUST_WASTELAND_BACKGROUND_URL = "/backgrounds/dust-wasteland-map.png";
+const DUST_WASTELAND_ROUTE_BACKGROUND_URL = "/backgrounds/dust-wasteland-route-map.png";
 
 const WASTELAND_NODES: WastelandNode[] = [
   { id: "scenario12", title: "第12話 荒野の入口", subtitle: "つつとやぶこの荒野調査開始", x: 24, y: 78 },
@@ -65,9 +65,10 @@ export function DustWastelandScene({ onReturnContinent, onStartScenario }: DustW
         </header>
 
         <div style={mapStyle}>
+          <div aria-hidden="true" style={routeAtmosphereStyle} />
           <svg viewBox="0 0 100 100" aria-hidden="true" style={routeLineStyle}>
-            <polyline points="24,78 72,56 28,34 74,18" fill="none" stroke="rgba(255,226,156,0.42)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
             <polyline points="24,78 72,56 28,34 74,18" fill="none" stroke="rgba(118,70,30,0.45)" strokeWidth="5.6" strokeLinecap="round" strokeLinejoin="round" />
+            <polyline points="24,78 72,56 28,34 74,18" fill="none" stroke="rgba(255,226,156,0.5)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
 
           {WASTELAND_NODES.map((node) => {
@@ -180,11 +181,21 @@ const mapStyle: CSSProperties = {
   borderRadius: 18,
   border: "1px solid rgba(255,220,150,0.26)",
   background:
-    `linear-gradient(180deg, rgba(32, 24, 14, 0.12), rgba(37, 20, 10, 0.5)), url(${DUST_WASTELAND_BACKGROUND_URL}), linear-gradient(180deg, #9c7449 0%, #6d4a2d 45%, #2a201c 100%)`,
+    `linear-gradient(180deg, rgba(30, 22, 15, 0.12), rgba(24, 15, 10, 0.46)), url(${DUST_WASTELAND_ROUTE_BACKGROUND_URL}), linear-gradient(180deg, #9c7449 0%, #6d4a2d 45%, #2a201c 100%)`,
   backgroundSize: "cover",
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
   boxShadow: "0 22px 60px rgba(0,0,0,0.5), inset 0 0 70px rgba(55,30,12,0.34)",
+};
+
+const routeAtmosphereStyle: CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  pointerEvents: "none",
+  zIndex: 1,
+  background:
+    "radial-gradient(circle at 72% 56%, rgba(255, 216, 122, 0.14), transparent 17%), radial-gradient(circle at 28% 34%, rgba(255, 236, 190, 0.10), transparent 18%), radial-gradient(circle at 74% 18%, rgba(66, 38, 24, 0.34), transparent 24%), linear-gradient(90deg, rgba(0,0,0,0.16), transparent 28%, transparent 72%, rgba(0,0,0,0.18))",
+  mixBlendMode: "multiply",
 };
 
 const routeLineStyle: CSSProperties = {
@@ -193,7 +204,7 @@ const routeLineStyle: CSSProperties = {
   width: "100%",
   height: "100%",
   pointerEvents: "none",
-  zIndex: 1,
+  zIndex: 2,
 };
 
 const nodeStyle: CSSProperties = {
@@ -210,7 +221,7 @@ const nodeStyle: CSSProperties = {
   boxShadow: "0 16px 30px rgba(0,0,0,0.36), 0 0 18px rgba(255, 194, 90, 0.16)",
   cursor: "pointer",
   textAlign: "left",
-  zIndex: 2,
+  zIndex: 3,
 };
 
 const nodeLockedStyle: CSSProperties = {
@@ -275,7 +286,7 @@ const dialogPanelStyle: CSSProperties = {
   border: "1px solid rgba(255, 227, 169, 0.34)",
   background: "linear-gradient(180deg, rgba(44, 29, 19, 0.88), rgba(21, 17, 16, 0.78))",
   boxShadow: "0 18px 38px rgba(0,0,0,0.34)",
-  zIndex: 3,
+  zIndex: 4,
 };
 
 const dialogSpeakerStyle: CSSProperties = {
