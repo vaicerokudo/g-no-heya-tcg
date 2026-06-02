@@ -853,6 +853,16 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     setScenarioSelectOpen(true);
   }
 
+  function handleScenarioSelectFromBattle() {
+    const returnScene = getScenarioReturnScene(activeScenarioId);
+    if (returnScene !== "astoria") {
+      returnFromScenario();
+      return;
+    }
+
+    openScenarioSelect();
+  }
+
   function retryActiveScenario() {
     if (!activeScenarioId) return;
     startScenario(activeScenarioId);
@@ -1530,7 +1540,7 @@ const reinforceSet = useMemo(() => {
         victory={scenarioDialogOpen ? null : victory}
         onRestart={gameMode === "scenario" ? returnFromScenario : resetGame}
         restartLabel={gameMode === "scenario" ? getScenarioReturnLabel() : undefined}
-        onScenarioSelect={gameMode === "scenario" && activeScenarioId ? openScenarioSelect : undefined}
+        onScenarioSelect={gameMode === "scenario" && activeScenarioId ? handleScenarioSelectFromBattle : undefined}
         onRetryScenario={gameMode === "scenario" && activeScenarioId ? retryActiveScenario : undefined}
         deltaClearRewardImageSrc={
           gameMode === "scenario" &&
