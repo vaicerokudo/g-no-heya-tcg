@@ -165,7 +165,7 @@ const sceneStyle: CSSProperties = {
   boxSizing: "border-box",
   color: "#edf7ff",
   background:
-    "radial-gradient(circle at 28% 18%, rgba(122, 198, 255, 0.14), transparent 28%), radial-gradient(circle at 72% 26%, rgba(178, 130, 255, 0.12), transparent 26%), linear-gradient(180deg, #151a23 0%, #12171c 48%, #080b10 100%)",
+    "linear-gradient(180deg, rgba(8, 12, 18, 0.28), rgba(4, 7, 11, 0.88)), radial-gradient(circle at 28% 18%, rgba(122, 198, 255, 0.14), transparent 28%), url('/backgrounds/necro-city-map.png') center top / cover no-repeat, linear-gradient(180deg, #151a23 0%, #12171c 48%, #080b10 100%)",
 };
 
 const shellStyle: CSSProperties = { width: "min(720px, 100%)", margin: "0 auto" };
@@ -174,13 +174,13 @@ const eyebrowStyle: CSSProperties = { color: "#a9d7ff", fontSize: 11, fontWeight
 const titleStyle: CSSProperties = { margin: "4px 0 0", color: "#f0f6ff", fontSize: 28, textShadow: "0 2px 14px rgba(0,0,0,0.58)" };
 const subtitleStyle: CSSProperties = { marginTop: 4, color: "rgba(237,247,255,0.72)", fontSize: 13, fontWeight: 850 };
 const returnButtonStyle: CSSProperties = { minHeight: 38, padding: "0 14px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(255,255,255,0.08)", color: "#edf7ff", fontWeight: 950, cursor: "pointer" };
-const mapStyle: CSSProperties = { position: "relative", height: "min(68vh, 560px)", minHeight: 420, overflow: "hidden", borderRadius: 16, border: "1px solid rgba(210,232,255,0.18)", background: "radial-gradient(circle at 50% 38%, rgba(121,135,144,0.24), transparent 30%), linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.46), inset 0 0 80px rgba(0,0,0,0.38)" };
-const fogLayerStyle: CSSProperties = { position: "absolute", inset: 0, background: "linear-gradient(115deg, transparent 0%, rgba(190,210,230,0.08) 36%, transparent 62%), radial-gradient(circle at 22% 74%, rgba(99,122,142,0.22), transparent 24%)", pointerEvents: "none" };
-const spotButtonStyle: CSSProperties = { position: "absolute", transform: "translate(-50%, -50%)", width: "min(34%, 180px)", minHeight: 58, padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.26)", background: "linear-gradient(180deg, rgba(35, 47, 58, 0.9), rgba(12, 16, 22, 0.84))", color: "#edf7ff", fontWeight: 950, cursor: "pointer", boxShadow: "0 12px 26px rgba(0,0,0,0.34)" };
+const mapStyle: CSSProperties = { position: "relative", height: "min(68vh, 560px)", minHeight: 420, overflow: "hidden", borderRadius: 16, border: "1px solid rgba(210,232,255,0.24)", background: "linear-gradient(180deg, rgba(8, 12, 18, 0.22), rgba(4, 7, 11, 0.5)), url('/backgrounds/necro-city-map.png') center / cover no-repeat, linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.5), inset 0 0 80px rgba(0,0,0,0.42)" };
+const fogLayerStyle: CSSProperties = { position: "absolute", inset: 0, background: "linear-gradient(115deg, transparent 0%, rgba(190,210,230,0.1) 36%, transparent 62%), radial-gradient(circle at 22% 74%, rgba(99,122,142,0.26), transparent 24%), linear-gradient(180deg, rgba(4,7,11,0.08), rgba(4,7,11,0.34))", pointerEvents: "none" };
+const spotButtonStyle: CSSProperties = { position: "absolute", transform: "translate(-50%, -50%)", width: "min(34%, 180px)", minHeight: 58, padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.32)", background: "linear-gradient(180deg, rgba(35, 47, 58, 0.94), rgba(12, 16, 22, 0.9))", color: "#edf7ff", fontWeight: 950, cursor: "pointer", boxShadow: "0 12px 26px rgba(0,0,0,0.44)" };
 const spotActiveStyle: CSSProperties = { borderColor: "rgba(255,224,163,0.62)", boxShadow: "0 0 18px rgba(255,224,163,0.15), 0 12px 26px rgba(0,0,0,0.34)" };
 const spotCollectedStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.6)" };
 const spotBadgeStyle: CSSProperties = { display: "inline-flex", marginRight: 6, padding: "2px 6px", borderRadius: 999, background: "rgba(169,215,255,0.16)", color: "#cfeaff", fontSize: 10 };
-const infoPanelStyle: CSSProperties = { marginTop: 12, padding: 14, borderRadius: 14, border: "1px solid rgba(210,232,255,0.16)", background: "rgba(7, 10, 15, 0.72)", boxShadow: "0 18px 42px rgba(0,0,0,0.34)" };
+const infoPanelStyle: CSSProperties = { marginTop: 12, padding: 14, borderRadius: 14, border: "1px solid rgba(210,232,255,0.2)", background: "rgba(7, 10, 15, 0.82)", boxShadow: "0 18px 42px rgba(0,0,0,0.42)", backdropFilter: "blur(2px)" };
 const infoTitleStyle: CSSProperties = { color: "#ffe0a3", fontSize: 14, fontWeight: 950, marginBottom: 8 };
 const messageStyle: CSSProperties = { display: "grid", gap: 7, color: "rgba(237,247,255,0.88)", fontSize: 13, lineHeight: 1.6, fontWeight: 850 };
 const buildButtonStyle: CSSProperties = { justifySelf: "start", minHeight: 38, padding: "0 14px", borderRadius: 10, border: "1px solid rgba(255,220,136,0.66)", background: "linear-gradient(180deg, #ffd979, #b87624)", color: "#22160a", fontWeight: 950, cursor: "pointer" };

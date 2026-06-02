@@ -143,7 +143,7 @@ const sceneStyle: CSSProperties = {
   boxSizing: "border-box",
   color: "#f3f7ff",
   background:
-    "radial-gradient(circle at 50% 32%, rgba(37, 95, 120, 0.24), transparent 34%), radial-gradient(circle at 18% 12%, rgba(93, 178, 255, 0.16), transparent 28%), linear-gradient(180deg, #101925 0%, #10202a 48%, #080b12 100%)",
+    "linear-gradient(180deg, rgba(4, 10, 18, 0.34), rgba(3, 6, 12, 0.9)), radial-gradient(circle at 50% 32%, rgba(37, 95, 120, 0.24), transparent 34%), url('/backgrounds/black-noise-bay-map.png') center top / cover no-repeat, linear-gradient(180deg, #101925 0%, #10202a 48%, #080b12 100%)",
 };
 
 const shellStyle: CSSProperties = { width: "min(720px, 100%)", margin: "0 auto" };
@@ -151,11 +151,11 @@ const headerStyle: CSSProperties = { display: "flex", justifyContent: "space-bet
 const eyebrowStyle: CSSProperties = { color: "#8fd7ff", fontSize: 11, fontWeight: 950 };
 const titleStyle: CSSProperties = { margin: "4px 0 0", color: "#e8f8ff", fontSize: 28, textShadow: "0 2px 14px rgba(0,0,0,0.58)" };
 const subtitleStyle: CSSProperties = { marginTop: 4, color: "rgba(214, 238, 255, 0.78)", fontSize: 13, fontWeight: 850 };
-const heroPanelStyle: CSSProperties = { padding: 16, borderRadius: 14, border: "1px solid rgba(143,215,255,0.24)", background: "linear-gradient(180deg, rgba(14, 38, 54, 0.88), rgba(8, 12, 19, 0.84))", boxShadow: "0 18px 46px rgba(0,0,0,0.42)" };
+const heroPanelStyle: CSSProperties = { padding: 16, borderRadius: 14, border: "1px solid rgba(143,215,255,0.3)", background: "linear-gradient(180deg, rgba(14, 38, 54, 0.92), rgba(8, 12, 19, 0.88))", boxShadow: "0 18px 46px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)", backdropFilter: "blur(2px)" };
 const panelTitleStyle: CSSProperties = { color: "#bdeaff", fontSize: 12, fontWeight: 950 };
 const leadStyle: CSSProperties = { margin: "8px 0 0", color: "rgba(244,250,255,0.88)", fontSize: 14, lineHeight: 1.7, fontWeight: 800 };
 const statusBoxStyle: CSSProperties = { display: "grid", gap: 6, marginTop: 14, padding: 12, borderRadius: 10, background: "rgba(0,0,0,0.24)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 13, lineHeight: 1.55 };
-const sectionStyle: CSSProperties = { marginTop: 12, padding: 14, borderRadius: 14, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(5, 9, 15, 0.62)" };
+const sectionStyle: CSSProperties = { marginTop: 12, padding: 14, borderRadius: 14, border: "1px solid rgba(255,255,255,0.14)", background: "rgba(5, 9, 15, 0.76)", boxShadow: "0 14px 32px rgba(0,0,0,0.28)", backdropFilter: "blur(2px)" };
 const sectionHeaderStyle: CSSProperties = { color: "#ffe0a3", fontSize: 13, fontWeight: 950, marginBottom: 10 };
 const missionGridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 10 };
 const missionButtonStyle: CSSProperties = { minHeight: 92, padding: 12, borderRadius: 10, border: "1px solid rgba(143,215,255,0.28)", background: "linear-gradient(180deg, rgba(22, 52, 70, 0.88), rgba(10, 16, 24, 0.84))", color: "#f3f7ff", textAlign: "left", cursor: "pointer" };

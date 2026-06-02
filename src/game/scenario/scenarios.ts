@@ -616,7 +616,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第16話 黒い潮",
     stageName: "ブラックノイズ湾・湾岸",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
     returnScene: "blackNoiseBay",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC16-USHIMARU" },
@@ -655,7 +655,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第17話 漂着する影",
     stageName: "ブラックノイズ湾・漂着地",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
     returnScene: "blackNoiseBay",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC17-USHIMARU" },
@@ -694,7 +694,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第18話 湾の中心へ",
     stageName: "ブラックノイズ湾・中心遠望",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
     returnScene: "blackNoiseBay",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC18-USHIMARU" },
