@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   getIsolationProgress,
+  hasClearedAllIsolationDuels,
   type IsolationDuelMemberId,
 } from "../game/isolation/progress";
 import type { ScenarioId } from "../game/scenario/scenarios";
@@ -17,6 +18,12 @@ type DuelMission = {
   scenarioId?: ScenarioId;
 };
 
+type FinalMission = {
+  id: "finalBattle";
+  label: string;
+  subLabel: string;
+};
+
 const DUEL_MISSIONS: DuelMission[] = [
   { memberId: "socho", label: "総長", subLabel: "影との一騎打ち" },
   { memberId: "tsutsu", label: "つつ", subLabel: "影との一騎打ち" },
@@ -31,10 +38,18 @@ const DUEL_MISSIONS: DuelMission[] = [
   { memberId: "player", label: "Player", subLabel: "影との一騎打ち" },
 ];
 
+const FINAL_MISSION: FinalMission = {
+  id: "finalBattle",
+  label: "最終決戦",
+  subLabel: "全員の影を越えた先",
+};
+
 export function IsolationZoneScene({ onReturnContinent, onStartScenario }: IsolationZoneSceneProps) {
   const [progress, setProgress] = useState(() => getIsolationProgress());
   const clearedSet = useMemo(() => new Set(progress.clearedDuels), [progress.clearedDuels]);
   const clearedCount = progress.clearedDuels.length;
+  const finalBattleUnlocked = hasClearedAllIsolationDuels(progress);
+  const finalBattleCleared = progress.finalBattleCleared;
 
   useEffect(() => {
     const refresh = () => setProgress(getIsolationProgress());
@@ -101,11 +116,27 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
                 </button>
               );
             })}
+            <button
+              type="button"
+              disabled
+              title="最終決戦：準備中"
+              style={{
+                ...missionButtonStyle,
+                ...disabledMissionStyle,
+                ...(finalBattleCleared ? clearedMissionStyle : null),
+              }}
+            >
+              <span style={missionBadgeStyle(finalBattleCleared, finalBattleUnlocked)}>
+                {finalBattleCleared ? "CLEAR" : finalBattleUnlocked ? "NEXT" : "LOCK"}
+              </span>
+              <span style={missionTitleStyle}>{FINAL_MISSION.label}</span>
+              <span style={missionSubStyle}>{FINAL_MISSION.subLabel}</span>
+            </button>
           </div>
         </section>
 
         <div style={noteStyle}>
-          闇落ちスキンは、全員分の影を越えた時に解放される予定です。現在は「うしまる」の動作確認用ミッションのみ実装済みです。
+          闇落ちスキンは、全員分の影を越えた後に開く「最終決戦」を制した時に解放される予定です。現在は「うしまる」の動作確認用ミッションのみ実装済みです。
         </div>
       </div>
     </div>

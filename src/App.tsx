@@ -81,10 +81,7 @@ import { addDeltaEventFlag, hasDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
 import { markWastelandScenarioCleared } from "./game/wasteland/progress";
 import { addBlackNoiseBayEventFlag, addShipPart } from "./game/blackNoiseBay/progress";
-import {
-  markIsolationDuelCleared,
-  unlockDarkSkinIfIsolationComplete,
-} from "./game/isolation/progress";
+import { markIsolationDuelCleared } from "./game/isolation/progress";
 import {
   markHiddenHintFlag,
   readHiddenHintFlags,
@@ -850,10 +847,7 @@ export default function App() {
         addBlackNoiseBayEventFlag("black_noise_bay_chapter_cleared");
       }
       if (activeScenarioId === "scenario22") {
-        const isolationProgress = markIsolationDuelCleared("ushimaru");
-        if (unlockDarkSkinIfIsolationComplete(isolationProgress)) {
-          setUnlockedSkins(readUnlockedSkins());
-        }
+        markIsolationDuelCleared("ushimaru");
       }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
@@ -1636,7 +1630,7 @@ const reinforceSet = useMemo(() => {
     return (
       <IsolationZoneScene
         onReturnContinent={() => setScene("continent")}
-        onStartScenario={startScenario}
+        onStartScenario={handleScenarioSelectStart}
       />
     );
   }

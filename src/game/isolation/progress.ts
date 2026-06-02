@@ -20,6 +20,7 @@ export type IsolationDuelMemberId = (typeof ISOLATION_DUEL_MEMBER_IDS)[number];
 
 export type IsolationProgress = {
   clearedDuels: IsolationDuelMemberId[];
+  finalBattleCleared: boolean;
 };
 
 function isIsolationDuelMemberId(value: unknown): value is IsolationDuelMemberId {
@@ -27,25 +28,26 @@ function isIsolationDuelMemberId(value: unknown): value is IsolationDuelMemberId
 }
 
 function normalizeIsolationProgress(value: unknown): IsolationProgress {
-  if (!value || typeof value !== "object") return { clearedDuels: [] };
+  if (!value || typeof value !== "object") return { clearedDuels: [], finalBattleCleared: false };
 
   const raw = value as Partial<Record<keyof IsolationProgress, unknown>>;
   const clearedDuels = Array.isArray(raw.clearedDuels)
     ? Array.from(new Set(raw.clearedDuels.filter(isIsolationDuelMemberId)))
     : [];
+  const finalBattleCleared = raw.finalBattleCleared === true;
 
-  return { clearedDuels };
+  return { clearedDuels, finalBattleCleared };
 }
 
 export function getIsolationProgress(): IsolationProgress {
-  if (typeof window === "undefined") return { clearedDuels: [] };
+  if (typeof window === "undefined") return { clearedDuels: [], finalBattleCleared: false };
 
   try {
     const raw = window.localStorage.getItem(ISOLATION_PROGRESS_STORAGE_KEY);
-    if (!raw) return { clearedDuels: [] };
+    if (!raw) return { clearedDuels: [], finalBattleCleared: false };
     return normalizeIsolationProgress(JSON.parse(raw));
   } catch {
-    return { clearedDuels: [] };
+    return { clearedDuels: [], finalBattleCleared: false };
   }
 }
 
@@ -68,15 +70,25 @@ export function markIsolationDuelCleared(memberId: IsolationDuelMemberId): Isola
   const current = getIsolationProgress();
   const next = normalizeIsolationProgress({
     clearedDuels: [...current.clearedDuels, memberId],
+    finalBattleCleared: current.finalBattleCleared,
   });
 
   writeIsolationProgress(next);
   return next;
 }
 
-export function unlockDarkSkinIfIsolationComplete(progress = getIsolationProgress()) {
-  if (!hasClearedAllIsolationDuels(progress)) return false;
+export function hasClearedFinalIsolationBattle(progress = getIsolationProgress()): boolean {
+  return progress.finalBattleCleared;
+}
 
+export function markFinalIsolationBattleCleared(): IsolationProgress {
+  const current = getIsolationProgress();
+  const next = normalizeIsolationProgress({
+    clearedDuels: current.clearedDuels,
+    finalBattleCleared: true,
+  });
+
+  writeIsolationProgress(next);
   unlockSkin(DARK_SKIN_ID);
-  return true;
+  return next;
 }
