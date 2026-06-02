@@ -328,6 +328,19 @@ export function DeltaMapScene({ onReturnContinent, onStartScenario, clearedScena
                     {scenario10Unlocked ? "開始" : "LOCK"}
                   </button>
                 </div>
+                {deltaClearComplete ? (
+                  <div style={scenarioEntryStyle}>
+                    <div>
+                      <div style={scenarioEntryTitleStyle}>
+                        第11話 ブラックノイズ <span style={scenarioEntryBadgeStyle}>BOSS</span>
+                      </div>
+                      <div style={scenarioEntryTextStyle}>ブラックノイズ戦の記録再生。クリア後も再戦できます。</div>
+                    </div>
+                    <button type="button" onClick={() => onStartScenario("scenario11")} style={scenarioStartButtonStyle}>
+                      再戦
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ) : null}
             {activeArea === "archive" ? (
@@ -900,6 +913,22 @@ const scenarioEntryTitleStyle: CSSProperties = {
   fontSize: 15,
   lineHeight: 1.2,
   fontWeight: 950,
+};
+
+const scenarioEntryBadgeStyle: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: 17,
+  marginLeft: 6,
+  padding: "2px 7px",
+  borderRadius: 999,
+  border: "1px solid rgba(127,255,193,0.68)",
+  background: "rgba(20,76,56,0.72)",
+  color: "#baffdf",
+  fontSize: 10,
+  fontWeight: 950,
+  lineHeight: 1,
+  verticalAlign: "middle",
 };
 
 const scenarioEntryTextStyle: CSSProperties = {
