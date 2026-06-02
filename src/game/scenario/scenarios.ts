@@ -24,6 +24,16 @@ export type ScenarioId =
   | "scenario20"
   | "scenario21"
   | "scenario22"
+  | "scenario23"
+  | "scenario24"
+  | "scenario25"
+  | "scenario26"
+  | "scenario27"
+  | "scenario28"
+  | "scenario29"
+  | "scenario30"
+  | "scenario31"
+  | "scenario32"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
@@ -62,6 +72,48 @@ export type ScenarioConfig = {
 };
 
 export const SCENARIO1_ID: ScenarioId = "scenario1";
+
+function makeIsolationDuelScenario(params: {
+  id: ScenarioId;
+  title: string;
+  stageName: string;
+  allyUnitId: string;
+  darkUnitId: string;
+  allyName: string;
+  darkName: string;
+  intro: string[];
+  victory: string[];
+  defeat?: string[];
+}): ScenarioConfig {
+  return {
+    id: params.id,
+    title: params.title,
+    stageName: params.stageName,
+    boardSizeMode: "advanced11",
+    scenarioType: "isolationDuel",
+    backgroundUrl: "/backgrounds/scenario-isolation-zone.png",
+    returnScene: "isolationZone",
+    placements: [
+      { unitId: params.allyUnitId, side: "south", r: 10, c: 5, instanceId: `${params.id}-ALLY` },
+      { unitId: params.darkUnitId, side: "north", r: 0, c: 5, instanceId: `${params.id}-DARK` },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: params.allyName, text: params.intro[0] },
+        { speaker: params.darkName, text: params.intro[1] },
+        { speaker: params.allyName, text: params.intro[2] },
+      ],
+      victory: [
+        { speaker: params.allyName, text: params.victory[0] },
+        { speaker: params.darkName, text: params.victory[1] },
+      ],
+      defeat: [
+        { speaker: params.darkName, text: params.defeat?.[0] ?? "まだ、影を越えられていない。" },
+        { speaker: params.allyName, text: params.defeat?.[1] ?? "もう一度、向き合う。" },
+      ],
+    },
+  };
+}
 
 export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
   scenario1: {
@@ -892,6 +944,156 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       ],
     },
   },
+  scenario23: makeIsolationDuelScenario({
+    id: "scenario23",
+    title: "第23話 影の総長",
+    stageName: "隔離区域・総長の影",
+    allyUnitId: "SOCHO",
+    darkUnitId: "DARK_SOCHO",
+    allyName: "総長",
+    darkName: "闇落ち総長",
+    intro: [
+      "……これが、自分の影ですね。OKです、向き合います。",
+      "人を導くふりをして、迷いを隠してきただけでしょう。",
+      "迷いがあるから、確認して進むんです。ここで止まりません。",
+    ],
+    victory: ["これも、自分の一部なんですね。受け止めて進みます。", "……ならば、先へ行きなさい。"],
+  }),
+  scenario24: makeIsolationDuelScenario({
+    id: "scenario24",
+    title: "第24話 影のつつ",
+    stageName: "隔離区域・つつの影",
+    allyUnitId: "TSUTSU",
+    darkUnitId: "DARK_TSUTSU",
+    allyName: "つつ",
+    darkName: "闇落ちつつ",
+    intro: [
+      "しょうがねぇなぁ……自分の影まで面倒見ろってか。",
+      "読めてるふりをして、外した時が怖いだけだろ。",
+      "怖くても読む。外したら、次を考える。それだけだ。",
+    ],
+    victory: ["面倒な影だったな。けど、置いてはいかねぇよ。", "……その調子で、先も読んでみろ。"],
+  }),
+  scenario25: makeIsolationDuelScenario({
+    id: "scenario25",
+    title: "第25話 影のROKUDO",
+    stageName: "隔離区域・ROKUDOの影",
+    allyUnitId: "ROKUDO",
+    darkUnitId: "DARK_ROKUDO",
+    allyName: "ROKUDO",
+    darkName: "闇落ちROKUDO",
+    intro: [
+      "大丈夫？ ……いえ、自分に聞くのも変ですね。",
+      "大丈夫じゃないことを、ずっと分かっていたはずです。",
+      "それでも、分かっているなら向き合えます。",
+    ],
+    victory: ["弱さも気配のひとつです。見落とさずに進みます。", "……見えているなら、もう行けますね。"],
+  }),
+  scenario26: makeIsolationDuelScenario({
+    id: "scenario26",
+    title: "第26話 影の7171",
+    stageName: "隔離区域・7171の影",
+    allyUnitId: "7171",
+    darkUnitId: "DARK_7171",
+    allyName: "7171",
+    darkName: "闇落ち7171",
+    intro: [
+      "自分の影にゃ。見た目より面倒そうにゃ。",
+      "平気な顔で、いつも距離を取ってるだけにゃ。",
+      "距離を取るのも手にゃ。でも今日は、近づいて見るにゃ。",
+    ],
+    victory: ["これも7171にゃ。忘れずに持っていくにゃ。", "……勝手にするにゃ。"],
+  }),
+  scenario27: makeIsolationDuelScenario({
+    id: "scenario27",
+    title: "第27話 影の明王",
+    stageName: "隔離区域・明王の影",
+    allyUnitId: "MYOUOU",
+    darkUnitId: "DARK_MYOUOU",
+    allyName: "明王",
+    darkName: "闇落ち明王",
+    intro: [
+      "ふむ。己の影とは、なかなか趣味が悪いのう。",
+      "強き者の顔をして、失うことを恐れておるだけじゃ。",
+      "恐れもまた火種じゃ。ならば、焼き払わず抱えてみせよう。",
+    ],
+    victory: ["影よ、見事じゃ。わしもまだ進めるようじゃな。", "……ならば行くがよい。"],
+  }),
+  scenario28: makeIsolationDuelScenario({
+    id: "scenario28",
+    title: "第28話 影のhibiki",
+    stageName: "隔離区域・hibikiの影",
+    allyUnitId: "HIBIKI",
+    darkUnitId: "DARK_HIBIKI",
+    allyName: "hibiki",
+    darkName: "闇落ちhibiki",
+    intro: [
+      "ふん。俺の影だと？ 当然、強いに決まっている。",
+      "強がっていれば、震えている手を見られずに済むからな。",
+      "う、うるさい！ 震えていても盾は構えられる！",
+    ],
+    victory: ["怖くないとは言わん。だが、俺は前に立つ。", "……それなら、守ってみせろ。"],
+  }),
+  scenario29: makeIsolationDuelScenario({
+    id: "scenario29",
+    title: "第29話 影のDeli",
+    stageName: "隔離区域・Deliの影",
+    allyUnitId: "DELI",
+    darkUnitId: "DARK_DELI",
+    allyName: "Deli",
+    darkName: "闇落ちDeli",
+    intro: [
+      "……自分の影まで、抱え込んでいたんですね。",
+      "誰にも言わず、全部ひとりで済ませようとしただけだ。",
+      "それでも、ここで向き合います。ひとりで終わらせないために。",
+    ],
+    victory: ["弱さを見たから、少しだけ軽くなりました。", "……なら、もう隠すな。"],
+  }),
+  scenario30: makeIsolationDuelScenario({
+    id: "scenario30",
+    title: "第30話 影のやぶこ",
+    stageName: "隔離区域・やぶこの影",
+    allyUnitId: "YABUKO_NORMAL",
+    darkUnitId: "DARK_YABUKO",
+    allyName: "やぶこ",
+    darkName: "闇落ちやぶこ",
+    intro: [
+      "これが、やぶこの影なの？ なんだか近そうなの。",
+      "近い道ばかり選んで、大事なものを見落としてきたの。",
+      "じゃあ、ちゃんと見るの。近くても、遠くても。",
+    ],
+    victory: ["これもやぶこなの。いっしょに行くの。", "……迷子にならないなら、行くの。"],
+  }),
+  scenario31: makeIsolationDuelScenario({
+    id: "scenario31",
+    title: "第31話 影のROCKEL",
+    stageName: "隔離区域・ROCKELの影",
+    allyUnitId: "ROCKEL",
+    darkUnitId: "DARK_ROCKEL",
+    allyName: "ROCKEL",
+    darkName: "闇落ちROCKEL",
+    intro: [
+      "影でもなんでも、正面から行くっす！",
+      "壊せば済むって思ってるから、守りたいものまで壊すっす。",
+      "それは違うっす。壊すためじゃなく、支えるために振るうっす！",
+    ],
+    victory: ["力の使い方、忘れないっす。", "……なら、その腕で支えるっす。"],
+  }),
+  scenario32: makeIsolationDuelScenario({
+    id: "scenario32",
+    title: "第32話 影のPlayer",
+    stageName: "隔離区域・Playerの影",
+    allyUnitId: "PLAYER",
+    darkUnitId: "DARK_PLAYER",
+    allyName: "Player",
+    darkName: "闇落ちPlayer",
+    intro: [
+      "かっこいい・・。でも、これが自分の影なんだ。",
+      "見ているだけなら、傷つかずに済むと思っていた。",
+      "もう見ているだけじゃない。ここで向き合う。",
+    ],
+    victory: ["これも、自分の一部なんだな。", "……進め。次は自分で選べ。"],
+  }),
   scenario_plaza_monten: {
     id: "scenario_plaza_monten",
     title: "Monten Trial",

@@ -242,17 +242,31 @@ export const LEVIATHAN_UNIT_DEF: UnitDef = {
   },
 };
 
-export const DARK_USHIMARU_UNIT_DEF: UnitDef = {
-  id: "DARK_USHIMARU",
-  name: "闇落ちうしまる",
-  enemyOnly: true,
-  hiddenFromCatalog: true,
-  base: {
-    atk: 3,
-    hp: 8,
-    movePattern: { type: "orthogonal", range: 2, diagonal: false, canPassThroughUnits: false },
-  },
-};
+function createDarkDuelUnitDef(id: string, name: string, hp: number, atk: number, move: number): UnitDef {
+  return {
+    id,
+    name,
+    enemyOnly: true,
+    hiddenFromCatalog: true,
+    base: {
+      atk,
+      hp,
+      movePattern: { type: "orthogonal", range: move, diagonal: false, canPassThroughUnits: false },
+    },
+  };
+}
+
+export const DARK_SOCHO_UNIT_DEF = createDarkDuelUnitDef("DARK_SOCHO", "闇落ち総長", 6, 4, 2);
+export const DARK_TSUTSU_UNIT_DEF = createDarkDuelUnitDef("DARK_TSUTSU", "闇落ちつつ", 6, 3, 2);
+export const DARK_ROKUDO_UNIT_DEF = createDarkDuelUnitDef("DARK_ROKUDO", "闇落ちROKUDO", 5, 5, 2);
+export const DARK_7171_UNIT_DEF = createDarkDuelUnitDef("DARK_7171", "闇落ち7171", 6, 3, 2);
+export const DARK_MYOUOU_UNIT_DEF = createDarkDuelUnitDef("DARK_MYOUOU", "闇落ち明王", 8, 4, 1);
+export const DARK_HIBIKI_UNIT_DEF = createDarkDuelUnitDef("DARK_HIBIKI", "闇落ちhibiki", 8, 3, 1);
+export const DARK_USHIMARU_UNIT_DEF = createDarkDuelUnitDef("DARK_USHIMARU", "闇落ちうしまる", 8, 3, 2);
+export const DARK_DELI_UNIT_DEF = createDarkDuelUnitDef("DARK_DELI", "闇落ちDeli", 6, 3, 2);
+export const DARK_YABUKO_UNIT_DEF = createDarkDuelUnitDef("DARK_YABUKO", "闇落ちやぶこ", 8, 4, 1);
+export const DARK_ROCKEL_UNIT_DEF = createDarkDuelUnitDef("DARK_ROCKEL", "闇落ちROCKEL", 8, 5, 1);
+export const DARK_PLAYER_UNIT_DEF = createDarkDuelUnitDef("DARK_PLAYER", "闇落ちPlayer", 6, 3, 2);
 
 export const scenarioEnemyUnits: UnitDef[] = [
   BOAR_UNIT_DEF,
@@ -274,7 +288,17 @@ export const scenarioEnemyUnits: UnitDef[] = [
   KRAKEN_UNIT_DEF,
   MIST_LEVIATHAN_UNIT_DEF,
   LEVIATHAN_UNIT_DEF,
+  DARK_SOCHO_UNIT_DEF,
+  DARK_TSUTSU_UNIT_DEF,
+  DARK_ROKUDO_UNIT_DEF,
+  DARK_7171_UNIT_DEF,
+  DARK_MYOUOU_UNIT_DEF,
+  DARK_HIBIKI_UNIT_DEF,
   DARK_USHIMARU_UNIT_DEF,
+  DARK_DELI_UNIT_DEF,
+  DARK_YABUKO_UNIT_DEF,
+  DARK_ROCKEL_UNIT_DEF,
+  DARK_PLAYER_UNIT_DEF,
 ];
 
 export function getScenarioEnemyUnit(unitId: string) {

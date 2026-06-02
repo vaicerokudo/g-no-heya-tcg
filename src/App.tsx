@@ -81,7 +81,7 @@ import { addDeltaEventFlag, hasDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
 import { markWastelandScenarioCleared } from "./game/wasteland/progress";
 import { addBlackNoiseBayEventFlag, addShipPart } from "./game/blackNoiseBay/progress";
-import { markIsolationDuelCleared } from "./game/isolation/progress";
+import { markIsolationDuelCleared, type IsolationDuelMemberId } from "./game/isolation/progress";
 import {
   markHiddenHintFlag,
   readHiddenHintFlags,
@@ -136,6 +136,20 @@ type Scene =
   | "town"
   | "tcg";
 type BoardPreviewMode = "move" | "attack";
+
+const ISOLATION_SCENARIO_DUEL_IDS: Partial<Record<ScenarioId, IsolationDuelMemberId>> = {
+  scenario22: "ushimaru",
+  scenario23: "socho",
+  scenario24: "tsutsu",
+  scenario25: "rokudo",
+  scenario26: "7171",
+  scenario27: "myouou",
+  scenario28: "hibiki",
+  scenario29: "deli",
+  scenario30: "yabuko",
+  scenario31: "rockel",
+  scenario32: "player",
+};
 type SkillImpactFxEvent = {
   id: string;
   skillId: SkillId;
@@ -846,8 +860,9 @@ export default function App() {
       if (activeScenarioId === "scenario21") {
         addBlackNoiseBayEventFlag("black_noise_bay_chapter_cleared");
       }
-      if (activeScenarioId === "scenario22") {
-        markIsolationDuelCleared("ushimaru");
+      const isolationDuelId = ISOLATION_SCENARIO_DUEL_IDS[activeScenarioId];
+      if (isolationDuelId) {
+        markIsolationDuelCleared(isolationDuelId);
       }
       if (activeScenarioId === "scenario_plaza_monten") {
         setHiddenHintFlags(markHiddenHintFlag("monten_defeated"));
@@ -1505,6 +1520,7 @@ const reinforceSet = useMemo(() => {
   }
 
   function getVisualUnitIdForImage(unitId: string) {
+    if (unitId === "DARK_YABUKO") return "YABUKO_NORMAL";
     if (unitId.startsWith("DARK_")) return unitId.slice("DARK_".length);
     return unitId;
   }

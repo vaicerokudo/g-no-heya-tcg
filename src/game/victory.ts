@@ -5,6 +5,20 @@ import type { ScenarioId } from "./scenario/scenarios";
 
 export type Victory = { winner: Side; detail: string };
 
+const ISOLATION_DUEL_MATCHUPS: Partial<Record<ScenarioId, { allyUnitId: string; darkUnitId: string }>> = {
+  scenario22: { allyUnitId: "USHIMARU", darkUnitId: "DARK_USHIMARU" },
+  scenario23: { allyUnitId: "SOCHO", darkUnitId: "DARK_SOCHO" },
+  scenario24: { allyUnitId: "TSUTSU", darkUnitId: "DARK_TSUTSU" },
+  scenario25: { allyUnitId: "ROKUDO", darkUnitId: "DARK_ROKUDO" },
+  scenario26: { allyUnitId: "7171", darkUnitId: "DARK_7171" },
+  scenario27: { allyUnitId: "MYOUOU", darkUnitId: "DARK_MYOUOU" },
+  scenario28: { allyUnitId: "HIBIKI", darkUnitId: "DARK_HIBIKI" },
+  scenario29: { allyUnitId: "DELI", darkUnitId: "DARK_DELI" },
+  scenario30: { allyUnitId: "YABUKO_NORMAL", darkUnitId: "DARK_YABUKO" },
+  scenario31: { allyUnitId: "ROCKEL", darkUnitId: "DARK_ROCKEL" },
+  scenario32: { allyUnitId: "PLAYER", darkUnitId: "DARK_PLAYER" },
+};
+
 export function checkVictory(
   rows: number,
   cols: number,
@@ -97,15 +111,16 @@ export function checkScenarioVictory(
     return null;
   }
 
-  if (scenarioId === "scenario22") {
-    const darkUshimaruAlive = instances.some((u) => u.unitId === "DARK_USHIMARU" && u.side === "north");
-    const ushimaruAlive = instances.some((u) => u.unitId === "USHIMARU" && u.side === "south");
+  const isolationDuel = ISOLATION_DUEL_MATCHUPS[scenarioId];
+  if (isolationDuel) {
+    const darkAlive = instances.some((u) => u.unitId === isolationDuel.darkUnitId && u.side === "north");
+    const allyAlive = instances.some((u) => u.unitId === isolationDuel.allyUnitId && u.side === "south");
 
-    if (!ushimaruAlive) {
-      return { winner: "north", detail: "Scenario 22 failed: USHIMARU was defeated by his shadow." };
+    if (!allyAlive) {
+      return { winner: "north", detail: `${scenarioId} failed: the isolation duel was lost.` };
     }
-    if (!darkUshimaruAlive) {
-      return { winner: "south", detail: "Scenario 22 clear: DARK_USHIMARU was defeated." };
+    if (!darkAlive) {
+      return { winner: "south", detail: `${scenarioId} clear: the shadow was defeated.` };
     }
 
     return null;

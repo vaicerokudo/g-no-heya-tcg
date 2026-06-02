@@ -25,17 +25,17 @@ type FinalMission = {
 };
 
 const DUEL_MISSIONS: DuelMission[] = [
-  { memberId: "socho", label: "総長", subLabel: "影との一騎打ち" },
-  { memberId: "tsutsu", label: "つつ", subLabel: "影との一騎打ち" },
-  { memberId: "rokudo", label: "ROKUDO", subLabel: "影との一騎打ち" },
-  { memberId: "7171", label: "7171", subLabel: "影との一騎打ち" },
-  { memberId: "myouou", label: "明王", subLabel: "影との一騎打ち" },
-  { memberId: "hibiki", label: "hibiki", subLabel: "影との一騎打ち" },
+  { memberId: "socho", label: "総長", subLabel: "第23話 影の総長", scenarioId: "scenario23" },
+  { memberId: "tsutsu", label: "つつ", subLabel: "第24話 影のつつ", scenarioId: "scenario24" },
+  { memberId: "rokudo", label: "ROKUDO", subLabel: "第25話 影のROKUDO", scenarioId: "scenario25" },
+  { memberId: "7171", label: "7171", subLabel: "第26話 影の7171", scenarioId: "scenario26" },
+  { memberId: "myouou", label: "明王", subLabel: "第27話 影の明王", scenarioId: "scenario27" },
+  { memberId: "hibiki", label: "hibiki", subLabel: "第28話 影のhibiki", scenarioId: "scenario28" },
   { memberId: "ushimaru", label: "うしまる", subLabel: "第22話 影のうしまる", scenarioId: "scenario22" },
-  { memberId: "deli", label: "Deli", subLabel: "影との一騎打ち" },
-  { memberId: "yabuko", label: "やぶこ", subLabel: "影との一騎打ち" },
-  { memberId: "rockel", label: "ROCKEL", subLabel: "影との一騎打ち" },
-  { memberId: "player", label: "Player", subLabel: "影との一騎打ち" },
+  { memberId: "deli", label: "Deli", subLabel: "第29話 影のDeli", scenarioId: "scenario29" },
+  { memberId: "yabuko", label: "やぶこ", subLabel: "第30話 影のやぶこ", scenarioId: "scenario30" },
+  { memberId: "rockel", label: "ROCKEL", subLabel: "第31話 影のROCKEL", scenarioId: "scenario31" },
+  { memberId: "player", label: "Player", subLabel: "第32話 影のPlayer", scenarioId: "scenario32" },
 ];
 
 const FINAL_MISSION: FinalMission = {
