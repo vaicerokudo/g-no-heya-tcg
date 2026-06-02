@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import { hasDeltaEventFlag } from "../game/delta/eventFlags";
+import { hasWastelandEventFlag } from "../game/wasteland/progress";
 
 type ContinentMapSceneProps = {
   onReturnAstoria: () => void;
@@ -39,6 +40,9 @@ export function ContinentMapScene({
   const [deltaChapterCleared, setDeltaChapterCleared] = useState(() =>
     hasDeltaEventFlag("delta_chapter_cleared")
   );
+  const [wastelandChapterCleared, setWastelandChapterCleared] = useState(() =>
+    hasWastelandEventFlag("wasteland_chapter_cleared")
+  );
   const [isDebugMap] = useState(() => {
     if (typeof window === "undefined") return false;
     return new URLSearchParams(window.location.search).get("debugMap") === "1";
@@ -46,12 +50,14 @@ export function ContinentMapScene({
   const [debugPoint, setDebugPoint] = useState<DebugPoint | null>(null);
 
   useEffect(() => {
-    const refreshDeltaClearStatus = () =>
+    const refreshChapterClearStatus = () => {
       setDeltaChapterCleared(hasDeltaEventFlag("delta_chapter_cleared"));
+      setWastelandChapterCleared(hasWastelandEventFlag("wasteland_chapter_cleared"));
+    };
 
-    refreshDeltaClearStatus();
-    window.addEventListener("storage", refreshDeltaClearStatus);
-    return () => window.removeEventListener("storage", refreshDeltaClearStatus);
+    refreshChapterClearStatus();
+    window.addEventListener("storage", refreshChapterClearStatus);
+    return () => window.removeEventListener("storage", refreshChapterClearStatus);
   }, []);
 
   const handleMapClick = (event: MouseEvent<HTMLDivElement>) => {
@@ -84,7 +90,9 @@ export function ContinentMapScene({
           <div style={hotspotLayerStyle}>
             {HOTSPOTS.map((spot) => {
               const deltaCleared = spot.id === "delta" && deltaChapterCleared;
-              const subLabel = deltaCleared ? "クリア済み" : spot.subLabel;
+              const wastelandCleared = spot.id === "dustWasteland" && wastelandChapterCleared;
+              const cleared = deltaCleared || wastelandCleared;
+              const subLabel = cleared ? "クリア済み" : spot.subLabel;
               const handleClick =
                 spot.id === "astoria"
                   ? onReturnAstoria
@@ -106,10 +114,10 @@ export function ContinentMapScene({
                   }}
                 >
                   <span style={hotspotLabelStyle}>{spot.label}</span>
-                  {deltaCleared || spot.badge ? (
+                  {cleared || spot.badge ? (
                     <span style={hotspotBadgeRowStyle}>
-                      {deltaCleared ? <span style={deltaClearedBadgeStyle}>クリア済み</span> : null}
-                      {spot.badge ? <span style={hotspotBadgeStyle}>{spot.badge}</span> : null}
+                      {cleared ? <span style={clearedBadgeStyle}>クリア済み</span> : null}
+                      {!cleared && spot.badge ? <span style={hotspotBadgeStyle}>{spot.badge}</span> : null}
                     </span>
                   ) : null}
                   <span style={hotspotSubLabelStyle}>{subLabel}</span>
@@ -260,7 +268,7 @@ const hotspotSubLabelStyle: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-const deltaClearedBadgeStyle: CSSProperties = {
+const clearedBadgeStyle: CSSProperties = {
   display: "inline-flex",
   padding: "3px 9px",
   borderRadius: 999,
