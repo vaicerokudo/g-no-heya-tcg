@@ -431,13 +431,13 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   const getHotspotBadge = (hotspot: NecroCityHotspot) => {
     if (hotspot.kind === "back") return "BACK";
     if (hotspot.kind === "guide") return "HINT";
-    if (hotspot.id === "shipyard") return shipBuilt ? "CLEAR" : allPartsReady ? "BUILD" : "CHECK";
-    if (hotspot.id === "market") return partsSet.has("sailcloth") ? "DONE" : flags.includes("necro_market_record_found") ? "GET" : "SEARCH";
-    if (hotspot.id === "clock") return partsSet.has("helm") && partsSet.has("compass") ? "DONE" : flags.includes("necro_clock_mechanism_found") ? "GET" : "SEARCH";
-    if (hotspot.id === "waterfront") return partsSet.has("waterproof_material") && partsSet.has("anchor_chain") ? "DONE" : "SEARCH";
-    if (hotspot.id === "lighthouse") return partsSet.has("lantern") ? "DONE" : "SEARCH";
+    if (hotspot.id === "shipyard") return shipBuilt ? "CLEAR" : allPartsReady ? "BUILD" : "GET";
+    if (hotspot.id === "market") return partsSet.has("sailcloth") ? "DONE" : "GET";
+    if (hotspot.id === "clock") return partsSet.has("helm") && partsSet.has("compass") ? "DONE" : "GET";
+    if (hotspot.id === "waterfront") return partsSet.has("waterproof_material") && partsSet.has("anchor_chain") ? "DONE" : "GET";
+    if (hotspot.id === "lighthouse") return partsSet.has("lantern") ? "DONE" : "GET";
     if (hotspot.id === "oldShipyard") return partsSet.has("hull_reinforcement") ? "DONE" : "GET";
-    return "LOG";
+    return "HINT";
   };
 
   return (
@@ -462,12 +462,13 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
         <main style={layoutStyle}>
           <section style={{ ...mapStyle, ...(isNarrow ? mapNarrowStyle : null) }} aria-label="廃都ネクロシティ探索MAP">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={routeSvgStyle} aria-hidden="true">
-              <polyline points="50,88 28,72 34,58 50,48 42,35 64,32 75,22 68,68 78,78" style={routeLineStyle} />
+              <polyline points="50,88 28,72 34,58 50,48 42,35 64,32 75,22" style={routeLineStyle} />
+              <polyline points="50,48 68,68 78,78" style={routeLineStyle} />
+              <polyline points="50,48 28,72 68,68" style={routeBranchStyle} />
             </svg>
             <div style={fogLayerStyle} />
             <div style={mapCaptionStyle}>
-              <span>廃都を歩き、背景内の地点を調べる</span>
-              <span>{shipBuilt ? "湾中央へ向かう準備が整った" : "クロイツの記憶を頼りに部材を探す"}</span>
+              <span>{shipBuilt ? "船完成。湾中央へ向かう準備が整った" : "クロイツの記憶を頼りに廃都を巡る"}</span>
             </div>
             {NECRO_CITY_HOTSPOTS.map((hotspot) => {
               const active = activeDistrict === hotspot.districtId;
@@ -491,7 +492,6 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
                 <span style={hotspotTextStyle}>
                   <span style={districtBadgeStyle}>{badge}</span>
                   <span style={hotspotLabelStyle}>{hotspot.label}</span>
-                  <span style={hotspotSubStyle}>{hotspot.subLabel}</span>
                 </span>
               </button>
               );
@@ -603,37 +603,37 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
 
 const sceneStyle: CSSProperties = {
   minHeight: "100dvh",
-  padding: "12px 10px 20px",
+  padding: "8px 8px 16px",
   boxSizing: "border-box",
   color: "#edf7ff",
   background:
     "linear-gradient(180deg, rgba(8, 12, 18, 0.28), rgba(4, 7, 11, 0.88)), radial-gradient(circle at 28% 18%, rgba(122, 198, 255, 0.14), transparent 28%), url('/backgrounds/necro-city-map.png') center top / cover no-repeat, linear-gradient(180deg, #151a23 0%, #12171c 48%, #080b10 100%)",
 };
 
-const shellStyle: CSSProperties = { width: "min(1040px, 100%)", margin: "0 auto" };
-const headerStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "end", gap: 12, flexWrap: "wrap", marginBottom: 12 };
+const shellStyle: CSSProperties = { width: "min(1180px, 100%)", margin: "0 auto" };
+const headerStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "end", gap: 12, flexWrap: "wrap", marginBottom: 8 };
 const eyebrowStyle: CSSProperties = { color: "#a9d7ff", fontSize: 11, fontWeight: 950 };
 const titleStyle: CSSProperties = { margin: "4px 0 0", color: "#f0f6ff", fontSize: 28, textShadow: "0 2px 14px rgba(0,0,0,0.58)" };
 const subtitleStyle: CSSProperties = { marginTop: 4, color: "rgba(237,247,255,0.72)", fontSize: 13, fontWeight: 850 };
 const returnButtonStyle: CSSProperties = { minHeight: 38, padding: "0 14px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(255,255,255,0.08)", color: "#edf7ff", fontWeight: 950, cursor: "pointer" };
-const progressStripStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 10, padding: "9px 12px", borderRadius: 12, border: "1px solid rgba(210,232,255,0.18)", background: "rgba(7, 10, 15, 0.74)", color: "#dff2ff", fontSize: 13, fontWeight: 950 };
+const progressStripStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 8, padding: "7px 10px", borderRadius: 12, border: "1px solid rgba(210,232,255,0.16)", background: "rgba(7, 10, 15, 0.62)", color: "#dff2ff", fontSize: 12, fontWeight: 950 };
 const layoutStyle: CSSProperties = { display: "block" };
-const mapStyle: CSSProperties = { position: "relative", minHeight: 640, overflow: "hidden", borderRadius: 16, border: "1px solid rgba(210,232,255,0.24)", background: "linear-gradient(180deg, rgba(8, 12, 18, 0.1), rgba(4, 7, 11, 0.38)), url('/backgrounds/necro-city-map.png') center / cover no-repeat, linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.5), inset 0 0 80px rgba(0,0,0,0.42)" };
-const mapNarrowStyle: CSSProperties = { minHeight: 540 };
+const mapStyle: CSSProperties = { position: "relative", minHeight: "min(74dvh, 760px)", overflow: "hidden", borderRadius: 14, border: "1px solid rgba(210,232,255,0.22)", background: "linear-gradient(180deg, rgba(8, 12, 18, 0.04), rgba(4, 7, 11, 0.28)), url('/backgrounds/necro-city-map.png') center / cover no-repeat, linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.5), inset 0 0 64px rgba(0,0,0,0.32)" };
+const mapNarrowStyle: CSSProperties = { minHeight: "68dvh", borderRadius: 12 };
 const routeSvgStyle: CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", opacity: 0.78 };
-const routeLineStyle: CSSProperties = { fill: "none", stroke: "rgba(255,224,163,0.34)", strokeWidth: 0.75, strokeDasharray: "2 2", filter: "drop-shadow(0 0 3px rgba(255,224,163,0.35))" };
-const fogLayerStyle: CSSProperties = { position: "absolute", inset: 0, background: "linear-gradient(115deg, transparent 0%, rgba(190,210,230,0.1) 36%, transparent 62%), radial-gradient(circle at 22% 74%, rgba(99,122,142,0.26), transparent 24%), linear-gradient(180deg, rgba(4,7,11,0.08), rgba(4,7,11,0.34))", pointerEvents: "none" };
-const mapCaptionStyle: CSSProperties = { position: "absolute", left: 14, right: 14, bottom: 12, zIndex: 2, display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", padding: "8px 10px", borderRadius: 12, border: "1px solid rgba(210,232,255,0.18)", background: "rgba(4, 7, 11, 0.62)", color: "rgba(237,247,255,0.78)", fontSize: 12, fontWeight: 850, pointerEvents: "none" };
-const hotspotButtonStyle: CSSProperties = { position: "absolute", zIndex: 3, transform: "translate(-50%, -50%)", minWidth: 126, maxWidth: 154, minHeight: 48, padding: "7px 9px 7px 26px", boxSizing: "border-box", borderRadius: 999, border: "1px solid rgba(210,232,255,0.34)", background: "linear-gradient(180deg, rgba(22, 32, 42, 0.9), rgba(7, 11, 17, 0.82))", color: "#edf7ff", fontWeight: 950, cursor: "pointer", boxShadow: "0 12px 28px rgba(0,0,0,0.44), inset 0 0 18px rgba(169,215,255,0.06)", display: "grid", alignItems: "center", textAlign: "left", lineHeight: 1.12, overflowWrap: "anywhere" };
-const hotspotButtonNarrowStyle: CSSProperties = { minWidth: "clamp(96px, 29vw, 126px)", maxWidth: "clamp(104px, 32vw, 136px)", minHeight: 46, padding: "7px 8px 7px 23px", fontSize: 11 };
-const hotspotActiveStyle: CSSProperties = { borderColor: "rgba(255,224,163,0.78)", boxShadow: "0 0 20px rgba(255,224,163,0.24), 0 12px 28px rgba(0,0,0,0.44)" };
-const plazaDistrictStyle: CSSProperties = { borderColor: "rgba(185,160,255,0.64)", background: "linear-gradient(180deg, rgba(48, 38, 78, 0.95), rgba(16, 14, 28, 0.9))" };
-const shipyardDistrictStyle: CSSProperties = { borderColor: "rgba(255,224,163,0.62)", background: "linear-gradient(180deg, rgba(72, 50, 24, 0.95), rgba(22, 16, 12, 0.9))" };
-const districtBadgeStyle: CSSProperties = { justifySelf: "start", padding: "2px 6px", borderRadius: 999, background: "rgba(169,215,255,0.16)", color: "#cfeaff", fontSize: 10 };
-const hotspotPinStyle: CSSProperties = { position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", width: 10, height: 10, borderRadius: "50%", background: "#ffe0a3", boxShadow: "0 0 0 4px rgba(255,224,163,0.16), 0 0 14px rgba(255,224,163,0.72)" };
-const hotspotTextStyle: CSSProperties = { display: "grid", gap: 2 };
-const hotspotLabelStyle: CSSProperties = { color: "#f5fbff", fontSize: 13, textShadow: "0 1px 5px rgba(0,0,0,0.78)" };
-const hotspotSubStyle: CSSProperties = { color: "rgba(237,247,255,0.66)", fontSize: 10, fontWeight: 850 };
+const routeLineStyle: CSSProperties = { fill: "none", stroke: "rgba(255,224,163,0.28)", strokeWidth: 0.62, strokeDasharray: "1.6 1.8", filter: "drop-shadow(0 0 4px rgba(255,224,163,0.28))" };
+const routeBranchStyle: CSSProperties = { fill: "none", stroke: "rgba(169,215,255,0.16)", strokeWidth: 0.45, strokeDasharray: "1.2 2.2", filter: "drop-shadow(0 0 3px rgba(169,215,255,0.18))" };
+const fogLayerStyle: CSSProperties = { position: "absolute", inset: 0, background: "linear-gradient(115deg, transparent 0%, rgba(190,210,230,0.08) 36%, transparent 62%), radial-gradient(circle at 22% 74%, rgba(99,122,142,0.18), transparent 24%), linear-gradient(180deg, rgba(4,7,11,0.02), rgba(4,7,11,0.22))", pointerEvents: "none" };
+const mapCaptionStyle: CSSProperties = { position: "absolute", left: 12, bottom: 10, zIndex: 2, maxWidth: "min(520px, calc(100% - 24px))", padding: "6px 9px", borderRadius: 999, border: "1px solid rgba(210,232,255,0.14)", background: "rgba(4, 7, 11, 0.48)", color: "rgba(237,247,255,0.72)", fontSize: 11, fontWeight: 850, pointerEvents: "none" };
+const hotspotButtonStyle: CSSProperties = { position: "absolute", zIndex: 3, transform: "translate(-50%, -50%)", minWidth: 86, maxWidth: 116, minHeight: 34, padding: "4px 7px 4px 22px", boxSizing: "border-box", borderRadius: 999, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(6, 10, 16, 0.58)", color: "#edf7ff", fontWeight: 950, cursor: "pointer", boxShadow: "0 8px 18px rgba(0,0,0,0.36), inset 0 0 12px rgba(169,215,255,0.04)", display: "grid", alignItems: "center", textAlign: "left", lineHeight: 1.08, overflowWrap: "anywhere", backdropFilter: "blur(1px)" };
+const hotspotButtonNarrowStyle: CSSProperties = { minWidth: "clamp(70px, 22vw, 96px)", maxWidth: "clamp(82px, 26vw, 110px)", minHeight: 38, padding: "5px 7px 5px 20px", fontSize: 10 };
+const hotspotActiveStyle: CSSProperties = { borderColor: "rgba(255,224,163,0.66)", background: "rgba(20, 17, 14, 0.68)", boxShadow: "0 0 16px rgba(255,224,163,0.22), 0 8px 18px rgba(0,0,0,0.36)" };
+const plazaDistrictStyle: CSSProperties = { borderColor: "rgba(185,160,255,0.56)", background: "rgba(23, 16, 39, 0.66)" };
+const shipyardDistrictStyle: CSSProperties = { borderColor: "rgba(255,224,163,0.54)", background: "rgba(47, 31, 12, 0.68)" };
+const districtBadgeStyle: CSSProperties = { justifySelf: "start", padding: "1px 5px", borderRadius: 999, background: "rgba(169,215,255,0.14)", color: "#cfeaff", fontSize: 9, lineHeight: 1.1 };
+const hotspotPinStyle: CSSProperties = { position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", width: 8, height: 8, borderRadius: "50%", background: "#ffe0a3", boxShadow: "0 0 0 4px rgba(255,224,163,0.13), 0 0 13px rgba(255,224,163,0.72)" };
+const hotspotTextStyle: CSSProperties = { display: "grid", gap: 1 };
+const hotspotLabelStyle: CSSProperties = { color: "#f5fbff", fontSize: 11, textShadow: "0 1px 5px rgba(0,0,0,0.86)", whiteSpace: "normal" };
 const detailPanelStyle: CSSProperties = { width: "min(560px, 100%)", minHeight: 430, maxHeight: "min(82dvh, 580px)", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.2)", background: "rgba(7, 10, 15, 0.9)", boxShadow: "0 18px 42px rgba(0,0,0,0.42)", backdropFilter: "blur(2px)", display: "flex", flexDirection: "column", gap: 12, overflowX: "hidden", overflowY: "auto" };
 const detailPanelNarrowStyle: CSSProperties = { minHeight: 340, maxHeight: "84dvh" };
 const detailHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10 };
