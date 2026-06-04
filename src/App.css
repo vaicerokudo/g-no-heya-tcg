@@ -688,12 +688,51 @@ html { overflow-y: scroll; }
   animation: unitSpriteBurnAura 1.5s ease-in-out infinite;
 }
 
+@keyframes skillCutInSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-8vw) scale(0.98);
+  }
+  16% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  82% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(5vw) scale(1.01);
+  }
+}
+
+@keyframes skillCutInFlash {
+  0% {
+    opacity: 0;
+    transform: translateX(-120%);
+  }
+  20% {
+    opacity: 1;
+  }
+  58% {
+    opacity: 0.45;
+    transform: translateX(118%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(118%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .unitSpriteMotion,
   .unitSpriteMoveHop,
   .unitSpriteAttackLunge,
   .unitSpriteSkillPulse,
-  .unitSpriteShake {
+  .unitSpriteShake,
+  .skillCutInBand,
+  .skillCutInFlash {
     animation: none !important;
     transform: none !important;
     filter: none !important;

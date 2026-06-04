@@ -31,6 +31,7 @@ type UseSkillExecutionArgs = {
   applyNextInstances: (next: UnitInstance[]) => void;
   logSkill: (ev: "TRY" | "FIRE", payload: SkillTryLogPayload | SkillFireLogPayload) => void;
   onSkillFired?: (payload: { casterId: string; skillId: SkillId }) => void;
+  playSkillCutIn?: (payload: { def: SkillDef; selected: UnitInstance }) => Promise<void>;
   onSkillImpact?: (payload: {
     skillId: SkillId;
     casterId: string;
@@ -129,6 +130,7 @@ export function useSkillExecution({
   applyNextInstances,
   logSkill,
   onSkillFired,
+  playSkillCutIn,
   onSkillImpact,
   setPerUnitTurn,
   setUsedSkills,
@@ -172,7 +174,7 @@ export function useSkillExecution({
     onSkillFired?.({ casterId, skillId: def.id });
   }
 
-  function executeSkill({ def, selected, key, rows, cols, instances, unitsById, target }: ExecuteSkillArgs) {
+  async function executeSkill({ def, selected, key, rows, cols, instances, unitsById, target }: ExecuteSkillArgs) {
     const skillContext = createSkillExecutionContext({ rows, cols, instances, unitsById, selected });
     const nextInstances = executeSkillToInstances({ def, skillContext, selected, target });
     if (!nextInstances) return false;
@@ -182,6 +184,8 @@ export function useSkillExecution({
       nextInstances,
       caster: selected,
     });
+
+    await playSkillCutIn?.({ def, selected });
 
     if (impacts.length > 0) {
       onSkillImpact?.({
@@ -202,7 +206,7 @@ export function useSkillExecution({
     return true;
   }
 
-  function tryExecuteSkillOnCell({
+  async function tryExecuteSkillOnCell({
     skillMode,
     selected,
     gameOver,
@@ -250,7 +254,7 @@ export function useSkillExecution({
     return executeSkill({ def, selected, key, rows, cols, instances, unitsById, target });
   }
 
-  function tryExecuteImmediateSkill({
+  async function tryExecuteImmediateSkill({
     def,
     selected,
     usedSkills,

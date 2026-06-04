@@ -6,8 +6,13 @@ import { otherSide } from "./game/turn";
 import type { Side } from "./game/types";
 import { getAttackableTargets, getAttackMarks } from "./game/attack";
 
-import { type SkillId } from "./game/skills/registry";
+import { type SkillDef, type SkillId } from "./game/skills/registry";
 import { getSkillImpactVariant, type SkillImpactVariant } from "./game/skills/impactVariant";
+import {
+  getSkillCutInDefinition,
+  loadSkillCutInImage,
+  type SkillCutInDefinition,
+} from "./assets/skillCutins";
 
 import checkVictory, { checkScenarioVictory } from "./game/victory";
 import {
@@ -47,6 +52,7 @@ import { GameBoardArea } from "./components/GameBoardArea";
 import { UnitPopup } from "./components/Popup/UnitPopup";
 import { SelectedUnitStatus } from "./components/SelectedUnitStatus";
 import { SkillModeBanner } from "./components/SkillModeBanner";
+import { SkillCutInOverlay } from "./components/SkillCutInOverlay";
 import { TopStatusBar } from "./components/TopStatusBar";
 import { AstoriaMapScene } from "./components/AstoriaMapScene";
 import { ContinentMapScene } from "./components/ContinentMapScene";
@@ -161,6 +167,38 @@ type SkillImpactFxEvent = {
   c: number;
 };
 
+const BATTLE_PREFS_STORAGE_KEY = "gnoheya_tcg_battle_prefs";
+const SKILL_CUT_IN_DURATION_MS = 820;
+
+function readSkillCutInEnabled() {
+  if (typeof window === "undefined") return true;
+
+  try {
+    const raw = window.localStorage.getItem(BATTLE_PREFS_STORAGE_KEY);
+    if (!raw) return true;
+    const parsed = JSON.parse(raw);
+    return parsed?.skillCutInEnabled !== false;
+  } catch {
+    return true;
+  }
+}
+
+function writeSkillCutInEnabled(enabled: boolean) {
+  if (typeof window === "undefined") return;
+
+  try {
+    const raw = window.localStorage.getItem(BATTLE_PREFS_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    window.localStorage.setItem(BATTLE_PREFS_STORAGE_KEY, JSON.stringify({ ...parsed, skillCutInEnabled: enabled }));
+  } catch {
+    window.localStorage.setItem(BATTLE_PREFS_STORAGE_KEY, JSON.stringify({ skillCutInEnabled: enabled }));
+  }
+}
+
+function wait(ms: number) {
+  return new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+}
+
 function getScenarioDialogTitle(scenarioId: ScenarioId, kind: ScenarioDialogKind) {
   const scenario = getScenarioConfig(scenarioId);
   if (!scenario) return "";
@@ -226,10 +264,15 @@ export default function App() {
   const [usedSkills, setUsedSkills] = useState<Record<string, boolean>>({});
   const [perUnitTurn, setPerUnitTurn] = useState<PerUnitTurn>({});
   const [showEndTurnConfirm, setShowEndTurnConfirm] = useState(false);
+  const [skillCutInEnabled, setSkillCutInEnabled] = useState(() => readSkillCutInEnabled());
+  const [skillCutIn, setSkillCutIn] = useState<SkillCutInDefinition | null>(null);
+  const [skillCutInBusy, setSkillCutInBusy] = useState(false);
 
   const [victory, setVictory] = useState<null | { winner: Side; detail: string }>(null);
   const gameOver = victory !== null;
   const scenarioDialogOpen = scenarioDialog !== null;
+  const skillCutInPlaying = skillCutInBusy || skillCutIn !== null;
+  const inputBlocked = scenarioDialogOpen || skillCutInPlaying;
 
   const [southSkin, setSouthSkin] = useState<Skin>("default");
   const [northSkin, setNorthSkin] = useState<Skin>("default");
@@ -641,6 +684,34 @@ export default function App() {
     window.setTimeout(() => {
       setSkillImpactFxEvents((prev) => prev.filter((event) => !born.some((impact) => impact.id === event.id)));
     }, 300);
+  }
+
+  async function playSkillCutIn({ def }: { def: SkillDef; selected: any }) {
+    if (!skillCutInEnabled) return;
+
+    const cutIn = getSkillCutInDefinition(def.id);
+    if (!cutIn) return;
+
+    setSkillCutInBusy(true);
+    try {
+      const imageAvailable = await loadSkillCutInImage(cutIn.imagePath);
+      if (!imageAvailable) return;
+
+      setSkillCutIn(cutIn);
+      await wait(SKILL_CUT_IN_DURATION_MS);
+      setSkillCutIn(null);
+    } finally {
+      setSkillCutInBusy(false);
+    }
+  }
+
+  function toggleSkillCutInEnabled() {
+    setSkillCutInEnabled((enabled) => {
+      const next = !enabled;
+      writeSkillCutInEnabled(next);
+      if (!next) setSkillCutIn(null);
+      return next;
+    });
   }
 
   function emitAttackMotion({ attackerId, dr, dc }: { attackerId: string; dr: number; dc: number }) {
@@ -1324,6 +1395,7 @@ const reinforceSet = useMemo(() => {
     applyNextInstances: (next) => applyNextInstances(next as any),
     logSkill,
     onSkillFired: ({ casterId }) => emitSkillMotion(casterId),
+    playSkillCutIn,
     onSkillImpact: emitSkillImpact,
     setPerUnitTurn,
     setUsedSkills,
@@ -1331,10 +1403,10 @@ const reinforceSet = useMemo(() => {
     setSelectedId,
   });
 
-  function tryExecuteSkillOnCell(opts: { r: number; c: number; inst: any | null }) {
+  async function tryExecuteSkillOnCell(opts: { r: number; c: number; inst: any | null }) {
     if (!skillMode) return false;
 
-    const executed = tryExecuteCellSkill({
+    const executed = await tryExecuteCellSkill({
       skillMode,
       selected,
       gameOver,
@@ -1355,13 +1427,13 @@ const reinforceSet = useMemo(() => {
     return true;
   }
 
-  function handleSkillButtonClick(skill: (typeof selectedSkills)[number]) {
-    if (scenarioDialogOpen) return;
+  async function handleSkillButtonClick(skill: (typeof selectedSkills)[number]) {
+    if (inputBlocked) return;
     if (gameOver) return;
     if (!selected) return;
 
     if (skill.targetMode === "instant" || skill.targetMode === "enemiesInRange") {
-      const executed = tryExecuteImmediateSkill({ def: skill, selected, usedSkills, rows, cols, instances });
+      const executed = await tryExecuteImmediateSkill({ def: skill, selected, usedSkills, rows, cols, instances });
       if (!executed) {
         setSkillMode(null);
       }
@@ -1372,7 +1444,7 @@ const reinforceSet = useMemo(() => {
   }
 
   function waitSelectedUnit() {
-    if (scenarioDialogOpen) return;
+    if (inputBlocked) return;
     if (gameOver) return;
     if (!selected) return;
 
@@ -1389,7 +1461,7 @@ const reinforceSet = useMemo(() => {
   }
 
   function handleBoardLongPressUnit(inst: any) {
-    if (scenarioDialogOpen) return;
+    if (inputBlocked) return;
     if (gameOver) return;
 
     setSelectedId(inst.instanceId);
@@ -1398,8 +1470,8 @@ const reinforceSet = useMemo(() => {
     setSkillMode(null);
   }
 
-  function handleBoardCellClick(r: number, c: number, inst: any | null) {
-    if (scenarioDialogOpen) return;
+  async function handleBoardCellClick(r: number, c: number, inst: any | null) {
+    if (inputBlocked) return;
     if (gameOver) return;
 
     if (phase === "setup_deploy") {
@@ -1418,7 +1490,7 @@ const reinforceSet = useMemo(() => {
 
     setPopupId(null);
 
-    const handled = tryExecuteSkillOnCell({ r, c, inst: inst ?? null });
+    const handled = await tryExecuteSkillOnCell({ r, c, inst: inst ?? null });
     if (handled) return;
 
     if (inst) {
@@ -1442,7 +1514,7 @@ const reinforceSet = useMemo(() => {
   }
 
   const endTurn = () => {
-    if (scenarioDialogOpen) return;
+    if (inputBlocked) return;
     if (!beginEndTurnOnce()) return;
 
     prepareEndTurnRun();
@@ -1452,7 +1524,7 @@ const reinforceSet = useMemo(() => {
   };
 
   const { stopCpuLoopNorth } = useCpuTurn({
-    cpuEnabled: cpuEnabled && !scenarioDialogOpen,
+    cpuEnabled: cpuEnabled && !inputBlocked,
     phase,
     gameOver,
     turn,
@@ -1796,6 +1868,8 @@ const reinforceSet = useMemo(() => {
         </div>
       ) : null}
 
+      <SkillCutInOverlay cutIn={skillCutIn} />
+
       <SkillModeBanner
         skillMode={skillMode}
         selected={selected}
@@ -1840,6 +1914,30 @@ const reinforceSet = useMemo(() => {
         }}
       >
         {gameMode === "scenario" ? getScenarioReturnLabel() : "街へ戻る"}
+      </button>
+
+      <button
+        type="button"
+        onClick={toggleSkillCutInEnabled}
+        disabled={skillCutInPlaying}
+        title="スキルカットイン演出のON/OFF"
+        style={{
+          position: "fixed",
+          right: 12,
+          top: 54,
+          zIndex: 9100,
+          padding: "6px 9px",
+          borderRadius: 10,
+          border: "1px solid rgba(255,255,255,0.18)",
+          background: skillCutInEnabled ? "rgba(46, 31, 92, 0.68)" : "rgba(0,0,0,0.48)",
+          color: "#fff",
+          fontSize: 11,
+          fontWeight: 900,
+          cursor: skillCutInPlaying ? "not-allowed" : "pointer",
+          opacity: skillCutInPlaying ? 0.55 : 1,
+        }}
+      >
+        CUT-IN {skillCutInEnabled ? "ON" : "OFF"}
       </button>
 
       <GameBoardArea
