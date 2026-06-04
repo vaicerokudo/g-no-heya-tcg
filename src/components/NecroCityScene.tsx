@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import rokuSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import {
   addBlackNoiseBayEventFlag,
   addShipPart,
@@ -29,6 +30,9 @@ type ActionId =
   | "inspectOldShipyard"
   | "buildShip";
 type KruitzExpression = "normal" | "think" | "idea" | "trouble" | "happy" | "satisfied";
+type MapPos = { x: number; y: number };
+type Facing = "left" | "right";
+type SpriteState = "idle" | "running-left" | "running-right";
 
 type District = {
   id: DistrictId;
@@ -44,6 +48,8 @@ type NecroCityHotspot = {
   subLabel: string;
   x: number;
   y: number;
+  rokuX?: number;
+  rokuY?: number;
   kind: "back" | "guide" | "search" | "hint" | "build";
 };
 
@@ -69,6 +75,17 @@ const KRUitz_IMAGES: Record<KruitzExpression, string> = {
   satisfied: "/ui/kruitz/satisfied.png",
 };
 
+const ROKU_PLAYER_SIZE = 32;
+const ROKU_MOVE_MS = 620;
+const SPRITE_CELL_WIDTH = 192;
+const SPRITE_CELL_HEIGHT = 208;
+const ROKU_SPRITE_SCALE = ROKU_PLAYER_SIZE / SPRITE_CELL_WIDTH;
+const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalMs: number }> = {
+  idle: { row: 0, frames: 6, intervalMs: 190 },
+  "running-right": { row: 1, frames: 8, intervalMs: 105 },
+  "running-left": { row: 2, frames: 8, intervalMs: 105 },
+};
+
 const DISTRICTS: District[] = [
   { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", backgroundUrl: "/backgrounds/necro-city/entrance.png" },
   { id: "plaza", label: "中央広場", subLabel: "クロイツに相談", backgroundUrl: "/backgrounds/necro-city/central-plaza.png" },
@@ -80,15 +97,15 @@ const DISTRICTS: District[] = [
 ];
 
 const NECRO_CITY_HOTSPOTS: NecroCityHotspot[] = [
-  { id: "entrance", districtId: "entrance", label: "入口", subLabel: "廃都の門", x: 50, y: 88, kind: "back" },
-  { id: "plaza", districtId: "plaza", label: "中央広場", subLabel: "クロイツ", x: 50, y: 48, kind: "guide" },
-  { id: "market", districtId: "market", label: "港湾市場", subLabel: "廃市場 / 旧酒場", x: 34, y: 58, kind: "search" },
-  { id: "clock", districtId: "clock", label: "時計塔", subLabel: "崩れた塔", x: 64, y: 32, kind: "search" },
-  { id: "waterfront", districtId: "waterfront", label: "水辺倉庫", subLabel: "水没区画", x: 28, y: 72, kind: "search" },
-  { id: "lighthouse", districtId: "waterfront", label: "灯台跡", subLabel: "航海灯", x: 75, y: 22, kind: "search" },
-  { id: "residential", districtId: "residential", label: "市街跡", subLabel: "記録と手記", x: 42, y: 35, kind: "hint" },
-  { id: "oldShipyard", districtId: "shipyard", label: "旧造船区", subLabel: "補強材", x: 68, y: 68, kind: "search" },
-  { id: "shipyard", districtId: "shipyard", label: "造船所", subLabel: "船を作る", x: 78, y: 78, kind: "build" },
+  { id: "entrance", districtId: "entrance", label: "入口", subLabel: "廃都の門", x: 50, y: 91, rokuX: 50, rokuY: 88, kind: "back" },
+  { id: "plaza", districtId: "plaza", label: "中央広場", subLabel: "クロイツ", x: 50, y: 57, rokuX: 50, rokuY: 61, kind: "guide" },
+  { id: "market", districtId: "market", label: "港湾市場", subLabel: "廃市場 / 旧酒場", x: 39, y: 66, rokuX: 37, rokuY: 70, kind: "search" },
+  { id: "clock", districtId: "clock", label: "時計塔", subLabel: "崩れた塔", x: 25, y: 24, rokuX: 29, rokuY: 30, kind: "search" },
+  { id: "waterfront", districtId: "waterfront", label: "水辺倉庫", subLabel: "水没区画", x: 26, y: 76, rokuX: 29, rokuY: 80, kind: "search" },
+  { id: "lighthouse", districtId: "waterfront", label: "灯台跡", subLabel: "航海灯", x: 80, y: 24, rokuX: 77, rokuY: 30, kind: "search" },
+  { id: "residential", districtId: "residential", label: "市街跡", subLabel: "記録と手記", x: 40, y: 42, rokuX: 42, rokuY: 47, kind: "hint" },
+  { id: "oldShipyard", districtId: "shipyard", label: "旧造船区", subLabel: "補強材", x: 68, y: 39, rokuX: 66, rokuY: 44, kind: "search" },
+  { id: "shipyard", districtId: "shipyard", label: "造船所", subLabel: "船を作る", x: 79, y: 33, rokuX: 82, rokuY: 39, kind: "build" },
 ];
 
 const DISTRICT_ACTIONS: Record<DistrictId, DistrictAction[]> = {
@@ -158,14 +175,19 @@ function getKruitzHint(partsSet: Set<ShipPartId>, flags: BlackNoiseBayEventFlag[
 
 export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   const [progress, setProgress] = useState(() => readShipProgress());
-  const [activeDistrict, setActiveDistrict] = useState<DistrictId>("plaza");
+  const [activeDistrict, setActiveDistrict] = useState<DistrictId>("entrance");
   const [isAreaModalOpen, setIsAreaModalOpen] = useState(false);
   const [isKruitzModalOpen, setIsKruitzModalOpen] = useState(false);
   const [isNarrow, setIsNarrow] = useState(() => (typeof window === "undefined" ? false : window.innerWidth < 820));
+  const [rokuPos, setRokuPos] = useState<MapPos>({ x: 50, y: 88 });
+  const [facing, setFacing] = useState<Facing>("right");
+  const [isMoving, setIsMoving] = useState(false);
+  const [frameIndex, setFrameIndex] = useState(0);
   const [message, setMessage] = useState<DetailMessage>({
-    title: "中央広場",
-    lines: ["廃都の中心に残された広場。", "クロイツがこの街の記憶をたどり、船の部材の手がかりを教えてくれる。"],
+    title: "入口",
+    lines: ["霧の向こうに、廃都ネクロシティが沈んでいる。", "背景の地点を選ぶと、ロクがその場所へ向かいます。"],
   });
+  const moveTimerRef = useRef<number | null>(null);
 
   const partsSet = useMemo(() => new Set(progress.parts), [progress.parts]);
   const flags = progress.flags;
@@ -205,6 +227,30 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isAreaModalOpen, isKruitzModalOpen]);
 
+  const spriteState: SpriteState = isMoving
+    ? facing === "left"
+      ? "running-left"
+      : "running-right"
+    : "idle";
+  const spriteAnim = SPRITE_ANIMS[spriteState];
+
+  useEffect(() => {
+    setFrameIndex(0);
+    const timerId = window.setInterval(() => {
+      setFrameIndex((current) => (current + 1) % spriteAnim.frames);
+    }, spriteAnim.intervalMs);
+
+    return () => window.clearInterval(timerId);
+  }, [spriteAnim.frames, spriteAnim.intervalMs, spriteState]);
+
+  useEffect(() => {
+    return () => {
+      if (moveTimerRef.current !== null) {
+        window.clearTimeout(moveTimerRef.current);
+      }
+    };
+  }, []);
+
   const refreshProgress = () => setProgress(readShipProgress());
 
   const collectPart = (partId: ShipPartId) => {
@@ -240,7 +286,24 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   const selectHotspot = (hotspot: NecroCityHotspot) => {
     const district = DISTRICTS.find((item) => item.id === hotspot.districtId);
     if (!district) return;
-    selectDistrict(district);
+    if (isMoving) return;
+
+    const nextPos = { x: hotspot.rokuX ?? hotspot.x, y: hotspot.rokuY ?? hotspot.y };
+    setActiveDistrict(district.id);
+    setIsAreaModalOpen(false);
+    setIsKruitzModalOpen(false);
+    setFacing(nextPos.x < rokuPos.x ? "left" : "right");
+    setIsMoving(true);
+    setRokuPos(nextPos);
+
+    if (moveTimerRef.current !== null) {
+      window.clearTimeout(moveTimerRef.current);
+    }
+    moveTimerRef.current = window.setTimeout(() => {
+      setIsMoving(false);
+      moveTimerRef.current = null;
+      selectDistrict(district);
+    }, ROKU_MOVE_MS);
   };
 
   const buildShip = () => {
@@ -462,11 +525,25 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
         <main style={layoutStyle}>
           <section style={{ ...mapStyle, ...(isNarrow ? mapNarrowStyle : null) }} aria-label="廃都ネクロシティ探索MAP">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={routeSvgStyle} aria-hidden="true">
-              <polyline points="50,88 28,72 34,58 50,48 42,35 64,32 75,22" style={routeLineStyle} />
-              <polyline points="50,48 68,68 78,78" style={routeLineStyle} />
-              <polyline points="50,48 28,72 68,68" style={routeBranchStyle} />
+              <polyline points="50,91 39,66 50,57 40,42 25,24" style={routeLineStyle} />
+              <polyline points="50,57 68,39 79,33 80,24" style={routeLineStyle} />
+              <polyline points="50,57 26,76 39,66" style={routeBranchStyle} />
+              <polyline points="50,57 68,39 26,76" style={routeBranchStyle} />
             </svg>
             <div style={fogLayerStyle} />
+            <div
+              aria-label="ロク"
+              style={{
+                ...rokuSpriteStyle,
+                ...(isNarrow ? rokuSpriteNarrowStyle : null),
+                left: `${rokuPos.x}%`,
+                top: `${rokuPos.y}%`,
+                backgroundImage: `url(${rokuSpriteSheet})`,
+                backgroundPosition: `${-frameIndex * SPRITE_CELL_WIDTH * ROKU_SPRITE_SCALE}px ${
+                  -spriteAnim.row * SPRITE_CELL_HEIGHT * ROKU_SPRITE_SCALE
+                }px`,
+              }}
+            />
             <div style={mapCaptionStyle}>
               <span>{shipBuilt ? "船完成。湾中央へ向かう準備が整った" : "クロイツの記憶を頼りに廃都を巡る"}</span>
             </div>
@@ -482,6 +559,7 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
                   ...hotspotButtonStyle,
                   ...(isNarrow ? hotspotButtonNarrowStyle : null),
                   ...(active ? hotspotActiveStyle : null),
+                  ...(isMoving ? hotspotMovingStyle : null),
                   ...(hotspot.kind === "guide" ? plazaDistrictStyle : null),
                   ...(hotspot.kind === "build" ? shipyardDistrictStyle : null),
                   left: `${hotspot.x}%`,
@@ -618,8 +696,8 @@ const subtitleStyle: CSSProperties = { marginTop: 4, color: "rgba(237,247,255,0.
 const returnButtonStyle: CSSProperties = { minHeight: 38, padding: "0 14px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(255,255,255,0.08)", color: "#edf7ff", fontWeight: 950, cursor: "pointer" };
 const progressStripStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 8, padding: "7px 10px", borderRadius: 12, border: "1px solid rgba(210,232,255,0.16)", background: "rgba(7, 10, 15, 0.62)", color: "#dff2ff", fontSize: 12, fontWeight: 950 };
 const layoutStyle: CSSProperties = { display: "block" };
-const mapStyle: CSSProperties = { position: "relative", minHeight: "min(74dvh, 760px)", overflow: "hidden", borderRadius: 14, border: "1px solid rgba(210,232,255,0.22)", background: "linear-gradient(180deg, rgba(8, 12, 18, 0.04), rgba(4, 7, 11, 0.28)), url('/backgrounds/necro-city-map.png') center / cover no-repeat, linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.5), inset 0 0 64px rgba(0,0,0,0.32)" };
-const mapNarrowStyle: CSSProperties = { minHeight: "68dvh", borderRadius: 12 };
+const mapStyle: CSSProperties = { position: "relative", minHeight: "min(80dvh, 820px)", overflow: "hidden", borderRadius: 14, border: "1px solid rgba(210,232,255,0.22)", background: "linear-gradient(180deg, rgba(8, 12, 18, 0.02), rgba(4, 7, 11, 0.24)), url('/backgrounds/necro-city-map.png') center / cover no-repeat, linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.5), inset 0 0 54px rgba(0,0,0,0.28)" };
+const mapNarrowStyle: CSSProperties = { minHeight: "72dvh", borderRadius: 12 };
 const routeSvgStyle: CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", opacity: 0.78 };
 const routeLineStyle: CSSProperties = { fill: "none", stroke: "rgba(255,224,163,0.28)", strokeWidth: 0.62, strokeDasharray: "1.6 1.8", filter: "drop-shadow(0 0 4px rgba(255,224,163,0.28))" };
 const routeBranchStyle: CSSProperties = { fill: "none", stroke: "rgba(169,215,255,0.16)", strokeWidth: 0.45, strokeDasharray: "1.2 2.2", filter: "drop-shadow(0 0 3px rgba(169,215,255,0.18))" };
@@ -628,12 +706,27 @@ const mapCaptionStyle: CSSProperties = { position: "absolute", left: 12, bottom:
 const hotspotButtonStyle: CSSProperties = { position: "absolute", zIndex: 3, transform: "translate(-50%, -50%)", minWidth: 86, maxWidth: 116, minHeight: 34, padding: "4px 7px 4px 22px", boxSizing: "border-box", borderRadius: 999, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(6, 10, 16, 0.58)", color: "#edf7ff", fontWeight: 950, cursor: "pointer", boxShadow: "0 8px 18px rgba(0,0,0,0.36), inset 0 0 12px rgba(169,215,255,0.04)", display: "grid", alignItems: "center", textAlign: "left", lineHeight: 1.08, overflowWrap: "anywhere", backdropFilter: "blur(1px)" };
 const hotspotButtonNarrowStyle: CSSProperties = { minWidth: "clamp(70px, 22vw, 96px)", maxWidth: "clamp(82px, 26vw, 110px)", minHeight: 38, padding: "5px 7px 5px 20px", fontSize: 10 };
 const hotspotActiveStyle: CSSProperties = { borderColor: "rgba(255,224,163,0.66)", background: "rgba(20, 17, 14, 0.68)", boxShadow: "0 0 16px rgba(255,224,163,0.22), 0 8px 18px rgba(0,0,0,0.36)" };
+const hotspotMovingStyle: CSSProperties = { cursor: "wait" };
 const plazaDistrictStyle: CSSProperties = { borderColor: "rgba(185,160,255,0.56)", background: "rgba(23, 16, 39, 0.66)" };
 const shipyardDistrictStyle: CSSProperties = { borderColor: "rgba(255,224,163,0.54)", background: "rgba(47, 31, 12, 0.68)" };
 const districtBadgeStyle: CSSProperties = { justifySelf: "start", padding: "1px 5px", borderRadius: 999, background: "rgba(169,215,255,0.14)", color: "#cfeaff", fontSize: 9, lineHeight: 1.1 };
 const hotspotPinStyle: CSSProperties = { position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", width: 8, height: 8, borderRadius: "50%", background: "#ffe0a3", boxShadow: "0 0 0 4px rgba(255,224,163,0.13), 0 0 13px rgba(255,224,163,0.72)" };
 const hotspotTextStyle: CSSProperties = { display: "grid", gap: 1 };
 const hotspotLabelStyle: CSSProperties = { color: "#f5fbff", fontSize: 11, textShadow: "0 1px 5px rgba(0,0,0,0.86)", whiteSpace: "normal" };
+const rokuSpriteStyle: CSSProperties = {
+  position: "absolute",
+  width: ROKU_PLAYER_SIZE,
+  height: ROKU_PLAYER_SIZE * (SPRITE_CELL_HEIGHT / SPRITE_CELL_WIDTH),
+  transform: "translate(-50%, -92%)",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: `${SPRITE_CELL_WIDTH * ROKU_SPRITE_SCALE * 8}px ${SPRITE_CELL_HEIGHT * ROKU_SPRITE_SCALE * 9}px`,
+  imageRendering: "auto",
+  filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.48)) drop-shadow(0 0 10px rgba(185,160,255,0.34))",
+  transition: `left ${ROKU_MOVE_MS}ms ease, top ${ROKU_MOVE_MS}ms ease`,
+  zIndex: 5,
+  pointerEvents: "none",
+};
+const rokuSpriteNarrowStyle: CSSProperties = { filter: "drop-shadow(0 6px 8px rgba(0,0,0,0.48)) drop-shadow(0 0 8px rgba(185,160,255,0.34))" };
 const detailPanelStyle: CSSProperties = { width: "min(560px, 100%)", minHeight: 430, maxHeight: "min(82dvh, 580px)", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.2)", background: "rgba(7, 10, 15, 0.9)", boxShadow: "0 18px 42px rgba(0,0,0,0.42)", backdropFilter: "blur(2px)", display: "flex", flexDirection: "column", gap: 12, overflowX: "hidden", overflowY: "auto" };
 const detailPanelNarrowStyle: CSSProperties = { minHeight: 340, maxHeight: "84dvh" };
 const detailHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10 };
