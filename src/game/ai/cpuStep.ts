@@ -88,7 +88,7 @@ export function cpuStepV1(opts: {
   unitsById: Record<string, any>;
   instances: any[];
   actorId: string;
-  scenarioType?: "standard" | "isolationDuel";
+  scenarioType?: "standard" | "isolationDuel" | "isolationFinalBattle";
 }): { nextInstances: any[]; action: CpuAction } {
   const { side, rows, cols, unitsById, instances, actorId, scenarioType } = opts;
 

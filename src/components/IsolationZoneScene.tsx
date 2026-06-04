@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   getIsolationProgress,
   hasClearedAllIsolationDuels,
+  hasClearedFinalIsolationBattle,
   type IsolationDuelMemberId,
 } from "../game/isolation/progress";
 import type { ScenarioId } from "../game/scenario/scenarios";
@@ -49,7 +50,7 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
   const clearedSet = useMemo(() => new Set(progress.clearedDuels), [progress.clearedDuels]);
   const clearedCount = progress.clearedDuels.length;
   const finalBattleUnlocked = hasClearedAllIsolationDuels(progress);
-  const finalBattleCleared = progress.finalBattleCleared;
+  const finalBattleCleared = hasClearedFinalIsolationBattle(progress);
 
   useEffect(() => {
     const refresh = () => setProgress(getIsolationProgress());
@@ -71,6 +72,7 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
             <div style={eyebrowStyle}>ISOLATION ZONE</div>
             <h1 style={titleStyle}>隔離区域</h1>
             <div style={subtitleStyle}>己の影と向き合う場所</div>
+            {finalBattleCleared && <div style={clearedZoneStyle}>ISOLATION ZONE CLEARED / 己の影を越えた</div>}
           </div>
           <button type="button" onClick={onReturnContinent} style={returnButtonStyle}>
             大陸MAPへ戻る
@@ -81,7 +83,7 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
           <div style={panelTitleStyle}>最終試練：一騎打ち</div>
           <p style={leadStyle}>
             この区域では、Gの部屋メンバーがそれぞれ自分の闇落ちVerと一騎打ちを行います。
-            すべての影を越えると、闇落ちスキンが解放されます。
+            すべての影を越え、最終決戦を制すると、闇落ちスキンが解放されます。
           </p>
           <div style={progressPillStyle}>
             影の踏破：{clearedCount} / {DUEL_MISSIONS.length}
@@ -118,11 +120,14 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
             })}
             <button
               type="button"
-              disabled
-              title="最終決戦：準備中"
+              disabled={!finalBattleUnlocked && !finalBattleCleared}
+              title={finalBattleUnlocked || finalBattleCleared ? "第33話 最終決戦" : "最終決戦：未解放"}
+              onClick={() => {
+                if (finalBattleUnlocked || finalBattleCleared) onStartScenario("scenario33");
+              }}
               style={{
                 ...missionButtonStyle,
-                ...disabledMissionStyle,
+                ...(!finalBattleUnlocked && !finalBattleCleared ? disabledMissionStyle : null),
                 ...(finalBattleCleared ? clearedMissionStyle : null),
               }}
             >
@@ -136,7 +141,7 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
         </section>
 
         <div style={noteStyle}>
-          闇落ちスキンは、全員分の影を越えた後に開く「最終決戦」を制した時に解放される予定です。現在は「うしまる」の動作確認用ミッションのみ実装済みです。
+          闇落ちスキンは、全員分の影を越えた後に開く「最終決戦」を制した時に解放されます。CLEAR状態のミッションも再プレイできます。
         </div>
       </div>
     </div>
@@ -160,6 +165,7 @@ const headerStyle: CSSProperties = { display: "flex", alignItems: "end", justify
 const eyebrowStyle: CSSProperties = { color: "#c9b5ff", fontSize: 11, fontWeight: 950 };
 const titleStyle: CSSProperties = { margin: "4px 0 0", color: "#f5f0ff", fontSize: 30, textShadow: "0 0 18px rgba(156,112,255,0.34)" };
 const subtitleStyle: CSSProperties = { marginTop: 4, color: "rgba(231,223,255,0.76)", fontSize: 13, fontWeight: 850 };
+const clearedZoneStyle: CSSProperties = { marginTop: 8, color: "#c8ffe9", fontSize: 12, fontWeight: 950, textShadow: "0 0 14px rgba(126,240,200,0.28)" };
 const returnButtonStyle: CSSProperties = { minHeight: 40, padding: "0 14px", borderRadius: 12, border: "1px solid rgba(218,207,255,0.28)", background: "rgba(255,255,255,0.08)", color: "#f5f0ff", fontWeight: 950, cursor: "pointer" };
 const heroStyle: CSSProperties = { padding: 16, borderRadius: 16, border: "1px solid rgba(190,170,255,0.28)", background: "linear-gradient(180deg, rgba(36, 28, 62, 0.82), rgba(8, 10, 18, 0.88))", boxShadow: "0 22px 58px rgba(0,0,0,0.44), inset 0 0 46px rgba(120,78,255,0.1)" };
 const panelTitleStyle: CSSProperties = { color: "#ffe0ff", fontSize: 13, fontWeight: 950 };

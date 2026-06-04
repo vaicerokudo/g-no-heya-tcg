@@ -111,6 +111,20 @@ export function checkScenarioVictory(
     return null;
   }
 
+  if (scenarioId === "scenario33") {
+    const southAlive = instances.some((u) => u.side === "south");
+    const northAlive = instances.some((u) => u.side === "north");
+
+    if (!southAlive) {
+      return { winner: "north", detail: "Scenario 33 failed: all members were defeated." };
+    }
+    if (!northAlive) {
+      return { winner: "south", detail: "Scenario 33 clear: all shadows were defeated." };
+    }
+
+    return null;
+  }
+
   const isolationDuel = ISOLATION_DUEL_MATCHUPS[scenarioId];
   if (isolationDuel) {
     const darkAlive = instances.some((u) => u.unitId === isolationDuel.darkUnitId && u.side === "north");

@@ -82,7 +82,7 @@ import { addDeltaEventFlag, hasDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
 import { markWastelandScenarioCleared } from "./game/wasteland/progress";
 import { addBlackNoiseBayEventFlag, addShipPart } from "./game/blackNoiseBay/progress";
-import { markIsolationDuelCleared, type IsolationDuelMemberId } from "./game/isolation/progress";
+import { markFinalIsolationBattleCleared, markIsolationDuelCleared, type IsolationDuelMemberId } from "./game/isolation/progress";
 import {
   markHiddenHintFlag,
   readHiddenHintFlags,
@@ -860,6 +860,10 @@ export default function App() {
       }
       if (activeScenarioId === "scenario21") {
         addBlackNoiseBayEventFlag("black_noise_bay_chapter_cleared");
+      }
+      if (activeScenarioId === "scenario33") {
+        markFinalIsolationBattleCleared();
+        setUnlockedSkins(readUnlockedSkins());
       }
       const isolationDuelId = ISOLATION_SCENARIO_DUEL_IDS[activeScenarioId];
       if (isolationDuelId) {

@@ -22,7 +22,7 @@ type UseCpuTurnArgs = {
   rows: number;
   cols: number;
   unitsById: GameState["unitsById"];
-  scenarioType?: "standard" | "isolationDuel";
+  scenarioType?: "standard" | "isolationDuel" | "isolationFinalBattle";
   gameIdRef: CurrentRef<string>;
   turnRef: CurrentRef<Side>;
   phaseRef: CurrentRef<Phase>;

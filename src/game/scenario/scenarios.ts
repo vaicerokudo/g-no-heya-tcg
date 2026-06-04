@@ -34,12 +34,13 @@ export type ScenarioId =
   | "scenario30"
   | "scenario31"
   | "scenario32"
+  | "scenario33"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
 export type ScenarioReturnScene = "astoria" | "delta" | "dustWasteland" | "blackNoiseBay" | "isolationZone";
-export type ScenarioType = "standard" | "isolationDuel";
+export type ScenarioType = "standard" | "isolationDuel" | "isolationFinalBattle";
 
 export type ScenarioLine = {
   speaker: string;
@@ -1094,6 +1095,72 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     ],
     victory: ["これも、自分の一部なんだな。", "……進め。次は自分で選べ。"],
   }),
+  scenario33: {
+    id: "scenario33",
+    title: "第33話 最終決戦",
+    stageName: "隔離区域・最終決戦",
+    boardSizeMode: "advanced11",
+    scenarioType: "isolationFinalBattle",
+    backgroundUrl: "/backgrounds/scenario-isolation-zone.png",
+    returnScene: "isolationZone",
+    placements: [
+      { unitId: "SOCHO", side: "south", r: 10, c: 1, instanceId: "SC33-SOCHO" },
+      { unitId: "TSUTSU", side: "south", r: 10, c: 3, instanceId: "SC33-TSUTSU" },
+      { unitId: "ROKUDO", side: "south", r: 10, c: 5, instanceId: "SC33-ROKUDO" },
+      { unitId: "7171", side: "south", r: 10, c: 7, instanceId: "SC33-7171" },
+      { unitId: "MYOUOU", side: "south", r: 10, c: 9, instanceId: "SC33-MYOUOU" },
+      { unitId: "HIBIKI", side: "south", r: 9, c: 0, instanceId: "SC33-HIBIKI" },
+      { unitId: "USHIMARU", side: "south", r: 9, c: 2, instanceId: "SC33-USHIMARU" },
+      { unitId: "DELI", side: "south", r: 9, c: 4, instanceId: "SC33-DELI" },
+      { unitId: "YABUKO_NORMAL", side: "south", r: 9, c: 6, instanceId: "SC33-YABUKO" },
+      { unitId: "ROCKEL", side: "south", r: 9, c: 8, instanceId: "SC33-ROCKEL" },
+      { unitId: "PLAYER", side: "south", r: 9, c: 10, instanceId: "SC33-PLAYER" },
+      { unitId: "DARK_SOCHO", side: "north", r: 0, c: 1, instanceId: "SC33-DARK-SOCHO" },
+      { unitId: "DARK_TSUTSU", side: "north", r: 0, c: 3, instanceId: "SC33-DARK-TSUTSU" },
+      { unitId: "DARK_ROKUDO", side: "north", r: 0, c: 5, instanceId: "SC33-DARK-ROKUDO" },
+      { unitId: "DARK_7171", side: "north", r: 0, c: 7, instanceId: "SC33-DARK-7171" },
+      { unitId: "DARK_MYOUOU", side: "north", r: 0, c: 9, instanceId: "SC33-DARK-MYOUOU" },
+      { unitId: "DARK_HIBIKI", side: "north", r: 1, c: 0, instanceId: "SC33-DARK-HIBIKI" },
+      { unitId: "DARK_USHIMARU", side: "north", r: 1, c: 2, instanceId: "SC33-DARK-USHIMARU" },
+      { unitId: "DARK_DELI", side: "north", r: 1, c: 4, instanceId: "SC33-DARK-DELI" },
+      { unitId: "DARK_YABUKO", side: "north", r: 1, c: 6, instanceId: "SC33-DARK-YABUKO" },
+      { unitId: "DARK_ROCKEL", side: "north", r: 1, c: 8, instanceId: "SC33-DARK-ROCKEL" },
+      { unitId: "DARK_PLAYER", side: "north", r: 1, c: 10, instanceId: "SC33-DARK-PLAYER" },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "明王", text: "ここが最後の試練じゃ。皆、己の影を越えよ。" },
+        { speaker: "総長", text: "OKです！ ここを越えれば、みんなで前に進めます！" },
+        { speaker: "つつ", text: "しょうがねぇなぁ……最後まで付き合うしかねぇか。" },
+        { speaker: "ROKUDO", text: "大丈夫？ でも、ここはもう逃げる場所ではありません。" },
+        { speaker: "7171", text: "全員まとめて来るにゃ。見ものだにゃ。" },
+        { speaker: "hibiki", text: "ふん……相手が影だろうが、本物が負ける道理はない。" },
+        { speaker: "うしまる", text: "釣り上げる相手が増えたみたいっすね。" },
+        { speaker: "Deli", text: "ここで止まるわけにはいかない……やるしかない。" },
+        { speaker: "やぶこ", text: "ちょっとこわいけど、みんな一緒なら大丈夫なの？" },
+        { speaker: "ROCKEL", text: "全部まとめてぶっ壊すっす！" },
+        { speaker: "Player", text: "かっこいい・・。僕も、負けない・・。" },
+        { speaker: "明王", text: "来るぞ。闇の軍勢……最終決戦開始じゃ！" },
+      ],
+      victory: [
+        { speaker: "総長", text: "OKです！ みんな、乗り越えました！" },
+        { speaker: "ROKUDO", text: "闇の気配が、静かにほどけていきます。" },
+        { speaker: "7171", text: "これで終わりにゃ。ようやく片付いたにゃ。" },
+        { speaker: "hibiki", text: "当然だ。俺たちが負けるわけないだろう。" },
+        { speaker: "うしまる", text: "怖いものがあっても、進めるって分かったっす。" },
+        { speaker: "Deli", text: "……これで、背負い込むだけじゃなくて済みそうだ。" },
+        { speaker: "やぶこ", text: "みんなの影も、ちゃんと前に進めたの？" },
+        { speaker: "ROCKEL", text: "最高の決着っす！" },
+        { speaker: "Player", text: "かっこいい・・。みんな、本当にかっこいい・・。" },
+        { speaker: "明王", text: "見事じゃ。己の影を越えし者たちよ、その証を受け取るがよい。" },
+        { speaker: "システム", text: "闇スキンを解放しました。" },
+      ],
+      defeat: [
+        { speaker: "明王", text: "影は濃い。じゃが、ここで終わりではない。" },
+        { speaker: "総長", text: "OKです……もう一度、全員で立て直しましょう。" },
+      ],
+    },
+  },
   scenario_plaza_monten: {
     id: "scenario_plaza_monten",
     title: "Monten Trial",

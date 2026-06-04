@@ -16,7 +16,7 @@ export type EvalCtx = {
   unitsById: Record<string, any>;
   instances: any[];
   actorId: string;
-  scenarioType?: "standard" | "isolationDuel";
+  scenarioType?: "standard" | "isolationDuel" | "isolationFinalBattle";
 
   // 任意：危険セルやゲート（今は未使用でもOK）
   dangerCells?: Set<string>;
@@ -37,12 +37,15 @@ export function manhattan(a: { r: number; c: number }, b: { r: number; c: number
   return Math.abs(a.r - b.r) + Math.abs(a.c - b.c);
 }
 
+function isIsolationBattleType(scenarioType: EvalCtx["scenarioType"]) {
+  return scenarioType === "isolationDuel" || scenarioType === "isolationFinalBattle";
+}
 
 export function scoreCandidate(ctx: EvalCtx, cand: { action: CpuAction; nextInstances: any[] }) {
   const { action, nextInstances } = cand;
 
-  // 通常戦ではゲート到達も勝ち筋として評価する。隔離区域の一騎打ちでは撃破だけを見る。
-  if (ctx.scenarioType !== "isolationDuel") {
+  // 通常戦ではゲート到達も勝ち筋として評価する。隔離区域では撃破だけを見る。
+  if (!isIsolationBattleType(ctx.scenarioType)) {
     const v = checkVictory(ctx.rows, ctx.cols, nextInstances as any);
     if (v && v.winner === ctx.side) return 1_000_000;
   }
@@ -90,7 +93,7 @@ export function scoreCandidate(ctx: EvalCtx, cand: { action: CpuAction; nextInst
 
     const actor = ctx.instances.find((u) => u.instanceId === ctx.actorId);
     if (actor) {
-      if (ctx.scenarioType !== "isolationDuel") {
+      if (!isIsolationBattleType(ctx.scenarioType)) {
         const forward = ctx.side === "south" ? -1 : 1;
         s += (action.r - actor.pos.r) * forward * 10;
       }
@@ -100,12 +103,12 @@ export function scoreCandidate(ctx: EvalCtx, cand: { action: CpuAction; nextInst
       if (enemies.length) {
         const curDist = Math.min(...enemies.map((e) => manhattan(actor.pos, e.pos)));
         const nextDist = Math.min(...enemies.map((e) => manhattan({ r: action.r, c: action.c }, e.pos)));
-        s += (curDist - nextDist) * (ctx.scenarioType === "isolationDuel" ? 80 : 15);
+        s += (curDist - nextDist) * (isIsolationBattleType(ctx.scenarioType) ? 80 : 15);
       }
     }
 
     // ゲートが渡されてたら、近いほど少し加点（今は未使用でもOK）
-    if (ctx.scenarioType !== "isolationDuel" && ctx.gateCells && ctx.gateCells.size) {
+    if (!isIsolationBattleType(ctx.scenarioType) && ctx.gateCells && ctx.gateCells.size) {
       const gates = Array.from(ctx.gateCells).map((k) => {
         const [rr, cc] = k.split(",").map(Number);
         return { r: rr, c: cc };

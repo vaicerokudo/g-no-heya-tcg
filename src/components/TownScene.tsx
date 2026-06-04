@@ -168,7 +168,7 @@ const RECEPTION_DIALOG: Record<Exclude<ReceptionTopic, "password">, { label: str
 const RECEPTION_CHOICES: ReceptionTopic[] = ["first", "table", "skin", "password"];
 const MYOUOU_ROOM_HINTS = [
   "ふははは、よく来たのう。\nここは、少し先の道を覗く部屋じゃ。\n\nサウンドコミックの姿を望むなら、7171に合言葉を伝えるがよい。",
-  "旅の装いは、砂塵の荒野を越えた者に開かれる。\n闇の姿は、己の影と向き合う隔離区域の先にあるじゃろう。",
+  "旅の装いは、砂塵の荒野を越えた者に開かれる。\n闇の姿は、隔離区域の最終決戦を越えた者に開かれる。",
 ];
 
 function clamp(value: number, min: number, max: number) {
