@@ -23,8 +23,61 @@ export type IsolationProgress = {
   finalBattleCleared: boolean;
 };
 
+const ISOLATION_SCENARIO_MEMBER_IDS: Record<string, IsolationDuelMemberId> = {
+  scenario22: "ushimaru",
+  scenario23: "socho",
+  scenario24: "tsutsu",
+  scenario25: "rokudo",
+  scenario26: "7171",
+  scenario27: "myouou",
+  scenario28: "hibiki",
+  scenario29: "deli",
+  scenario30: "yabuko",
+  scenario31: "rockel",
+  scenario32: "player",
+};
+
+const LEGACY_MEMBER_ID_ALIASES: Record<string, IsolationDuelMemberId> = {
+  SOCHO: "socho",
+  TSUTSU: "tsutsu",
+  ROKUDO: "rokudo",
+  MYOUOU: "myouou",
+  HIBIKI: "hibiki",
+  USHIMARU: "ushimaru",
+  DELI: "deli",
+  YABUKO_NORMAL: "yabuko",
+  YABUKO_FM: "yabuko",
+  YABUKO: "yabuko",
+  ROCKEL: "rockel",
+  PLAYER: "player",
+};
+
 function isIsolationDuelMemberId(value: unknown): value is IsolationDuelMemberId {
   return typeof value === "string" && ISOLATION_DUEL_MEMBER_IDS.includes(value as IsolationDuelMemberId);
+}
+
+function normalizeIsolationDuelMemberId(value: unknown): IsolationDuelMemberId | null {
+  if (isIsolationDuelMemberId(value)) return value;
+  if (typeof value !== "string") return null;
+  return LEGACY_MEMBER_ID_ALIASES[value] ?? null;
+}
+
+function readScenarioClearedIsolationDuels(): IsolationDuelMemberId[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = window.localStorage.getItem("gnoheya_tcg_cleared_scenarios");
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .map((scenarioId) => ISOLATION_SCENARIO_MEMBER_IDS[String(scenarioId)])
+      .filter((memberId): memberId is IsolationDuelMemberId => Boolean(memberId));
+  } catch {
+    return [];
+  }
 }
 
 function normalizeIsolationProgress(value: unknown): IsolationProgress {
@@ -32,7 +85,7 @@ function normalizeIsolationProgress(value: unknown): IsolationProgress {
 
   const raw = value as Partial<Record<keyof IsolationProgress, unknown>>;
   const clearedDuels = Array.isArray(raw.clearedDuels)
-    ? Array.from(new Set(raw.clearedDuels.filter(isIsolationDuelMemberId)))
+    ? Array.from(new Set(raw.clearedDuels.map(normalizeIsolationDuelMemberId).filter(isIsolationDuelMemberId)))
     : [];
   const finalBattleCleared = raw.finalBattleCleared === true;
 
@@ -44,10 +97,16 @@ export function getIsolationProgress(): IsolationProgress {
 
   try {
     const raw = window.localStorage.getItem(ISOLATION_PROGRESS_STORAGE_KEY);
-    if (!raw) return { clearedDuels: [], finalBattleCleared: false };
-    return normalizeIsolationProgress(JSON.parse(raw));
+    const stored = raw ? normalizeIsolationProgress(JSON.parse(raw)) : { clearedDuels: [], finalBattleCleared: false };
+    return normalizeIsolationProgress({
+      clearedDuels: [...stored.clearedDuels, ...readScenarioClearedIsolationDuels()],
+      finalBattleCleared: stored.finalBattleCleared,
+    });
   } catch {
-    return { clearedDuels: [], finalBattleCleared: false };
+    return normalizeIsolationProgress({
+      clearedDuels: readScenarioClearedIsolationDuels(),
+      finalBattleCleared: false,
+    });
   }
 }
 
