@@ -536,7 +536,7 @@ const mapFrameStyle: CSSProperties = {
   borderRadius: 20,
   border: "1px solid rgba(125,231,255,0.30)",
   background:
-    "linear-gradient(180deg, rgba(4,10,16,0.08), rgba(4,10,16,0.26)), url('/backgrounds/delta-facility-map.png') center / 100% 100% no-repeat, linear-gradient(180deg, rgba(12,31,43,0.98), rgba(11,16,28,0.98))",
+    "linear-gradient(180deg, rgba(4,10,16,0.08), rgba(4,10,16,0.26)), url('/backgrounds/delta-facility-map.webp') center / 100% 100% no-repeat, linear-gradient(180deg, rgba(12,31,43,0.98), rgba(11,16,28,0.98))",
   boxShadow: "0 22px 60px rgba(0,0,0,0.52), inset 0 0 62px rgba(64,211,255,0.13)",
 };
 

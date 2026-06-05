@@ -97,13 +97,13 @@ const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalM
 };
 
 const DISTRICTS: District[] = [
-  { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", backgroundUrl: "/backgrounds/necro-city/entrance.png" },
-  { id: "plaza", label: "中央広場", subLabel: "クロイツに相談", backgroundUrl: "/backgrounds/necro-city/central-plaza.png" },
-  { id: "market", label: "港湾市場区", subLabel: "帆布の手がかり", backgroundUrl: "/backgrounds/necro-city/harbor-market.png" },
-  { id: "clock", label: "時計塔周辺", subLabel: "舵輪と羅針盤", backgroundUrl: "/backgrounds/necro-city/clocktower-area.png" },
-  { id: "waterfront", label: "水辺区画", subLabel: "倉庫と灯台", backgroundUrl: "/backgrounds/necro-city/waterfront-area.png" },
-  { id: "residential", label: "市街跡", subLabel: "記録と手記", backgroundUrl: "/backgrounds/necro-city/residential-ruins.png" },
-  { id: "shipyard", label: "造船区", subLabel: "補強材と造船", backgroundUrl: "/backgrounds/necro-city/shipyard-area.png" },
+  { id: "entrance", label: "入口", subLabel: "大陸MAPへ戻る", backgroundUrl: "/backgrounds/necro-city/entrance.webp" },
+  { id: "plaza", label: "中央広場", subLabel: "クロイツに相談", backgroundUrl: "/backgrounds/necro-city/central-plaza.webp" },
+  { id: "market", label: "港湾市場区", subLabel: "帆布の手がかり", backgroundUrl: "/backgrounds/necro-city/harbor-market.webp" },
+  { id: "clock", label: "時計塔周辺", subLabel: "舵輪と羅針盤", backgroundUrl: "/backgrounds/necro-city/clocktower-area.webp" },
+  { id: "waterfront", label: "水辺区画", subLabel: "倉庫と灯台", backgroundUrl: "/backgrounds/necro-city/waterfront-area.webp" },
+  { id: "residential", label: "市街跡", subLabel: "記録と手記", backgroundUrl: "/backgrounds/necro-city/residential-ruins.webp" },
+  { id: "shipyard", label: "造船区", subLabel: "補強材と造船", backgroundUrl: "/backgrounds/necro-city/shipyard-area.webp" },
 ];
 
 const NECRO_CITY_HOTSPOTS: NecroCityHotspot[] = [
@@ -775,7 +775,7 @@ const sceneStyle: CSSProperties = {
   boxSizing: "border-box",
   color: "#edf7ff",
   background:
-    "linear-gradient(180deg, rgba(8, 12, 18, 0.28), rgba(4, 7, 11, 0.88)), radial-gradient(circle at 28% 18%, rgba(122, 198, 255, 0.14), transparent 28%), url('/backgrounds/necro-city-map.png') center top / cover no-repeat, linear-gradient(180deg, #151a23 0%, #12171c 48%, #080b10 100%)",
+    "linear-gradient(180deg, rgba(8, 12, 18, 0.28), rgba(4, 7, 11, 0.88)), radial-gradient(circle at 28% 18%, rgba(122, 198, 255, 0.14), transparent 28%), url('/backgrounds/necro-city-map.webp') center top / cover no-repeat, linear-gradient(180deg, #151a23 0%, #12171c 48%, #080b10 100%)",
 };
 
 const shellStyle: CSSProperties = { width: "min(1180px, 100%)", margin: "0 auto" };
@@ -786,7 +786,7 @@ const subtitleStyle: CSSProperties = { marginTop: 4, color: "rgba(237,247,255,0.
 const returnButtonStyle: CSSProperties = { minHeight: 38, padding: "0 14px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(255,255,255,0.08)", color: "#edf7ff", fontWeight: 950, cursor: "pointer" };
 const progressStripStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 8, padding: "7px 10px", borderRadius: 12, border: "1px solid rgba(210,232,255,0.16)", background: "rgba(7, 10, 15, 0.62)", color: "#dff2ff", fontSize: 12, fontWeight: 950 };
 const layoutStyle: CSSProperties = { display: "block" };
-const mapStyle: CSSProperties = { position: "relative", minHeight: "min(80dvh, 820px)", overflow: "hidden", borderRadius: 14, border: "1px solid rgba(210,232,255,0.22)", background: "linear-gradient(180deg, rgba(8, 12, 18, 0.02), rgba(4, 7, 11, 0.24)), url('/backgrounds/necro-city-map.png') center / cover no-repeat, linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.5), inset 0 0 54px rgba(0,0,0,0.28)" };
+const mapStyle: CSSProperties = { position: "relative", minHeight: "min(80dvh, 820px)", overflow: "hidden", borderRadius: 14, border: "1px solid rgba(210,232,255,0.22)", background: "linear-gradient(180deg, rgba(8, 12, 18, 0.02), rgba(4, 7, 11, 0.24)), url('/backgrounds/necro-city-map.webp') center / cover no-repeat, linear-gradient(145deg, #28313a 0%, #161a20 52%, #0d1016 100%)", boxShadow: "0 20px 56px rgba(0,0,0,0.5), inset 0 0 54px rgba(0,0,0,0.28)" };
 const mapNarrowStyle: CSSProperties = { minHeight: "72dvh", borderRadius: 12 };
 const routeSvgStyle: CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", opacity: 0.78 };
 const routeLineStyle: CSSProperties = { fill: "none", stroke: "rgba(255,224,163,0.28)", strokeWidth: 0.62, strokeDasharray: "1.6 1.8", filter: "drop-shadow(0 0 4px rgba(255,224,163,0.28))" };

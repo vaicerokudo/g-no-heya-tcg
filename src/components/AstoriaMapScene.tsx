@@ -47,7 +47,7 @@ type SpriteState = "idle" | "running-left" | "running-right";
 
 const YOUTUBE_URL = "https://www.youtube.com/@Gnoheya-6910";
 const LINE_STAMP_URL = "https://store.line.me/stickershop/product/32711346/ja?from=sticker";
-const ASTORIA_MAP_IMAGE_URL = "/backgrounds/astoria-map.png";
+const ASTORIA_MAP_IMAGE_URL = "/backgrounds/astoria-map.webp";
 const SAGG_IMAGE_URL = "/characters/sagg.png";
 const SHOPKEEPER_IMAGE_URL = "/characters/shopkeeper.png";
 const MONTEN_IMAGE_URL = "/characters/monten.png";

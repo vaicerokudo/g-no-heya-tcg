@@ -15,7 +15,7 @@ type ContinentMapSceneProps = {
   onEnterIsolationZone: () => void;
 };
 
-const CONTINENT_MAP_IMAGE_URL = "/backgrounds/continent-map.png";
+const CONTINENT_MAP_IMAGE_URL = "/backgrounds/continent-map.webp";
 
 type Hotspot = {
   id: "astoria" | "delta" | "dustWasteland" | "fortressZero" | "blackNoiseBay" | "necroCity" | "isolationZone";

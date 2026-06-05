@@ -31,7 +31,7 @@ type WastelandExplorationSpot = {
   dialogue: { speaker: string; text: string }[];
 };
 
-const DUST_WASTELAND_ROUTE_BACKGROUND_URL = "/backgrounds/dust-wasteland-route-map.png";
+const DUST_WASTELAND_ROUTE_BACKGROUND_URL = "/backgrounds/dust-wasteland-route-map.webp";
 
 const WASTELAND_NODES: WastelandNode[] = [
   { id: "scenario12", title: "第12話 荒野の入口", subtitle: "つつとやぶこの荒野調査開始", x: 24, y: 78 },

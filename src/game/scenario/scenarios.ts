@@ -522,7 +522,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第12話 荒野の入口",
     stageName: "砂塵の荒野",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.webp",
     returnScene: "dustWasteland",
     placements: [
       { unitId: "TSUTSU", side: "south", r: 5, c: 2, instanceId: "SC12-TSUTSU" },
@@ -554,7 +554,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第13話 流砂地帯",
     stageName: "砂塵の荒野・流砂地帯",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.webp",
     returnScene: "dustWasteland",
     terrain: {
       quicksand: ["C3", "D4", "E5"],
@@ -592,7 +592,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第14話 砂嵐の抜け道",
     stageName: "砂塵の荒野・砂嵐の抜け道",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.webp",
     returnScene: "dustWasteland",
     terrain: {
       quicksand: ["B4", "F4"],
@@ -630,7 +630,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第15話 荒野の奥地",
     stageName: "砂塵の荒野・奥地",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-dust-wasteland.png",
+    backgroundUrl: "/backgrounds/scenario-dust-wasteland.webp",
     returnScene: "dustWasteland",
     terrain: {
       quicksand: ["C4", "D3", "E4"],
@@ -675,7 +675,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第16話 黒い潮",
     stageName: "ブラックノイズ湾・湾岸",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.webp",
     returnScene: "blackNoiseBay",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC16-USHIMARU" },
@@ -714,7 +714,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第17話 漂着する影",
     stageName: "ブラックノイズ湾・漂着地",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.webp",
     returnScene: "blackNoiseBay",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC17-USHIMARU" },
@@ -753,7 +753,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第18話 湾の中心へ",
     stageName: "ブラックノイズ湾・中心遠望",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.webp",
     returnScene: "blackNoiseBay",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 2, instanceId: "SC18-USHIMARU" },
@@ -789,7 +789,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第19話 船出",
     stageName: "ブラックノイズ湾・船出",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.webp",
     returnScene: "blackNoiseBay",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 1, instanceId: "SC19-USHIMARU" },
@@ -831,7 +831,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第20話 リヴァイアサンを釣れ",
     stageName: "ブラックノイズ湾・湾中央",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.webp",
     returnScene: "blackNoiseBay",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 1, instanceId: "SC20-USHIMARU" },
@@ -876,7 +876,7 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "第21話 黒潮の主",
     stageName: "ブラックノイズ湾・黒潮の主",
     boardSizeMode: "starter7",
-    backgroundUrl: "/backgrounds/scenario-black-noise-bay.png",
+    backgroundUrl: "/backgrounds/scenario-black-noise-bay.webp",
     returnScene: "blackNoiseBay",
     placements: [
       { unitId: "USHIMARU", side: "south", r: 5, c: 1, instanceId: "SC21-USHIMARU" },

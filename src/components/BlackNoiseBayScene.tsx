@@ -456,7 +456,7 @@ const mapFrameStyle: CSSProperties = {
   borderRadius: 18,
   border: "1px solid rgba(143,215,255,0.24)",
   background:
-    "linear-gradient(180deg, rgba(5, 14, 22, 0.08), rgba(3, 8, 13, 0.36)), url('/backgrounds/black-noise-bay-map.png') center / cover no-repeat, linear-gradient(180deg, #143040 0%, #0b1723 100%)",
+    "linear-gradient(180deg, rgba(5, 14, 22, 0.08), rgba(3, 8, 13, 0.36)), url('/backgrounds/black-noise-bay-map.webp') center / cover no-repeat, linear-gradient(180deg, #143040 0%, #0b1723 100%)",
   boxShadow: "0 24px 70px rgba(0,0,0,0.52), inset 0 0 70px rgba(9, 22, 32, 0.42)",
 };
 
