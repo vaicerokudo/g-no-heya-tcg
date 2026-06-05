@@ -23,7 +23,7 @@ import {
 } from "./game/scenario/scenarios";
 import { scenarioEnemyUnits } from "./game/scenario/enemyUnits";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSkillTargeting } from "./game/hooks/useSkillTargeting";
 import { useSkillExecution } from "./game/hooks/useSkillExecution";
 import { usePlayerActions } from "./game/hooks/usePlayerActions";
@@ -54,15 +54,6 @@ import { SelectedUnitStatus } from "./components/SelectedUnitStatus";
 import { SkillModeBanner } from "./components/SkillModeBanner";
 import { SkillCutInOverlay } from "./components/SkillCutInOverlay";
 import { TopStatusBar } from "./components/TopStatusBar";
-import { AstoriaMapScene } from "./components/AstoriaMapScene";
-import { ContinentMapScene } from "./components/ContinentMapScene";
-import { DeltaMapScene } from "./components/DeltaMapScene";
-import { DustWastelandScene } from "./components/DustWastelandScene";
-import { FortressZeroScene } from "./components/FortressZeroScene";
-import { BlackNoiseBayScene } from "./components/BlackNoiseBayScene";
-import { NecroCityScene } from "./components/NecroCityScene";
-import { IsolationZoneScene } from "./components/IsolationZoneScene";
-import { TownScene } from "./components/TownScene";
 import { TurnEndConfirm } from "./components/UI/TurnEndConfirm";
 import { VictoryModal } from "./components/UI/VictoryModal";
 import { ScenarioDialog } from "./components/Scenario/ScenarioDialog";
@@ -95,6 +86,34 @@ import {
   type HiddenHintFlag,
 } from "./game/scenario/hiddenHints";
 
+const AstoriaMapScene = lazy(() =>
+  import("./components/AstoriaMapScene").then((module) => ({ default: module.AstoriaMapScene }))
+);
+const ContinentMapScene = lazy(() =>
+  import("./components/ContinentMapScene").then((module) => ({ default: module.ContinentMapScene }))
+);
+const DeltaMapScene = lazy(() =>
+  import("./components/DeltaMapScene").then((module) => ({ default: module.DeltaMapScene }))
+);
+const DustWastelandScene = lazy(() =>
+  import("./components/DustWastelandScene").then((module) => ({ default: module.DustWastelandScene }))
+);
+const FortressZeroScene = lazy(() =>
+  import("./components/FortressZeroScene").then((module) => ({ default: module.FortressZeroScene }))
+);
+const BlackNoiseBayScene = lazy(() =>
+  import("./components/BlackNoiseBayScene").then((module) => ({ default: module.BlackNoiseBayScene }))
+);
+const NecroCityScene = lazy(() =>
+  import("./components/NecroCityScene").then((module) => ({ default: module.NecroCityScene }))
+);
+const IsolationZoneScene = lazy(() =>
+  import("./components/IsolationZoneScene").then((module) => ({ default: module.IsolationZoneScene }))
+);
+const TownScene = lazy(() =>
+  import("./components/TownScene").then((module) => ({ default: module.TownScene }))
+);
+
 function posKey(r: number, c: number) {
   return `${r},${c}`;
 }
@@ -122,6 +141,17 @@ function getHandFallbackSrc(unitId: string, side: Side, skin: Skin) {
 // Prefer the lightweight hand thumbnail; image onError falls back to the full card.
 function getHandCardSrc(unitId: string, side: Side, skin: Skin) {
   return getHandThumbSrc(unitId, side, skin);
+}
+
+function SceneLoading() {
+  return (
+    <div className="sceneLoading" role="status" aria-live="polite">
+      <div className="sceneLoadingPanel">
+        <div className="sceneLoadingEyebrow">Gの部屋TCG</div>
+        <div className="sceneLoadingTitle">読み込み中...</div>
+      </div>
+    </div>
+  );
 }
 
 type PerUnitTurn = Record<string, { moved: boolean; attacked: boolean; done: boolean }>;
@@ -1699,7 +1729,7 @@ const reinforceSet = useMemo(() => {
     const continentUnlocked = clearedScenarioIds.includes("scenario7");
 
     return (
-      <>
+      <Suspense fallback={<SceneLoading />}>
         <AstoriaMapScene
           onEnterLobby={() => setScene("town")}
           onOpenScenarioSelect={openScenarioSelect}
@@ -1714,73 +1744,91 @@ const reinforceSet = useMemo(() => {
           onClose={() => setScenarioSelectOpen(false)}
           onStartScenario={handleScenarioSelectStart}
         />
-      </>
+      </Suspense>
     );
   }
 
   if (scene === "continent") {
     return (
-      <ContinentMapScene
-        onReturnAstoria={() => setScene("astoria")}
-        onEnterDelta={() => setScene("delta")}
-        onEnterDustWasteland={() => setScene("dustWasteland")}
-        onEnterFortressZero={() => setScene("fortressZero")}
-        onEnterBlackNoiseBay={() => setScene("blackNoiseBay")}
-        onEnterNecroCity={() => setScene("necroCity")}
-        onEnterIsolationZone={() => setScene("isolationZone")}
-      />
+      <Suspense fallback={<SceneLoading />}>
+        <ContinentMapScene
+          onReturnAstoria={() => setScene("astoria")}
+          onEnterDelta={() => setScene("delta")}
+          onEnterDustWasteland={() => setScene("dustWasteland")}
+          onEnterFortressZero={() => setScene("fortressZero")}
+          onEnterBlackNoiseBay={() => setScene("blackNoiseBay")}
+          onEnterNecroCity={() => setScene("necroCity")}
+          onEnterIsolationZone={() => setScene("isolationZone")}
+        />
+      </Suspense>
     );
   }
 
   if (scene === "delta") {
     return (
-      <DeltaMapScene
-        onReturnContinent={() => setScene("continent")}
-        onStartScenario={handleScenarioSelectStart}
-        clearedScenarioIds={clearedScenarioIds}
-      />
+      <Suspense fallback={<SceneLoading />}>
+        <DeltaMapScene
+          onReturnContinent={() => setScene("continent")}
+          onStartScenario={handleScenarioSelectStart}
+          clearedScenarioIds={clearedScenarioIds}
+        />
+      </Suspense>
     );
   }
 
   if (scene === "dustWasteland") {
     return (
-      <DustWastelandScene
-        onReturnContinent={() => setScene("continent")}
-        onStartScenario={handleScenarioSelectStart}
-      />
+      <Suspense fallback={<SceneLoading />}>
+        <DustWastelandScene
+          onReturnContinent={() => setScene("continent")}
+          onStartScenario={handleScenarioSelectStart}
+        />
+      </Suspense>
     );
   }
 
   if (scene === "fortressZero") {
-    return <FortressZeroScene onReturnContinent={() => setScene("continent")} />;
+    return (
+      <Suspense fallback={<SceneLoading />}>
+        <FortressZeroScene onReturnContinent={() => setScene("continent")} />
+      </Suspense>
+    );
   }
 
   if (scene === "blackNoiseBay") {
     return (
-      <BlackNoiseBayScene
-        clearedScenarioIds={clearedScenarioIds}
-        onReturnContinent={() => setScene("continent")}
-        onStartScenario={handleScenarioSelectStart}
-      />
+      <Suspense fallback={<SceneLoading />}>
+        <BlackNoiseBayScene
+          clearedScenarioIds={clearedScenarioIds}
+          onReturnContinent={() => setScene("continent")}
+          onStartScenario={handleScenarioSelectStart}
+        />
+      </Suspense>
     );
   }
 
   if (scene === "necroCity") {
-    return <NecroCityScene onReturnContinent={() => setScene("continent")} />;
+    return (
+      <Suspense fallback={<SceneLoading />}>
+        <NecroCityScene onReturnContinent={() => setScene("continent")} />
+      </Suspense>
+    );
   }
 
   if (scene === "isolationZone") {
     return (
-      <IsolationZoneScene
-        onReturnContinent={() => setScene("continent")}
-        onStartScenario={handleScenarioSelectStart}
-      />
+      <Suspense fallback={<SceneLoading />}>
+        <IsolationZoneScene
+          onReturnContinent={() => setScene("continent")}
+          onStartScenario={handleScenarioSelectStart}
+        />
+      </Suspense>
     );
   }
 
   if (scene === "town") {
     return (
-      <>
+      <Suspense fallback={<SceneLoading />}>
         <TownScene
           onExitToMap={() => setScene("astoria")}
           onEnterTcg={() => setScene("tcg")}
@@ -1796,7 +1844,7 @@ const reinforceSet = useMemo(() => {
           onClose={() => setScenarioSelectOpen(false)}
           onStartScenario={handleScenarioSelectStart}
         />
-      </>
+      </Suspense>
     );
   }
 
