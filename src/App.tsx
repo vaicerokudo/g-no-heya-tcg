@@ -79,7 +79,12 @@ import { addDeltaEventFlag, hasDeltaEventFlag } from "./game/delta/eventFlags";
 import { addDeltaMachinePart } from "./game/delta/progress";
 import { markWastelandScenarioCleared } from "./game/wasteland/progress";
 import { addBlackNoiseBayEventFlag, addShipPart } from "./game/blackNoiseBay/progress";
-import { markFinalIsolationBattleCleared, markIsolationDuelCleared, type IsolationDuelMemberId } from "./game/isolation/progress";
+import {
+  hasClearedFinalIsolationBattle,
+  markFinalIsolationBattleCleared,
+  markIsolationDuelCleared,
+  type IsolationDuelMemberId,
+} from "./game/isolation/progress";
 import {
   hasStoredGameProgress,
   resetGameProgressStorage,
@@ -1184,12 +1189,8 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     startScenario(scenarioId);
   }
 
-  function handleHiddenScenarioStart() {
-    const cleared = readClearedScenarios();
-    const nextScenarioId: ScenarioId = cleared.includes("scenario_hidden_myouou")
-      ? "scenario_hidden_author"
-      : "scenario_hidden_myouou";
-    handleScenarioSelectStart(nextScenarioId);
+  function handleHiddenScenarioStart(scenarioId: ScenarioId) {
+    handleScenarioSelectStart(scenarioId);
   }
 
   function handleStartMontenTrial() {
@@ -1919,6 +1920,7 @@ const reinforceSet = useMemo(() => {
           onStartHiddenScenario={handleHiddenScenarioStart}
           onSkinUnlocked={refreshUnlockedSkins}
           hiddenTrialHintUnlocked={hiddenHintFlags.includes("monten_defeated")}
+          authorTrialUnlocked={hasClearedFinalIsolationBattle()}
           clearedScenarioIds={clearedScenarioIds}
           unitsById={unitsById}
         />

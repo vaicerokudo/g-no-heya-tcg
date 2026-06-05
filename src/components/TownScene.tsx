@@ -10,10 +10,11 @@ import { CollectionDialog } from "./Town/CollectionDialog";
 type TownSceneProps = {
   onEnterTcg: () => void;
   onOpenScenarioSelect?: () => void;
-  onStartHiddenScenario?: () => void;
+  onStartHiddenScenario?: (scenarioId: ScenarioId) => void;
   onExitToMap?: () => void;
   onSkinUnlocked?: () => void;
   hiddenTrialHintUnlocked?: boolean;
+  authorTrialUnlocked?: boolean;
   clearedScenarioIds?: ScenarioId[];
   unitsById: Record<string, UnitDef>;
 };
@@ -130,6 +131,7 @@ const TOWN_HOTSPOTS: TownHotspot[] = [
   },
 ];
 const MYOUOU_ROOM_IMAGE = "/characters/myouou-room.png";
+const AUTHOR_ROKUDO_IMAGE = "/ui/isolation/rokudo-final-boss.png";
 const INTERACTION_THRESHOLD = 4;
 const RECEPTION_INTERACTION_THRESHOLD = 2.5;
 const SPRITE_CELL_WIDTH = 192;
@@ -190,6 +192,7 @@ export function TownScene({
   onExitToMap,
   onSkinUnlocked,
   hiddenTrialHintUnlocked = false,
+  authorTrialUnlocked = false,
   clearedScenarioIds = [],
   unitsById,
 }: TownSceneProps) {
@@ -240,7 +243,7 @@ export function TownScene({
     } else if (target === "story") {
       onOpenScenarioSelect?.();
     } else if (target === "hiddenTrial") {
-      onStartHiddenScenario?.();
+      setActiveDialog("myououRoom");
     } else if (target === "table") {
       onEnterTcg();
     } else if (target === "exit") {
@@ -380,6 +383,8 @@ export function TownScene({
   }, [receptionTopic]);
 
   const safeFrameIndex = frameIndex % spriteAnim.frames;
+  const myououTrialCleared = clearedScenarioIds.includes("scenario_hidden_myouou");
+  const authorTrialCleared = clearedScenarioIds.includes("scenario_hidden_author");
   const interactionButtonLabel =
     interactionTarget === "reception"
       ? "話す"
@@ -534,6 +539,55 @@ export function TownScene({
                   <div style={dialogNameStyle}>明王</div>
                   <div style={dialogTopicStyle}>明王の部屋</div>
                   <div style={dialogTextStyle}>{MYOUOU_ROOM_HINTS.join("\n\n")}</div>
+                  {onStartHiddenScenario ? (
+                    <div style={trialSelectStyle}>
+                      <div style={trialSelectTitleStyle}>試練</div>
+                      <button
+                        type="button"
+                        onClick={() => onStartHiddenScenario("scenario_hidden_myouou")}
+                        style={trialCardStyle(myououTrialCleared)}
+                      >
+                        <span style={trialBadgeStyle(myououTrialCleared)}>
+                          {myououTrialCleared ? "CLEAR" : "NEXT"}
+                        </span>
+                        <span style={trialTextWrapStyle}>
+                          <span style={trialTitleStyle}>明王の試練</span>
+                          <span style={trialSubStyle}>
+                            {myououTrialCleared ? "もう一度挑む" : "明王の試練に挑む"}
+                          </span>
+                        </span>
+                      </button>
+                      {authorTrialUnlocked ? (
+                        <button
+                          type="button"
+                          onClick={() => onStartHiddenScenario("scenario_hidden_author")}
+                          style={trialCardStyle(authorTrialCleared)}
+                        >
+                          <span style={trialImageFrameStyle}>
+                            <img
+                              src={AUTHOR_ROKUDO_IMAGE}
+                              alt="作者ロクド"
+                              style={trialImageStyle}
+                              loading="lazy"
+                              decoding="async"
+                              onError={(event) => {
+                                event.currentTarget.style.display = "none";
+                              }}
+                            />
+                          </span>
+                          <span style={trialTextWrapStyle}>
+                            <span style={trialBadgeStyle(authorTrialCleared)}>
+                              {authorTrialCleared ? "CLEAR" : "NEXT"}
+                            </span>
+                            <span style={trialTitleStyle}>作者ロクド戦</span>
+                            <span style={trialSubStyle}>
+                              {authorTrialCleared ? "もう一度挑む" : "越えた先の気配"}
+                            </span>
+                          </span>
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
                 <button onClick={() => setActiveDialog(null)} style={dialogCloseButtonStyle}>
                   閉じる
@@ -831,6 +885,90 @@ const passphraseMessageStyle: CSSProperties = {
   fontSize: 14,
   lineHeight: 1.55,
   whiteSpace: "pre-line",
+};
+
+const trialSelectStyle: CSSProperties = {
+  marginTop: 18,
+  display: "grid",
+  gap: 10,
+};
+
+const trialSelectTitleStyle: CSSProperties = {
+  color: "#ffd66d",
+  fontSize: 13,
+  fontWeight: 950,
+};
+
+function trialCardStyle(cleared: boolean): CSSProperties {
+  return {
+    width: "100%",
+    minHeight: 68,
+    padding: 10,
+    borderRadius: 14,
+    border: cleared ? "1px solid rgba(126,240,200,0.58)" : "1px solid rgba(255,216,102,0.42)",
+    background: cleared ? "rgba(34, 105, 78, 0.22)" : "rgba(255, 216, 102, 0.1)",
+    color: "#fff6df",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    textAlign: "left",
+    cursor: "pointer",
+    boxShadow: cleared ? "0 0 18px rgba(126,240,200,0.12)" : "0 0 16px rgba(255,216,102,0.1)",
+    touchAction: "manipulation",
+  };
+}
+
+function trialBadgeStyle(cleared: boolean): CSSProperties {
+  return {
+    flex: "0 0 auto",
+    minWidth: 54,
+    padding: "5px 8px",
+    borderRadius: 999,
+    background: cleared ? "rgba(35, 116, 86, 0.86)" : "rgba(198, 135, 45, 0.74)",
+    color: cleared ? "#c8ffe9" : "#fff1cc",
+    fontSize: 11,
+    fontWeight: 950,
+    lineHeight: 1,
+    textAlign: "center",
+  };
+}
+
+const trialTextWrapStyle: CSSProperties = {
+  minWidth: 0,
+  display: "grid",
+  gap: 3,
+};
+
+const trialTitleStyle: CSSProperties = {
+  color: "#fff6df",
+  fontSize: 15,
+  fontWeight: 950,
+};
+
+const trialSubStyle: CSSProperties = {
+  color: "rgba(255,246,223,0.76)",
+  fontSize: 12,
+  fontWeight: 850,
+};
+
+const trialImageFrameStyle: CSSProperties = {
+  flex: "0 0 auto",
+  width: 48,
+  height: 58,
+  borderRadius: 10,
+  overflow: "hidden",
+  border: "1px solid rgba(255,232,180,0.28)",
+  background: "radial-gradient(circle, rgba(150,100,255,0.24), rgba(20,12,26,0.78))",
+  display: "grid",
+  placeItems: "center",
+};
+
+const trialImageStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  objectPosition: "center",
+  display: "block",
 };
 
 const dialogCloseButtonStyle: CSSProperties = {
