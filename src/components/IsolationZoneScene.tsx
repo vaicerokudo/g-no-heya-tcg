@@ -44,8 +44,10 @@ const DUEL_MISSIONS: DuelMission[] = [
 const FINAL_MISSION: FinalMission = {
   id: "finalBattle",
   label: "最終決戦",
-  subLabel: "全員の影を越えた先",
+  subLabel: "越えた先の気配",
 };
+
+const AUTHOR_ROKUDO_FINAL_IMAGE_PATH = "/ui/isolation/rokudo-final-boss.png";
 
 export function IsolationZoneScene({ onReturnContinent, onStartScenario }: IsolationZoneSceneProps) {
   const [progress, setProgress] = useState(() => getIsolationProgress());
@@ -54,6 +56,7 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
   const clearedCount = progress.clearedDuels.length;
   const finalBattleUnlocked = hasClearedAllIsolationDuels(progress);
   const finalBattleCleared = hasClearedFinalIsolationBattle(progress);
+  const finalImageAvailable = !failedImagePaths.has(AUTHOR_ROKUDO_FINAL_IMAGE_PATH);
 
   useEffect(() => {
     const refresh = () => setProgress(getIsolationProgress());
@@ -153,8 +156,20 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
                 ...(finalBattleCleared ? clearedMissionStyle : null),
               }}
             >
-              <span style={finalVisualFrameStyle} aria-hidden="true">
-                <span style={finalVisualCoreStyle}>影</span>
+              <span style={finalVisualFrameStyle}>
+                {finalImageAvailable ? (
+                  <img
+                    src={AUTHOR_ROKUDO_FINAL_IMAGE_PATH}
+                    alt="作者ロクド"
+                    style={finalVisualImageStyle}
+                    draggable={false}
+                    onError={() => {
+                      setFailedImagePaths((current) => new Set(current).add(AUTHOR_ROKUDO_FINAL_IMAGE_PATH));
+                    }}
+                  />
+                ) : (
+                  <span style={finalVisualCoreStyle}>影</span>
+                )}
               </span>
               <span style={missionContentStyle}>
                 <span style={missionBadgeStyle(finalBattleCleared, finalBattleUnlocked)}>
@@ -245,7 +260,17 @@ const darkPortraitFallbackStyle: CSSProperties = {
 const finalVisualFrameStyle: CSSProperties = {
   ...darkPortraitFrameStyle,
   background:
-    "radial-gradient(circle at 50% 32%, rgba(255,255,255,0.7), rgba(139,91,255,0.5) 22%, rgba(20,8,40,0.95) 68%)",
+    "radial-gradient(circle at 50% 32%, rgba(255,255,255,0.18), rgba(139,91,255,0.28) 34%, rgba(20,8,40,0.95) 74%)",
+  borderColor: "rgba(216, 194, 255, 0.48)",
+  boxShadow: "inset 0 0 20px rgba(0,0,0,0.5), 0 0 24px rgba(123,82,255,0.22)",
+};
+const finalVisualImageStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  objectPosition: "center",
+  display: "block",
+  filter: "contrast(1.05) saturate(1.08)",
 };
 const finalVisualCoreStyle: CSSProperties = {
   display: "grid",
