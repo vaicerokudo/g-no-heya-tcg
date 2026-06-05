@@ -4,9 +4,13 @@ import {
   addBlackNoiseBayEventFlag,
   addShipPart,
   readShipProgress,
+  readNecroCityProgress,
   SHIP_PART_IDS,
   SHIP_PART_LABELS,
+  unlockNextNecroCitySpot,
   type BlackNoiseBayEventFlag,
+  type NecroCityProgress,
+  type NecroCitySpotId,
   type ShipPartId,
 } from "../game/blackNoiseBay/progress";
 
@@ -42,7 +46,7 @@ type District = {
 };
 
 type NecroCityHotspot = {
-  id: string;
+  id: NecroCitySpotId;
   districtId: DistrictId;
   label: string;
   subLabel: string;
@@ -51,6 +55,12 @@ type NecroCityHotspot = {
   rokuX?: number;
   rokuY?: number;
   kind: "back" | "guide" | "search" | "hint" | "build";
+};
+
+type RouteSegment = {
+  from: NecroCitySpotId;
+  to: NecroCitySpotId;
+  branch?: boolean;
 };
 
 type DistrictAction = {
@@ -108,6 +118,30 @@ const NECRO_CITY_HOTSPOTS: NecroCityHotspot[] = [
   { id: "shipyard", districtId: "shipyard", label: "造船所", subLabel: "船を作る", x: 79, y: 33, rokuX: 82, rokuY: 39, kind: "build" },
 ];
 
+const NECRO_CITY_ROUTE_SEGMENTS: RouteSegment[] = [
+  { from: "entrance", to: "plaza" },
+  { from: "plaza", to: "market" },
+  { from: "plaza", to: "residential" },
+  { from: "residential", to: "clock" },
+  { from: "plaza", to: "waterfront", branch: true },
+  { from: "plaza", to: "oldShipyard" },
+  { from: "oldShipyard", to: "shipyard" },
+  { from: "shipyard", to: "lighthouse" },
+  { from: "waterfront", to: "market", branch: true },
+];
+
+const NECRO_CITY_SPOT_LABELS: Record<NecroCitySpotId, string> = {
+  entrance: "入口",
+  plaza: "中央広場",
+  market: "港湾市場",
+  residential: "市街跡",
+  clock: "時計塔",
+  waterfront: "水辺倉庫",
+  oldShipyard: "旧造船区",
+  lighthouse: "灯台跡",
+  shipyard: "造船所",
+};
+
 const DISTRICT_ACTIONS: Record<DistrictId, DistrictAction[]> = {
   entrance: [{ id: "returnContinent", label: "大陸MAPへ戻る", subLabel: "廃都の入口から外へ出る" }],
   plaza: [{ id: "consultKruitz", label: "クロイツに相談する", subLabel: "次の探索先を聞く" }],
@@ -134,47 +168,26 @@ const DISTRICT_ACTIONS: Record<DistrictId, DistrictAction[]> = {
   ],
 };
 
-function hasFlag(flags: BlackNoiseBayEventFlag[], flag: BlackNoiseBayEventFlag) {
-  return flags.includes(flag);
-}
-
 function getNextMissingPart(partsSet: Set<ShipPartId>) {
   return SHIP_PART_IDS.find((partId) => !partsSet.has(partId)) ?? null;
 }
 
-function getKruitzHint(partsSet: Set<ShipPartId>, flags: BlackNoiseBayEventFlag[]) {
-  if (!partsSet.has("wood")) {
-    return "木材は、でっかい斧の子が持ってくるって言ってたにゃ。湾での調査を進めるにゃ。";
-  }
-  if (!hasFlag(flags, "necro_market_record_found")) {
-    return "まず港湾市場区に行くにゃ。廃市場に、帆布の行き先を書いた記録が残ってるかもしれないにゃ。";
-  }
-  if (!partsSet.has("sailcloth")) {
-    return "帆布の本体は旧酒場にゃ。市場で見つけた記録が、そこを指してるにゃ。";
-  }
-  if (!partsSet.has("helm")) {
-    return "高いところに、回るものが残ってた気がするにゃ。時計塔周辺を探すにゃ。";
-  }
-  if (!hasFlag(flags, "necro_clock_mechanism_found") || !partsSet.has("compass")) {
-    return "時計塔の機構が分かれば、見張り塔跡の羅針盤も使えるかもしれないにゃ。";
-  }
-  if (!partsSet.has("waterproof_material")) {
-    return "沈まないためのものは、水の近くを探すにゃ。水辺区画に向かうにゃ。";
-  }
-  if (!partsSet.has("anchor_chain")) {
-    return "船を留める鎖は、朽ちた船着き場に残ってるかもしれないにゃ。";
-  }
-  if (!partsSet.has("lantern")) {
-    return "霧の湾を進むなら光がいるにゃ。灯台跡を見てくるにゃ。";
-  }
-  if (!partsSet.has("hull_reinforcement")) {
-    return "最後は造船区にゃ。船の底を守るものを探すにゃ。";
-  }
-  return "部材は揃ったにゃ。造船区の造船所へ行くにゃ。";
+function getKruitzStageHint(
+  progress: NecroCityProgress,
+  partsSet: Set<ShipPartId>,
+  shipBuilt: boolean,
+  unlockedSpotId: NecroCitySpotId | null
+) {
+  if (shipBuilt) return "船は完成しているにゃ。湾へ戻るにゃ。";
+  if (unlockedSpotId) return `思い出したにゃ。次は${NECRO_CITY_SPOT_LABELS[unlockedSpotId]}を調べるにゃ。`;
+  if (SHIP_PART_IDS.every((partId) => partsSet.has(partId))) return "部材は揃ったにゃ。造船所へ行くにゃ。";
+  if (progress.unlockedSpotIds.length <= 2) return "この街、まだ少しだけ覚えてるにゃ。まずは港湾市場を思い出すにゃ。";
+  return "もう行ける場所は思い出したにゃ。あとは部材を揃えて造船所へ行くにゃ。";
 }
 
 export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   const [progress, setProgress] = useState(() => readShipProgress());
+  const [necroProgress, setNecroProgress] = useState<NecroCityProgress>(() => readNecroCityProgress(readShipProgress()));
   const [activeDistrict, setActiveDistrict] = useState<DistrictId>("entrance");
   const [isAreaModalOpen, setIsAreaModalOpen] = useState(false);
   const [isKruitzModalOpen, setIsKruitzModalOpen] = useState(false);
@@ -187,6 +200,7 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
     title: "入口",
     lines: ["霧の向こうに、廃都ネクロシティが沈んでいる。", "背景の地点を選ぶと、ロクがその場所へ向かいます。"],
   });
+  const [unlockNotice, setUnlockNotice] = useState<string | null>(null);
   const moveTimerRef = useRef<number | null>(null);
 
   const partsSet = useMemo(() => new Set(progress.parts), [progress.parts]);
@@ -196,7 +210,11 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   const activeDistrictConfig = DISTRICTS.find((district) => district.id === activeDistrict) ?? DISTRICTS[1];
 
   useEffect(() => {
-    const refresh = () => setProgress(readShipProgress());
+    const refresh = () => {
+      const nextShipProgress = readShipProgress();
+      setProgress(nextShipProgress);
+      setNecroProgress(readNecroCityProgress(nextShipProgress));
+    };
     refresh();
     window.addEventListener("storage", refresh);
     window.addEventListener("focus", refresh);
@@ -251,17 +269,23 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
     };
   }, []);
 
-  const refreshProgress = () => setProgress(readShipProgress());
+  const refreshProgress = () => {
+    const nextShipProgress = readShipProgress();
+    setProgress(nextShipProgress);
+    setNecroProgress(readNecroCityProgress(nextShipProgress));
+  };
 
   const collectPart = (partId: ShipPartId) => {
     if (partsSet.has(partId)) return false;
     setProgress(addShipPart(partId));
+    setNecroProgress(readNecroCityProgress());
     return true;
   };
 
   const markFlag = (flag: BlackNoiseBayEventFlag) => {
     if (flags.includes(flag)) return false;
     setProgress(addBlackNoiseBayEventFlag(flag));
+    setNecroProgress(readNecroCityProgress());
     return true;
   };
 
@@ -292,6 +316,7 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
     setActiveDistrict(district.id);
     setIsAreaModalOpen(false);
     setIsKruitzModalOpen(false);
+    setUnlockNotice(null);
     setFacing(nextPos.x < rokuPos.x ? "left" : "right");
     setIsMoving(true);
     setRokuPos(nextPos);
@@ -322,7 +347,9 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
     }
 
     addBlackNoiseBayEventFlag("ship_built");
-    setProgress(addBlackNoiseBayEventFlag("black_noise_bay_ship_ready"));
+    const nextShipProgress = addBlackNoiseBayEventFlag("black_noise_bay_ship_ready");
+    setProgress(nextShipProgress);
+    setNecroProgress(readNecroCityProgress(nextShipProgress));
     setMessage({
       title: "造船所",
       lines: ["船が組み上がった。", "これでブラックノイズ湾の中心へ向かえる。"],
@@ -337,6 +364,14 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
     }
 
     if (action.id === "consultKruitz") {
+      const result = unlockNextNecroCitySpot(progress);
+      setNecroProgress(result.progress);
+      setUnlockNotice(result.unlockedSpotId ? `新しい探索地点：${NECRO_CITY_SPOT_LABELS[result.unlockedSpotId]}` : null);
+      setMessage({
+        title: "クロイツの記憶",
+        lines: [getKruitzStageHint(result.progress, partsSet, shipBuilt, result.unlockedSpotId)],
+        tone: result.unlockedSpotId ? "success" : "hint",
+      });
       setIsKruitzModalOpen(true);
       return;
     }
@@ -489,7 +524,22 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
   const districtActions =
     DISTRICT_ACTIONS[activeDistrict];
   const kruitzExpression = getKruitzExpression(isKruitzModalOpen);
-  const kruitzHint = getKruitzHint(partsSet, flags);
+  const unlockedSpotSet = useMemo(() => new Set(necroProgress.unlockedSpotIds), [necroProgress.unlockedSpotIds]);
+  const visibleHotspots = useMemo(
+    () => NECRO_CITY_HOTSPOTS.filter((hotspot) => unlockedSpotSet.has(hotspot.id)),
+    [unlockedSpotSet]
+  );
+  const visibleRouteSegments = useMemo(
+    () => NECRO_CITY_ROUTE_SEGMENTS.filter((segment) => unlockedSpotSet.has(segment.from) && unlockedSpotSet.has(segment.to)),
+    [unlockedSpotSet]
+  );
+  const kruitzHint = getKruitzStageHint(necroProgress, partsSet, shipBuilt, null);
+  const blueprintStatus = shipBuilt ? "船完成" : allPartsReady ? "設計図完成" : `完成度 ${progress.parts.length} / ${SHIP_PART_IDS.length}`;
+
+  const getRoutePoint = (spotId: NecroCitySpotId) => {
+    const spot = NECRO_CITY_HOTSPOTS.find((item) => item.id === spotId);
+    return spot ? `${spot.x},${spot.y}` : "0,0";
+  };
 
   const getHotspotBadge = (hotspot: NecroCityHotspot) => {
     if (hotspot.kind === "back") return "BACK";
@@ -525,10 +575,16 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
         <main style={layoutStyle}>
           <section style={{ ...mapStyle, ...(isNarrow ? mapNarrowStyle : null) }} aria-label="廃都ネクロシティ探索MAP">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={routeSvgStyle} aria-hidden="true">
-              <polyline points="50,91 39,66 50,57 40,42 25,24" style={routeLineStyle} />
-              <polyline points="50,57 68,39 79,33 80,24" style={routeLineStyle} />
-              <polyline points="50,57 26,76 39,66" style={routeBranchStyle} />
-              <polyline points="50,57 68,39 26,76" style={routeBranchStyle} />
+              {visibleRouteSegments.map((segment) => (
+                <line
+                  key={`${segment.from}-${segment.to}`}
+                  x1={getRoutePoint(segment.from).split(",")[0]}
+                  y1={getRoutePoint(segment.from).split(",")[1]}
+                  x2={getRoutePoint(segment.to).split(",")[0]}
+                  y2={getRoutePoint(segment.to).split(",")[1]}
+                  style={segment.branch ? routeBranchStyle : routeLineStyle}
+                />
+              ))}
             </svg>
             <div style={fogLayerStyle} />
             <div
@@ -547,7 +603,7 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
             <div style={mapCaptionStyle}>
               <span>{shipBuilt ? "船完成。湾中央へ向かう準備が整った" : "クロイツの記憶を頼りに廃都を巡る"}</span>
             </div>
-            {NECRO_CITY_HOTSPOTS.map((hotspot) => {
+            {visibleHotspots.map((hotspot) => {
               const active = activeDistrict === hotspot.districtId;
               const badge = getHotspotBadge(hotspot);
               return (
@@ -604,6 +660,33 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
               <div style={areaVisualLabelStyle}>{activeDistrictConfig.label}</div>
               <div style={areaVisualSubStyle}>{activeDistrictConfig.subLabel}</div>
             </div>
+
+            {activeDistrict === "plaza" ? (
+              <div style={blueprintPanelStyle}>
+                <div style={blueprintHeaderStyle}>
+                  <span>船の設計図</span>
+                  <span>{blueprintStatus}</span>
+                </div>
+                <div style={blueprintGridStyle}>
+                  {SHIP_PART_IDS.map((partId) => {
+                    const collected = partsSet.has(partId);
+                    return (
+                      <div key={partId} style={{ ...blueprintPieceStyle, ...(collected ? blueprintPieceDoneStyle : null) }}>
+                        <span>{collected ? "✓" : "□"}</span>
+                        <span>{SHIP_PART_LABELS[partId]}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={blueprintNoteStyle}>
+                  {shipBuilt
+                    ? "船は完成した。湾中央へ向かう準備が整っている。"
+                    : allPartsReady
+                      ? "必要な部材が揃った。造船所へ向かおう。"
+                      : "部材を見つけるたび、設計図の線が少しずつ戻っていく。"}
+                </div>
+              </div>
+            ) : null}
 
             {districtActions.length ? (
               <div style={actionListStyle}>
@@ -664,6 +747,7 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
                 <strong style={kruitzNameStyle}>クロイツ</strong>
                 <span>この街、まだ少しだけ覚えてるにゃ。</span>
                 <span>{kruitzHint}</span>
+                {unlockNotice ? <span style={unlockNoticeStyle}>{unlockNotice}</span> : null}
               </div>
             </div>
 
@@ -736,6 +820,12 @@ const detailSubStyle: CSSProperties = { marginTop: 4, color: "rgba(237,247,255,0
 const areaVisualStyle: CSSProperties = { minHeight: 150, borderRadius: 12, border: "1px solid rgba(210,232,255,0.2)", backgroundPosition: "center", backgroundSize: "cover", backgroundRepeat: "no-repeat", boxShadow: "inset 0 -56px 68px rgba(0,0,0,0.72), inset 0 0 70px rgba(0,0,0,0.4)", display: "flex", flexDirection: "column", justifyContent: "end", gap: 4, padding: 12, boxSizing: "border-box", overflow: "hidden" };
 const areaVisualLabelStyle: CSSProperties = { width: "fit-content", maxWidth: "100%", padding: "4px 9px", borderRadius: 999, border: "1px solid rgba(255,224,163,0.58)", background: "rgba(5,8,13,0.68)", color: "#ffe0a3", fontSize: 13, fontWeight: 950, textShadow: "0 1px 4px rgba(0,0,0,0.82)" };
 const areaVisualSubStyle: CSSProperties = { width: "fit-content", maxWidth: "100%", padding: "3px 8px", borderRadius: 999, background: "rgba(5,8,13,0.62)", color: "rgba(237,247,255,0.86)", fontSize: 11, fontWeight: 900, textShadow: "0 1px 4px rgba(0,0,0,0.82)" };
+const blueprintPanelStyle: CSSProperties = { display: "grid", gap: 10, padding: 12, borderRadius: 12, border: "1px solid rgba(255,224,163,0.24)", background: "linear-gradient(135deg, rgba(43, 34, 20, 0.72), rgba(8, 13, 19, 0.72))", boxShadow: "inset 0 0 30px rgba(255,224,163,0.08)" };
+const blueprintHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", color: "#ffe0a3", fontSize: 13, fontWeight: 950 };
+const blueprintGridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 7 };
+const blueprintPieceStyle: CSSProperties = { minHeight: 34, padding: "6px 8px", boxSizing: "border-box", borderRadius: 8, border: "1px solid rgba(210,232,255,0.13)", background: "rgba(0,0,0,0.22)", color: "rgba(237,247,255,0.48)", display: "flex", alignItems: "center", gap: 7, fontSize: 12, fontWeight: 850 };
+const blueprintPieceDoneStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.5)", background: "rgba(54, 104, 84, 0.24)", color: "#dfffea", boxShadow: "0 0 14px rgba(126,240,200,0.08)" };
+const blueprintNoteStyle: CSSProperties = { color: "rgba(237,247,255,0.68)", fontSize: 12, lineHeight: 1.5, fontWeight: 850 };
 const kruitzPanelStyle: CSSProperties = { display: "grid", gridTemplateColumns: "132px 1fr", gap: 16, alignItems: "center", minHeight: 176, padding: 14, boxSizing: "border-box", borderRadius: 14, border: "1px solid rgba(185,160,255,0.32)", background: "linear-gradient(135deg, rgba(52, 36, 82, 0.68), rgba(12, 18, 28, 0.64))", boxShadow: "inset 0 0 34px rgba(137,95,255,0.12)" };
 const kruitzPanelNarrowStyle: CSSProperties = { gridTemplateColumns: "1fr", justifyItems: "center", textAlign: "center", gap: 10 };
 const kruitzFrameStyle: CSSProperties = { width: 128, height: 128, borderRadius: 18, display: "grid", placeItems: "center", background: "radial-gradient(circle, rgba(185,160,255,0.26), rgba(10,14,24,0.2))", border: "1px solid rgba(185,160,255,0.38)", boxShadow: "0 0 24px rgba(137,95,255,0.24), inset 0 0 22px rgba(0,0,0,0.28)", overflow: "hidden" };
@@ -743,6 +833,7 @@ const kruitzFrameNarrowStyle: CSSProperties = { width: 104, height: 104 };
 const kruitzImageStyle: CSSProperties = { width: "132%", height: "132%", objectFit: "contain" };
 const kruitzTextStyle: CSSProperties = { display: "grid", alignContent: "center", gap: 6, color: "rgba(237,247,255,0.9)", fontSize: 14, lineHeight: 1.6, fontWeight: 850 };
 const kruitzNameStyle: CSSProperties = { color: "#ffe0a3", fontSize: 16, letterSpacing: 0, textShadow: "0 0 14px rgba(255,214,150,0.24)" };
+const unlockNoticeStyle: CSSProperties = { width: "fit-content", padding: "4px 8px", borderRadius: 999, border: "1px solid rgba(126,240,200,0.34)", background: "rgba(48, 100, 78, 0.24)", color: "#dfffea", fontSize: 12, fontWeight: 950 };
 const actionListStyle: CSSProperties = { display: "grid", gap: 8, gridAutoRows: "minmax(76px, auto)" };
 const actionButtonStyle: CSSProperties = { width: "100%", minHeight: 76, padding: 11, boxSizing: "border-box", borderRadius: 10, border: "1px solid rgba(210,232,255,0.22)", background: "linear-gradient(180deg, rgba(31, 44, 54, 0.92), rgba(10, 14, 20, 0.88))", color: "#edf7ff", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4, textAlign: "left", cursor: "pointer", lineHeight: 1.25 };
 const actionDoneStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.64)" };
