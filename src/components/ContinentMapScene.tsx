@@ -1,7 +1,9 @@
-import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import rokuSpriteSheet from "../assets/pets/roku/spritesheet.webp";
 import { hasDeltaEventFlag } from "../game/delta/eventFlags";
 import { hasWastelandEventFlag } from "../game/wasteland/progress";
 import { hasBlackNoiseBayEventFlag } from "../game/blackNoiseBay/progress";
+import { getIsolationProgress, hasClearedFinalIsolationBattle } from "../game/isolation/progress";
 
 type ContinentMapSceneProps = {
   onReturnAstoria: () => void;
@@ -29,6 +31,25 @@ type Hotspot = {
 type DebugPoint = {
   x: number;
   y: number;
+};
+
+type MapPos = {
+  x: number;
+  y: number;
+};
+
+type Facing = "left" | "right";
+type SpriteState = "idle" | "running-left" | "running-right";
+
+const ROKU_PLAYER_SIZE = 30;
+const ROKU_MOVE_MS = 520;
+const SPRITE_CELL_WIDTH = 192;
+const SPRITE_CELL_HEIGHT = 208;
+const ROKU_SPRITE_SCALE = ROKU_PLAYER_SIZE / SPRITE_CELL_WIDTH;
+const SPRITE_ANIMS: Record<SpriteState, { row: number; frames: number; intervalMs: number }> = {
+  idle: { row: 0, frames: 6, intervalMs: 190 },
+  "running-right": { row: 1, frames: 8, intervalMs: 105 },
+  "running-left": { row: 2, frames: 8, intervalMs: 105 },
 };
 
 const HOTSPOTS: Hotspot[] = [
@@ -65,11 +86,19 @@ export function ContinentMapScene({
   const [blackNoiseBayCleared, setBlackNoiseBayCleared] = useState(() =>
     hasBlackNoiseBayEventFlag("black_noise_bay_chapter_cleared")
   );
+  const [isolationFinalCleared, setIsolationFinalCleared] = useState(() =>
+    hasClearedFinalIsolationBattle(getIsolationProgress())
+  );
+  const [rokuPos, setRokuPos] = useState<MapPos>({ x: 77, y: 71 });
+  const [facing, setFacing] = useState<Facing>("right");
+  const [isMoving, setIsMoving] = useState(false);
+  const [frameIndex, setFrameIndex] = useState(0);
   const [isDebugMap] = useState(() => {
     if (typeof window === "undefined") return false;
     return new URLSearchParams(window.location.search).get("debugMap") === "1";
   });
   const [debugPoint, setDebugPoint] = useState<DebugPoint | null>(null);
+  const moveTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const refreshChapterClearStatus = () => {
@@ -78,11 +107,36 @@ export function ContinentMapScene({
       setShipRequiredDiscovered(hasBlackNoiseBayEventFlag("ship_required_discovered"));
       setShipBuilt(hasBlackNoiseBayEventFlag("ship_built") || hasBlackNoiseBayEventFlag("black_noise_bay_ship_ready"));
       setBlackNoiseBayCleared(hasBlackNoiseBayEventFlag("black_noise_bay_chapter_cleared"));
+      setIsolationFinalCleared(hasClearedFinalIsolationBattle(getIsolationProgress()));
     };
 
     refreshChapterClearStatus();
     window.addEventListener("storage", refreshChapterClearStatus);
     return () => window.removeEventListener("storage", refreshChapterClearStatus);
+  }, []);
+
+  const spriteState: SpriteState = isMoving
+    ? facing === "left"
+      ? "running-left"
+      : "running-right"
+    : "idle";
+  const spriteAnim = SPRITE_ANIMS[spriteState];
+
+  useEffect(() => {
+    setFrameIndex(0);
+    const timerId = window.setInterval(() => {
+      setFrameIndex((current) => (current + 1) % spriteAnim.frames);
+    }, spriteAnim.intervalMs);
+
+    return () => window.clearInterval(timerId);
+  }, [spriteAnim.frames, spriteAnim.intervalMs, spriteState]);
+
+  useEffect(() => {
+    return () => {
+      if (moveTimerRef.current !== null) {
+        window.clearTimeout(moveTimerRef.current);
+      }
+    };
   }, []);
 
   const handleMapClick = (event: MouseEvent<HTMLDivElement>) => {
@@ -95,6 +149,35 @@ export function ContinentMapScene({
 
     setDebugPoint(nextPoint);
     console.log(`map position: left: ${x.toFixed(1)}%, top: ${y.toFixed(1)}%`);
+  };
+
+  const getHotspotAction = (spotId: Hotspot["id"]) => {
+    if (spotId === "astoria") return onReturnAstoria;
+    if (spotId === "delta") return onEnterDelta;
+    if (spotId === "dustWasteland") return onEnterDustWasteland;
+    if (spotId === "fortressZero") return onEnterFortressZero;
+    if (spotId === "blackNoiseBay") return onEnterBlackNoiseBay;
+    if (spotId === "necroCity") return onEnterNecroCity;
+    return onEnterIsolationZone;
+  };
+
+  const enterHotspotAfterRokuMove = (spot: Hotspot) => {
+    if (isMoving) return;
+
+    const nextPos = { x: spot.x, y: Math.min(94, spot.y + spot.h * 0.72) };
+    setFacing(nextPos.x < rokuPos.x ? "left" : "right");
+    setIsMoving(true);
+    setRokuPos(nextPos);
+
+    if (moveTimerRef.current !== null) {
+      window.clearTimeout(moveTimerRef.current);
+    }
+
+    moveTimerRef.current = window.setTimeout(() => {
+      setIsMoving(false);
+      moveTimerRef.current = null;
+      getHotspotAction(spot.id)();
+    }, ROKU_MOVE_MS);
   };
 
   return (
@@ -112,39 +195,43 @@ export function ContinentMapScene({
 
         <div style={mapFrameStyle} onClick={handleMapClick}>
           <img src={CONTINENT_MAP_IMAGE_URL} alt="" aria-hidden="true" style={mapImageStyle} />
+          <div
+            aria-label="ロク"
+            style={{
+              ...rokuSpriteStyle,
+              left: `${rokuPos.x}%`,
+              top: `${rokuPos.y}%`,
+              backgroundImage: `url(${rokuSpriteSheet})`,
+              backgroundPosition: `${-frameIndex * SPRITE_CELL_WIDTH * ROKU_SPRITE_SCALE}px ${
+                -spriteAnim.row * SPRITE_CELL_HEIGHT * ROKU_SPRITE_SCALE
+              }px`,
+            }}
+          />
           <div style={hotspotLayerStyle}>
             {HOTSPOTS.map((spot) => {
               if (spot.id === "necroCity" && !shipRequiredDiscovered) return null;
+              if (spot.id === "isolationZone" && !blackNoiseBayCleared) return null;
 
               const deltaCleared = spot.id === "delta" && deltaChapterCleared;
               const wastelandCleared = spot.id === "dustWasteland" && wastelandChapterCleared;
               const necroCityCleared = spot.id === "necroCity" && shipBuilt;
               const bayCleared = spot.id === "blackNoiseBay" && blackNoiseBayCleared;
-              const cleared = deltaCleared || wastelandCleared || necroCityCleared || bayCleared;
+              const isolationCleared = spot.id === "isolationZone" && isolationFinalCleared;
+              const cleared = deltaCleared || wastelandCleared || necroCityCleared || bayCleared || isolationCleared;
               const subLabel = cleared ? (spot.id === "necroCity" ? "探索完了" : "クリア済み") : spot.subLabel;
-              const handleClick =
-                spot.id === "astoria"
-                  ? onReturnAstoria
-                  : spot.id === "delta"
-                    ? onEnterDelta
-                    : spot.id === "dustWasteland"
-                      ? onEnterDustWasteland
-                    : spot.id === "fortressZero"
-                      ? onEnterFortressZero
-                      : spot.id === "blackNoiseBay"
-                        ? onEnterBlackNoiseBay
-                        : spot.id === "necroCity"
-                          ? onEnterNecroCity
-                          : onEnterIsolationZone;
 
               return (
                 <button
                   key={spot.id}
                   type="button"
-                  onClick={handleClick}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    enterHotspotAfterRokuMove(spot);
+                  }}
                   title={`${spot.label}: ${subLabel}`}
                   style={{
                     ...hotspotStyle,
+                    ...(isMoving ? hotspotMovingStyle : null),
                     left: `${spot.x}%`,
                     top: `${spot.y}%`,
                     width: `${spot.w}%`,
@@ -274,6 +361,24 @@ const hotspotStyle: CSSProperties = {
   cursor: "pointer",
   transform: "translate(-50%, -50%)",
   pointerEvents: "auto",
+};
+
+const hotspotMovingStyle: CSSProperties = {
+  cursor: "wait",
+};
+
+const rokuSpriteStyle: CSSProperties = {
+  position: "absolute",
+  width: ROKU_PLAYER_SIZE,
+  height: ROKU_PLAYER_SIZE * (SPRITE_CELL_HEIGHT / SPRITE_CELL_WIDTH),
+  transform: "translate(-50%, -90%)",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: `${SPRITE_CELL_WIDTH * ROKU_SPRITE_SCALE * 8}px ${SPRITE_CELL_HEIGHT * ROKU_SPRITE_SCALE * 9}px`,
+  imageRendering: "auto",
+  filter: "drop-shadow(0 7px 9px rgba(0,0,0,0.46)) drop-shadow(0 0 10px rgba(255,214,109,0.34))",
+  transition: `left ${ROKU_MOVE_MS}ms ease, top ${ROKU_MOVE_MS}ms ease`,
+  zIndex: 2,
+  pointerEvents: "none",
 };
 
 const hotspotLabelStyle: CSSProperties = {
