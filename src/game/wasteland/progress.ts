@@ -3,14 +3,22 @@ import type { ScenarioId } from "../scenario/scenarios";
 export const WASTELAND_PROGRESS_STORAGE_KEY = "gnoheya_tcg_wasteland_progress";
 
 export type WastelandEventFlag = "wasteland_chapter_cleared";
+export type WastelandExplorationSpotId = "camp" | "stone_monument" | "broken_cart" | "quicksand_watch";
 
 export type WastelandProgress = {
   clearedScenarios: ScenarioId[];
   flags: WastelandEventFlag[];
+  visitedSpots: WastelandExplorationSpotId[];
 };
 
 const WASTELAND_SCENARIO_IDS: ScenarioId[] = ["scenario12", "scenario13", "scenario14", "scenario15"];
 const WASTELAND_EVENT_FLAGS: WastelandEventFlag[] = ["wasteland_chapter_cleared"];
+const WASTELAND_EXPLORATION_SPOT_IDS: WastelandExplorationSpotId[] = [
+  "camp",
+  "stone_monument",
+  "broken_cart",
+  "quicksand_watch",
+];
 
 function isWastelandScenarioId(value: unknown): value is ScenarioId {
   return typeof value === "string" && WASTELAND_SCENARIO_IDS.includes(value as ScenarioId);
@@ -20,9 +28,16 @@ function isWastelandEventFlag(value: unknown): value is WastelandEventFlag {
   return typeof value === "string" && WASTELAND_EVENT_FLAGS.includes(value as WastelandEventFlag);
 }
 
+function isWastelandExplorationSpotId(value: unknown): value is WastelandExplorationSpotId {
+  return (
+    typeof value === "string" &&
+    WASTELAND_EXPLORATION_SPOT_IDS.includes(value as WastelandExplorationSpotId)
+  );
+}
+
 function normalizeWastelandProgress(value: unknown): WastelandProgress {
   if (!value || typeof value !== "object") {
-    return { clearedScenarios: [], flags: [] };
+    return { clearedScenarios: [], flags: [], visitedSpots: [] };
   }
 
   const raw = value as Partial<Record<keyof WastelandProgress, unknown>>;
@@ -32,20 +47,23 @@ function normalizeWastelandProgress(value: unknown): WastelandProgress {
   const flags = Array.isArray(raw.flags)
     ? Array.from(new Set(raw.flags.filter(isWastelandEventFlag)))
     : [];
+  const visitedSpots = Array.isArray(raw.visitedSpots)
+    ? Array.from(new Set(raw.visitedSpots.filter(isWastelandExplorationSpotId)))
+    : [];
 
-  return { clearedScenarios, flags };
+  return { clearedScenarios, flags, visitedSpots };
 }
 
 export function readWastelandProgress(): WastelandProgress {
-  if (typeof window === "undefined") return { clearedScenarios: [], flags: [] };
+  if (typeof window === "undefined") return { clearedScenarios: [], flags: [], visitedSpots: [] };
 
   try {
     const raw = window.localStorage.getItem(WASTELAND_PROGRESS_STORAGE_KEY);
-    if (!raw) return { clearedScenarios: [], flags: [] };
+    if (!raw) return { clearedScenarios: [], flags: [], visitedSpots: [] };
 
     return normalizeWastelandProgress(JSON.parse(raw));
   } catch {
-    return { clearedScenarios: [], flags: [] };
+    return { clearedScenarios: [], flags: [], visitedSpots: [] };
   }
 }
 
@@ -66,6 +84,17 @@ export function markWastelandScenarioCleared(scenarioId: ScenarioId): WastelandP
   const next = normalizeWastelandProgress({
     clearedScenarios: [...current.clearedScenarios, scenarioId],
     flags,
+    visitedSpots: current.visitedSpots,
+  });
+  writeWastelandProgress(next);
+  return next;
+}
+
+export function markWastelandExplorationSpotVisited(spotId: WastelandExplorationSpotId): WastelandProgress {
+  const current = readWastelandProgress();
+  const next = normalizeWastelandProgress({
+    ...current,
+    visitedSpots: [...current.visitedSpots, spotId],
   });
   writeWastelandProgress(next);
   return next;

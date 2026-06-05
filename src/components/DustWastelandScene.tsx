@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { ScenarioId } from "../game/scenario/scenarios";
-import { readWastelandProgress } from "../game/wasteland/progress";
+import {
+  markWastelandExplorationSpotVisited,
+  readWastelandProgress,
+  type WastelandExplorationSpotId,
+} from "../game/wasteland/progress";
 
 type DustWastelandSceneProps = {
   onReturnContinent: () => void;
@@ -16,6 +20,17 @@ type WastelandNode = {
   requires?: ScenarioId;
 };
 
+type WastelandExplorationSpot = {
+  id: WastelandExplorationSpotId;
+  title: string;
+  subtitle: string;
+  x: number;
+  y: number;
+  unlockAfter: ScenarioId;
+  description: string;
+  dialogue: { speaker: string; text: string }[];
+};
+
 const DUST_WASTELAND_ROUTE_BACKGROUND_URL = "/backgrounds/dust-wasteland-route-map.png";
 
 const WASTELAND_NODES: WastelandNode[] = [
@@ -25,9 +40,77 @@ const WASTELAND_NODES: WastelandNode[] = [
   { id: "scenario15", title: "第15話 荒野の奥地", subtitle: "助っ人7171参加予定", x: 74, y: 18, requires: "scenario14" },
 ];
 
+const EXPLORATION_SPOTS: WastelandExplorationSpot[] = [
+  {
+    id: "camp",
+    title: "砂除けの野営地",
+    subtitle: "砂風を避ける小さな休憩地点",
+    x: 47,
+    y: 68,
+    unlockAfter: "scenario12",
+    description: "砂を避ける布と、半分埋もれた焚き跡が残っている。荒野を渡る者が息を整えた場所だ。",
+    dialogue: [
+      { speaker: "やぶこ", text: "砂って、どこまで砂なの？" },
+      { speaker: "つつ", text: "哲学みたいに言うな。歩け。" },
+      { speaker: "やぶこ", text: "でも、休憩は大事なの？" },
+      { speaker: "つつ", text: "それはそうだ。倒れたら元も子もねぇからな。" },
+    ],
+  },
+  {
+    id: "stone_monument",
+    title: "風化した石碑",
+    subtitle: "流砂の道を示す古い警告",
+    x: 54,
+    y: 44,
+    unlockAfter: "scenario13",
+    description: "欠けた石碑に、砂に沈む道を避けろという古い警句が刻まれている。",
+    dialogue: [
+      { speaker: "やぶこ", text: "なんか古い文字があるの。" },
+      { speaker: "つつ", text: "砂に沈む者は、進む道を見失う……ってところか。" },
+      { speaker: "やぶこ", text: "つまり、砂に気をつけるの？" },
+      { speaker: "つつ", text: "そういうことだ。足元を見ろ。" },
+    ],
+  },
+  {
+    id: "broken_cart",
+    title: "壊れた荷車",
+    subtitle: "古い旅人の痕跡",
+    x: 45,
+    y: 24,
+    unlockAfter: "scenario14",
+    description: "砂に呑まれかけた荷車が、かつてこの道を越えようとした旅人の存在を物語っている。",
+    dialogue: [
+      { speaker: "やぶこ", text: "これ、誰かの荷車なの？" },
+      { speaker: "つつ", text: "だいぶ前のもんだな。砂に呑まれかけてる。" },
+      { speaker: "やぶこ", text: "ここを通った人がいたの？" },
+      { speaker: "つつ", text: "ああ。俺たちも、その道の続きを進んでるってことだ。" },
+      { speaker: "つつ", text: "荒野を越えるには、装備も歩き方も変えねぇとな。" },
+      { speaker: "やぶこ", text: "じゃあ、旅の服が必要なの？" },
+    ],
+  },
+  {
+    id: "quicksand_watch",
+    title: "流砂観測地点",
+    subtitle: "止まると次の動きが潰れる砂場",
+    x: 61,
+    y: 34,
+    unlockAfter: "scenario14",
+    description: "乾いた砂の中に、色の違う流れが混じっている。見分けを誤ると足を取られる。",
+    dialogue: [
+      { speaker: "つつ", text: "見ろ。あの砂、色が少し違うだろ。" },
+      { speaker: "やぶこ", text: "ほんとだ。おいしそうな色なの？" },
+      { speaker: "つつ", text: "食うな。あれが流砂だ。足を取られるぞ。" },
+      { speaker: "やぶこ", text: "足を取られたら、動けなくなるの？" },
+      { speaker: "つつ", text: "そうだ。次の動きが潰れる。覚えとけ。" },
+    ],
+  },
+];
+
 export function DustWastelandScene({ onReturnContinent, onStartScenario }: DustWastelandSceneProps) {
   const [progress, setProgress] = useState(() => readWastelandProgress());
+  const [activeSpot, setActiveSpot] = useState<WastelandExplorationSpot | null>(null);
   const clearedSet = useMemo(() => new Set(progress.clearedScenarios), [progress.clearedScenarios]);
+  const visitedSpotSet = useMemo(() => new Set(progress.visitedSpots), [progress.visitedSpots]);
   const chapterCleared = progress.flags.includes("wasteland_chapter_cleared");
 
   useEffect(() => {
@@ -46,6 +129,22 @@ export function DustWastelandScene({ onReturnContinent, onStartScenario }: DustW
     if (clearedSet.has(node.id)) return "clear";
     if (node.requires && !clearedSet.has(node.requires)) return "locked";
     return "next";
+  }
+
+  function getExplorationSpotState(spot: WastelandExplorationSpot) {
+    if (chapterCleared || visitedSpotSet.has(spot.id)) return "visited";
+    if (!clearedSet.has(spot.unlockAfter)) return "locked";
+    return "new";
+  }
+
+  function openExplorationSpot(spot: WastelandExplorationSpot) {
+    const spotState = getExplorationSpotState(spot);
+    if (spotState === "locked") return;
+
+    if (!visitedSpotSet.has(spot.id)) {
+      setProgress(markWastelandExplorationSpotVisited(spot.id));
+    }
+    setActiveSpot(spot);
   }
 
   return (
@@ -69,6 +168,7 @@ export function DustWastelandScene({ onReturnContinent, onStartScenario }: DustW
           <svg viewBox="0 0 100 100" aria-hidden="true" style={routeLineStyle}>
             <polyline points="24,78 72,56 28,34 74,18" fill="none" stroke="rgba(118,70,30,0.45)" strokeWidth="5.6" strokeLinecap="round" strokeLinejoin="round" />
             <polyline points="24,78 72,56 28,34 74,18" fill="none" stroke="rgba(255,226,156,0.5)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            <polyline points="24,78 47,68 72,56 54,44 28,34 45,24 61,34 74,18" fill="none" stroke="rgba(255,245,195,0.22)" strokeWidth="1.4" strokeDasharray="2.4 3.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
 
           {WASTELAND_NODES.map((node) => {
@@ -100,6 +200,32 @@ export function DustWastelandScene({ onReturnContinent, onStartScenario }: DustW
             );
           })}
 
+          {EXPLORATION_SPOTS.map((spot) => {
+            const spotState = getExplorationSpotState(spot);
+            const badge = spotState === "visited" ? "CHECK" : spotState === "new" ? "調査" : "LOCK";
+
+            return (
+              <button
+                key={spot.id}
+                type="button"
+                disabled={spotState === "locked"}
+                onClick={() => openExplorationSpot(spot)}
+                title={`${spot.title}: ${spotState === "locked" ? "LOCK" : spotState === "visited" ? "調査済み" : "調査可能"}`}
+                style={{
+                  ...explorationSpotStyle,
+                  ...(spotState === "locked" ? explorationSpotLockedStyle : null),
+                  ...(spotState === "visited" ? explorationSpotVisitedStyle : null),
+                  left: `${spot.x}%`,
+                  top: `${spot.y}%`,
+                }}
+              >
+                <span style={explorationPinStyle(spotState)} />
+                <span style={explorationLabelStyle}>{spot.title}</span>
+                <span style={explorationBadgeStyle(spotState)}>{badge}</span>
+              </button>
+            );
+          })}
+
           <div style={dialogPanelStyle}>
             <div style={dialogSpeakerStyle}>つつ</div>
             <div style={dialogTextStyle}>しょうがねぇなぁ……そっちは危ねぇって言ってんだろ</div>
@@ -108,6 +234,35 @@ export function DustWastelandScene({ onReturnContinent, onStartScenario }: DustW
           </div>
         </div>
       </div>
+
+      {activeSpot ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="wasteland-exploration-title"
+          style={explorationModalOverlayStyle}
+          onClick={() => setActiveSpot(null)}
+        >
+          <div style={explorationModalStyle} onClick={(event) => event.stopPropagation()}>
+            <div style={modalEyebrowStyle}>WASTELAND FIELD NOTE</div>
+            <h2 id="wasteland-exploration-title" style={modalTitleStyle}>
+              {activeSpot.title}
+            </h2>
+            <p style={modalDescriptionStyle}>{activeSpot.description}</p>
+            <div style={modalDialogueListStyle}>
+              {activeSpot.dialogue.map((line, index) => (
+                <div key={`${line.speaker}-${index}`} style={modalDialogueLineStyle}>
+                  <span style={modalSpeakerStyle}>{line.speaker}</span>
+                  <span style={modalTextStyle}>{line.text}</span>
+                </div>
+              ))}
+            </div>
+            <button type="button" style={modalCloseButtonStyle} onClick={() => setActiveSpot(null)}>
+              閉じる
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -274,6 +429,88 @@ const nodeSubtitleStyle: CSSProperties = {
   lineHeight: 1.35,
 };
 
+const explorationSpotStyle: CSSProperties = {
+  position: "absolute",
+  minWidth: 126,
+  maxWidth: 150,
+  minHeight: 46,
+  transform: "translate(-50%, -50%)",
+  display: "grid",
+  gridTemplateColumns: "16px 1fr",
+  gridTemplateRows: "auto auto",
+  columnGap: 7,
+  rowGap: 3,
+  alignItems: "center",
+  padding: "7px 9px",
+  boxSizing: "border-box",
+  borderRadius: 999,
+  border: "1px solid rgba(255, 233, 178, 0.5)",
+  background: "linear-gradient(180deg, rgba(67, 43, 24, 0.86), rgba(32, 24, 18, 0.76))",
+  color: "#fff2cf",
+  boxShadow: "0 10px 22px rgba(0,0,0,0.3), 0 0 16px rgba(255, 204, 104, 0.16)",
+  cursor: "pointer",
+  textAlign: "left",
+  zIndex: 5,
+};
+
+const explorationSpotLockedStyle: CSSProperties = {
+  opacity: 0.36,
+  cursor: "not-allowed",
+  filter: "saturate(0.45)",
+};
+
+const explorationSpotVisitedStyle: CSSProperties = {
+  borderColor: "rgba(126, 240, 200, 0.58)",
+  background: "linear-gradient(180deg, rgba(38, 77, 59, 0.84), rgba(25, 33, 27, 0.76))",
+};
+
+function explorationPinStyle(state: "visited" | "locked" | "new"): CSSProperties {
+  const background =
+    state === "visited"
+      ? "radial-gradient(circle, #c8ffe9 0 28%, #42bd8f 30% 64%, rgba(15,54,40,0.95) 66%)"
+      : state === "new"
+        ? "radial-gradient(circle, #fff5c8 0 28%, #ffb34d 30% 64%, rgba(95,45,16,0.95) 66%)"
+        : "radial-gradient(circle, #d0c0aa 0 28%, #6d6256 30% 64%, rgba(42,36,31,0.95) 66%)";
+
+  return {
+    width: 16,
+    height: 16,
+    borderRadius: "50%",
+    background,
+    boxShadow: state === "locked" ? "none" : "0 0 14px rgba(255,221,148,0.45)",
+    gridRow: "1 / 3",
+  };
+}
+
+const explorationLabelStyle: CSSProperties = {
+  display: "block",
+  color: "#fff1cb",
+  fontSize: 11,
+  lineHeight: 1.2,
+  fontWeight: 950,
+  whiteSpace: "normal",
+};
+
+function explorationBadgeStyle(state: "visited" | "locked" | "new"): CSSProperties {
+  const colors =
+    state === "visited"
+      ? ["rgba(37, 118, 90, 0.9)", "#d7ffed"]
+      : state === "new"
+        ? ["rgba(184, 86, 19, 0.94)", "#fff3c2"]
+        : ["rgba(68, 57, 48, 0.9)", "#d9c8b5"];
+
+  return {
+    justifySelf: "start",
+    padding: "2px 6px",
+    borderRadius: 999,
+    background: colors[0],
+    color: colors[1],
+    fontSize: 9,
+    fontWeight: 950,
+    lineHeight: 1,
+  };
+}
+
 const dialogPanelStyle: CSSProperties = {
   position: "absolute",
   left: "50%",
@@ -302,4 +539,93 @@ const dialogTextStyle: CSSProperties = {
   fontSize: 12,
   lineHeight: 1.5,
   fontWeight: 800,
+};
+
+const explorationModalOverlayStyle: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 50,
+  display: "grid",
+  placeItems: "center",
+  padding: 16,
+  boxSizing: "border-box",
+  background: "rgba(9, 8, 7, 0.64)",
+  backdropFilter: "blur(3px)",
+};
+
+const explorationModalStyle: CSSProperties = {
+  width: "min(520px, 100%)",
+  maxHeight: "min(82dvh, 620px)",
+  overflowY: "auto",
+  borderRadius: 16,
+  border: "1px solid rgba(255, 223, 154, 0.38)",
+  background:
+    "radial-gradient(circle at 20% 0%, rgba(255, 207, 118, 0.18), transparent 34%), linear-gradient(180deg, rgba(58, 39, 25, 0.98), rgba(22, 18, 16, 0.98))",
+  boxShadow: "0 28px 70px rgba(0,0,0,0.56), inset 0 0 45px rgba(255, 207, 118, 0.08)",
+  padding: 18,
+  boxSizing: "border-box",
+  color: "#fff1cf",
+};
+
+const modalEyebrowStyle: CSSProperties = {
+  color: "#ffd27b",
+  fontSize: 11,
+  fontWeight: 950,
+  letterSpacing: 0,
+};
+
+const modalTitleStyle: CSSProperties = {
+  margin: "4px 0 8px",
+  fontSize: 22,
+  lineHeight: 1.25,
+  color: "#fff0c2",
+};
+
+const modalDescriptionStyle: CSSProperties = {
+  margin: "0 0 12px",
+  color: "rgba(255, 239, 207, 0.82)",
+  fontSize: 13,
+  lineHeight: 1.6,
+  fontWeight: 800,
+};
+
+const modalDialogueListStyle: CSSProperties = {
+  display: "grid",
+  gap: 8,
+  padding: 12,
+  borderRadius: 12,
+  border: "1px solid rgba(255, 232, 180, 0.18)",
+  background: "rgba(15, 12, 10, 0.32)",
+};
+
+const modalDialogueLineStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "72px 1fr",
+  gap: 8,
+  alignItems: "start",
+};
+
+const modalSpeakerStyle: CSSProperties = {
+  color: "#ffd27b",
+  fontSize: 12,
+  fontWeight: 950,
+};
+
+const modalTextStyle: CSSProperties = {
+  color: "rgba(255, 244, 220, 0.92)",
+  fontSize: 13,
+  lineHeight: 1.55,
+  fontWeight: 800,
+};
+
+const modalCloseButtonStyle: CSSProperties = {
+  width: "100%",
+  minHeight: 42,
+  marginTop: 14,
+  borderRadius: 12,
+  border: "1px solid rgba(255,232,180,0.34)",
+  background: "rgba(255,241,204,0.12)",
+  color: "#fff1cc",
+  fontWeight: 950,
+  cursor: "pointer",
 };
