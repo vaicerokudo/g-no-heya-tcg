@@ -81,6 +81,10 @@ import { markWastelandScenarioCleared } from "./game/wasteland/progress";
 import { addBlackNoiseBayEventFlag, addShipPart } from "./game/blackNoiseBay/progress";
 import { markFinalIsolationBattleCleared, markIsolationDuelCleared, type IsolationDuelMemberId } from "./game/isolation/progress";
 import {
+  hasStoredGameProgress,
+  resetGameProgressStorage,
+} from "./game/progressReset";
+import {
   markHiddenHintFlag,
   readHiddenHintFlags,
   type HiddenHintFlag,
@@ -149,6 +153,37 @@ function SceneLoading() {
       <div className="sceneLoadingPanel">
         <div className="sceneLoadingEyebrow">Gの部屋TCG</div>
         <div className="sceneLoadingTitle">読み込み中...</div>
+      </div>
+    </div>
+  );
+}
+
+function StartMenu({
+  hasProgress,
+  onContinue,
+  onNewGame,
+}: {
+  hasProgress: boolean;
+  onContinue: () => void;
+  onNewGame: () => void;
+}) {
+  return (
+    <div className="startMenuScene">
+      <div className="startMenuPanel">
+        <div className="startMenuEyebrow">G NO HEYA TCG</div>
+        <h1 className="startMenuTitle">Gの部屋TCG</h1>
+        <p className="startMenuLead">進行状況を選んで開始します。</p>
+        <div className="startMenuProgress">
+          {hasProgress ? "現在の進行あり" : "進行なし"}
+        </div>
+        <div className="startMenuActions">
+          <button type="button" className="startMenuButton startMenuButtonPrimary" onClick={onContinue}>
+            続きから
+          </button>
+          <button type="button" className="startMenuButton startMenuButtonSecondary" onClick={onNewGame}>
+            はじめから
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -280,6 +315,8 @@ export default function App() {
   const [clearedScenarioIds, setClearedScenarioIds] = useState<ScenarioId[]>(() => readClearedScenarios());
   const [hiddenHintFlags, setHiddenHintFlags] = useState<HiddenHintFlag[]>(() => readHiddenHintFlags());
   const [cpuEnabled, setCpuEnabled] = useState(true);
+  const [startMenuOpen, setStartMenuOpen] = useState(true);
+  const [storedProgressExists, setStoredProgressExists] = useState(() => hasStoredGameProgress());
 
   const [deployPlaced, setDeployPlaced] = useState(0);
   const [battleDeployUsed, setBattleDeployUsed] = useState(false);
@@ -1046,6 +1083,43 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     startSetup();
   }
 
+  function refreshProgressStateFromStorage() {
+    setClearedScenarioIds(readClearedScenarios());
+    setHiddenHintFlags(readHiddenHintFlags());
+    setUnlockedSkins(readUnlockedSkins());
+    setDeliMetalMachineUnlocked(hasDeltaEventFlag("deli_metal_machine_unlocked"));
+    setStoredProgressExists(hasStoredGameProgress());
+  }
+
+  function handleContinueFromStartMenu() {
+    refreshProgressStateFromStorage();
+    setScene("astoria");
+    setStartMenuOpen(false);
+  }
+
+  function handleNewGameFromStartMenu() {
+    const confirmed = window.confirm(
+      "進行状況をリセットして、はじめから開始します。\nこの操作は取り消せません。\nよろしいですか？"
+    );
+    if (!confirmed) return;
+
+    resetGameProgressStorage();
+    setClearedScenarioIds([]);
+    setHiddenHintFlags([]);
+    setUnlockedSkins([]);
+    setDeliMetalMachineUnlocked(false);
+    setSouthSkin("default");
+    setNorthSkin("default");
+    setScene("astoria");
+    setScenarioSelectOpen(false);
+    setPopupId(null);
+    setBattleNotice(null);
+    setBoardSizeMode("starter7");
+    resetGame();
+    setStoredProgressExists(false);
+    setStartMenuOpen(false);
+  }
+
   function handleGameReset() {
     if (gameMode === "scenario" && activeScenarioId) {
       startScenario(activeScenarioId);
@@ -1724,6 +1798,16 @@ const reinforceSet = useMemo(() => {
         .map((inst: any) => inst.instanceId)
     );
   }, [gameOver, instances, perUnitTurn, phase, scenarioDialogOpen, turn]);
+
+  if (startMenuOpen) {
+    return (
+      <StartMenu
+        hasProgress={storedProgressExists}
+        onContinue={handleContinueFromStartMenu}
+        onNewGame={handleNewGameFromStartMenu}
+      />
+    );
+  }
 
   if (scene === "astoria") {
     const continentUnlocked = clearedScenarioIds.includes("scenario7");
