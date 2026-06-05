@@ -741,7 +741,13 @@ export function NecroCityScene({ onReturnContinent }: NecroCitySceneProps) {
 
             <div style={{ ...kruitzPanelStyle, ...(isNarrow ? kruitzPanelNarrowStyle : null) }}>
               <div style={{ ...kruitzFrameStyle, ...(isNarrow ? kruitzFrameNarrowStyle : null) }}>
-                <img src={KRUitz_IMAGES[kruitzExpression]} alt="クロイツ" style={kruitzImageStyle} />
+                <img
+                  src={KRUitz_IMAGES[kruitzExpression]}
+                  alt="クロイツ"
+                  style={kruitzImageStyle}
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
               <div style={kruitzTextStyle}>
                 <strong style={kruitzNameStyle}>クロイツ</strong>

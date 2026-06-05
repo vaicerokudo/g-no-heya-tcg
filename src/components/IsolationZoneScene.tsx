@@ -19,6 +19,7 @@ type DuelMission = {
   subLabel: string;
   scenarioId?: ScenarioId;
   darkImageUnitId: string;
+  darkImageCandidates: string[];
 };
 
 type FinalMission = {
@@ -27,7 +28,7 @@ type FinalMission = {
   subLabel: string;
 };
 
-const DUEL_MISSIONS: DuelMission[] = [
+const DUEL_MISSION_BASES: Omit<DuelMission, "darkImageCandidates">[] = [
   { memberId: "socho", label: "総長", subLabel: "第23話 影の総長", scenarioId: "scenario23", darkImageUnitId: "SOCHO" },
   { memberId: "tsutsu", label: "つつ", subLabel: "第24話 影のつつ", scenarioId: "scenario24", darkImageUnitId: "TSUTSU" },
   { memberId: "rokudo", label: "ROKUDO", subLabel: "第25話 影のROKUDO", scenarioId: "scenario25", darkImageUnitId: "ROKUDO" },
@@ -40,6 +41,11 @@ const DUEL_MISSIONS: DuelMission[] = [
   { memberId: "rockel", label: "ROCKEL", subLabel: "第31話 影のROCKEL", scenarioId: "scenario31", darkImageUnitId: "ROCKEL" },
   { memberId: "player", label: "Player", subLabel: "第32話 影のPlayer", scenarioId: "scenario32", darkImageUnitId: "PLAYER" },
 ];
+
+const DUEL_MISSIONS: DuelMission[] = DUEL_MISSION_BASES.map((mission) => ({
+  ...mission,
+  darkImageCandidates: portraitCandidates(mission.darkImageUnitId, "north", "base", "dark"),
+}));
 
 const FINAL_MISSION: FinalMission = {
   id: "finalBattle",
@@ -103,8 +109,7 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
               const cleared = clearedSet.has(mission.memberId);
               const implemented = Boolean(mission.scenarioId);
               const badge = cleared ? "CLEAR" : implemented ? "NEXT" : "準備中";
-              const imageCandidates = portraitCandidates(mission.darkImageUnitId, "north", "base", "dark");
-              const imagePath = imageCandidates.find((candidate) => !failedImagePaths.has(candidate));
+              const imagePath = mission.darkImageCandidates.find((candidate) => !failedImagePaths.has(candidate));
 
               return (
                 <button
@@ -126,6 +131,8 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
                         src={imagePath}
                         alt={`闇落ち${mission.label}`}
                         style={darkPortraitStyle}
+                        loading="lazy"
+                        decoding="async"
                         draggable={false}
                         onError={() => {
                           setFailedImagePaths((current) => new Set(current).add(imagePath));
@@ -162,6 +169,8 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
                     src={AUTHOR_ROKUDO_FINAL_IMAGE_PATH}
                     alt="作者ロクド"
                     style={finalVisualImageStyle}
+                    loading="lazy"
+                    decoding="async"
                     draggable={false}
                     onError={() => {
                       setFailedImagePaths((current) => new Set(current).add(AUTHOR_ROKUDO_FINAL_IMAGE_PATH));

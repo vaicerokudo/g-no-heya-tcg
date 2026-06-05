@@ -51,6 +51,7 @@ export function SouthDeck({ deckSouth, skin, getDeckBackPath }: SouthDeckProps) 
             <img
               src={getDeckBackPath(skin)}
               alt="deck back"
+              decoding="async"
               style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
             />
 

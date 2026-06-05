@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useLongPress } from "../../hooks/useLongPress";
 import { buildStatusIcons } from "../../game/ui/statusIcons";
@@ -88,11 +88,12 @@ const {
 
 const form = (inst?.form ?? "base") as "base" | "g";
 
-const cands = inst
-  ? (getPortraitCandidates
-      ? getPortraitCandidates(inst.unitId, inst.side, form)
-      : [getPortrait(inst.unitId, inst.side, form)])
-  : [];
+const cands = useMemo(() => {
+  if (!inst) return [];
+  return getPortraitCandidates
+    ? getPortraitCandidates(inst.unitId, inst.side, form)
+    : [getPortrait(inst.unitId, inst.side, form)];
+}, [form, getPortrait, getPortraitCandidates, inst?.side, inst?.unitId]);
 
 const [hpFlash, setHpFlash] = useState(false);
 const prevHpRef = useRef<number | null>(null);

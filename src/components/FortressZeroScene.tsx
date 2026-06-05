@@ -31,7 +31,13 @@ export function FortressZeroScene({ onReturnContinent }: FortressZeroSceneProps)
 
         <div style={memoPanelStyle}>
           <div style={memoLabelStyle}>門番のメモ</div>
-          <img src={GATEKEEPER_MEMO_IMAGE_URL} alt="門番のメモ" style={memoImageStyle} />
+          <img
+            src={GATEKEEPER_MEMO_IMAGE_URL}
+            alt="門番のメモ"
+            style={memoImageStyle}
+            loading="lazy"
+            decoding="async"
+          />
         </div>
 
         <div style={noticeStyle}>この先は、Gの部屋の外側に残された記録領域です。</div>

@@ -1609,25 +1609,47 @@ const reinforceSet = useMemo(() => {
     return m;
   }, [skillImpactFxEvents]);
 
-  function getSkinForSide(side: Side) {
+  const getSkinForSide = useCallback((side: Side) => {
     return side === "south" ? southSkin : northSkin;
-  }
+  }, [northSkin, southSkin]);
 
-  function getVisualUnitIdForImage(unitId: string) {
+  const getVisualUnitIdForImage = useCallback((unitId: string) => {
     if (unitId === "DARK_YABUKO") return "YABUKO_NORMAL";
     if (unitId.startsWith("DARK_")) return unitId.slice("DARK_".length);
     return unitId;
-  }
+  }, []);
 
-  function getSkinForUnitImage(unitId: string, side: Side) {
+  const getSkinForUnitImage = useCallback((unitId: string, side: Side) => {
     if (side === "north" && unitId.startsWith("DARK_")) return "dark";
     return getSkinForSide(side);
-  }
+  }, [getSkinForSide]);
 
-  function getDisplayFormForImage(unitId: string, side: Side, form: Form = "base"): Form {
+  const getDisplayFormForImage = useCallback((unitId: string, side: Side, form: Form = "base"): Form => {
     if (deliMetalMachineUnlocked && side === "south" && unitId === "DELI") return "metal";
     return form;
-  }
+  }, [deliMetalMachineUnlocked]);
+
+  const getBoardPortrait = useCallback(
+    (unitId: string, side: "south" | "north", form?: Form) =>
+      getPortraitPath(
+        getVisualUnitIdForImage(unitId),
+        side,
+        getDisplayFormForImage(unitId, side, form ?? "base"),
+        getSkinForUnitImage(unitId, side)
+      ),
+    [getDisplayFormForImage, getSkinForUnitImage, getVisualUnitIdForImage]
+  );
+
+  const getBoardPortraitCandidates = useCallback(
+    (unitId: string, side: "south" | "north", form?: Form) =>
+      portraitThumbCandidates(
+        getVisualUnitIdForImage(unitId),
+        side,
+        getDisplayFormForImage(unitId, side, form ?? "base"),
+        getSkinForUnitImage(unitId, side)
+      ),
+    [getDisplayFormForImage, getSkinForUnitImage, getVisualUnitIdForImage]
+  );
 
   function handleSouthSkinChange(nextSkin: Skin) {
     if (!isSkinUnlocked(nextSkin, unlockedSkins)) {
@@ -1980,22 +2002,8 @@ const reinforceSet = useMemo(() => {
         skillTargetSet={skillTargetSet}
         debugTargetId={null}
         onShiftEnemyPick={() => {}}
-        getPortrait={(unitId, side, form) =>
-          getPortraitPath(
-            getVisualUnitIdForImage(unitId),
-            side,
-            getDisplayFormForImage(unitId, side, form ?? "base"),
-            getSkinForUnitImage(unitId, side)
-          )
-        }
-        getPortraitCandidates={(unitId, side, form) =>
-          portraitThumbCandidates(
-            getVisualUnitIdForImage(unitId),
-            side,
-            getDisplayFormForImage(unitId, side, form ?? "base"),
-            getSkinForUnitImage(unitId, side)
-          )
-        }
+        getPortrait={getBoardPortrait}
+        getPortraitCandidates={getBoardPortraitCandidates}
         posKey={posKey}
         canSelect={canSelect}
         onLongPressUnit={handleBoardLongPressUnit}
