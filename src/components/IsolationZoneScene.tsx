@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { portraitCandidates } from "../assets/imagePaths";
 import {
   getIsolationProgress,
   hasClearedAllIsolationDuels,
@@ -17,6 +18,7 @@ type DuelMission = {
   label: string;
   subLabel: string;
   scenarioId?: ScenarioId;
+  darkImageUnitId: string;
 };
 
 type FinalMission = {
@@ -26,17 +28,17 @@ type FinalMission = {
 };
 
 const DUEL_MISSIONS: DuelMission[] = [
-  { memberId: "socho", label: "総長", subLabel: "第23話 影の総長", scenarioId: "scenario23" },
-  { memberId: "tsutsu", label: "つつ", subLabel: "第24話 影のつつ", scenarioId: "scenario24" },
-  { memberId: "rokudo", label: "ROKUDO", subLabel: "第25話 影のROKUDO", scenarioId: "scenario25" },
-  { memberId: "7171", label: "7171", subLabel: "第26話 影の7171", scenarioId: "scenario26" },
-  { memberId: "myouou", label: "明王", subLabel: "第27話 影の明王", scenarioId: "scenario27" },
-  { memberId: "hibiki", label: "hibiki", subLabel: "第28話 影のhibiki", scenarioId: "scenario28" },
-  { memberId: "ushimaru", label: "うしまる", subLabel: "第22話 影のうしまる", scenarioId: "scenario22" },
-  { memberId: "deli", label: "Deli", subLabel: "第29話 影のDeli", scenarioId: "scenario29" },
-  { memberId: "yabuko", label: "やぶこ", subLabel: "第30話 影のやぶこ", scenarioId: "scenario30" },
-  { memberId: "rockel", label: "ROCKEL", subLabel: "第31話 影のROCKEL", scenarioId: "scenario31" },
-  { memberId: "player", label: "Player", subLabel: "第32話 影のPlayer", scenarioId: "scenario32" },
+  { memberId: "socho", label: "総長", subLabel: "第23話 影の総長", scenarioId: "scenario23", darkImageUnitId: "SOCHO" },
+  { memberId: "tsutsu", label: "つつ", subLabel: "第24話 影のつつ", scenarioId: "scenario24", darkImageUnitId: "TSUTSU" },
+  { memberId: "rokudo", label: "ROKUDO", subLabel: "第25話 影のROKUDO", scenarioId: "scenario25", darkImageUnitId: "ROKUDO" },
+  { memberId: "7171", label: "7171", subLabel: "第26話 影の7171", scenarioId: "scenario26", darkImageUnitId: "7171" },
+  { memberId: "myouou", label: "明王", subLabel: "第27話 影の明王", scenarioId: "scenario27", darkImageUnitId: "MYOUOU" },
+  { memberId: "hibiki", label: "hibiki", subLabel: "第28話 影のhibiki", scenarioId: "scenario28", darkImageUnitId: "HIBIKI" },
+  { memberId: "ushimaru", label: "うしまる", subLabel: "第22話 影のうしまる", scenarioId: "scenario22", darkImageUnitId: "USHIMARU" },
+  { memberId: "deli", label: "Deli", subLabel: "第29話 影のDeli", scenarioId: "scenario29", darkImageUnitId: "DELI" },
+  { memberId: "yabuko", label: "やぶこ", subLabel: "第30話 影のやぶこ", scenarioId: "scenario30", darkImageUnitId: "YABUKO_NORMAL" },
+  { memberId: "rockel", label: "ROCKEL", subLabel: "第31話 影のROCKEL", scenarioId: "scenario31", darkImageUnitId: "ROCKEL" },
+  { memberId: "player", label: "Player", subLabel: "第32話 影のPlayer", scenarioId: "scenario32", darkImageUnitId: "PLAYER" },
 ];
 
 const FINAL_MISSION: FinalMission = {
@@ -47,6 +49,7 @@ const FINAL_MISSION: FinalMission = {
 
 export function IsolationZoneScene({ onReturnContinent, onStartScenario }: IsolationZoneSceneProps) {
   const [progress, setProgress] = useState(() => getIsolationProgress());
+  const [failedImagePaths, setFailedImagePaths] = useState(() => new Set<string>());
   const clearedSet = useMemo(() => new Set(progress.clearedDuels), [progress.clearedDuels]);
   const clearedCount = progress.clearedDuels.length;
   const finalBattleUnlocked = hasClearedAllIsolationDuels(progress);
@@ -97,6 +100,8 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
               const cleared = clearedSet.has(mission.memberId);
               const implemented = Boolean(mission.scenarioId);
               const badge = cleared ? "CLEAR" : implemented ? "NEXT" : "準備中";
+              const imageCandidates = portraitCandidates(mission.darkImageUnitId, "north", "base", "dark");
+              const imagePath = imageCandidates.find((candidate) => !failedImagePaths.has(candidate));
 
               return (
                 <button
@@ -112,9 +117,26 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
                     ...(cleared ? clearedMissionStyle : null),
                   }}
                 >
-                  <span style={missionBadgeStyle(cleared, implemented)}>{badge}</span>
-                  <span style={missionTitleStyle}>{mission.label}</span>
-                  <span style={missionSubStyle}>{mission.subLabel}</span>
+                  <span style={darkPortraitFrameStyle}>
+                    {imagePath ? (
+                      <img
+                        src={imagePath}
+                        alt={`闇落ち${mission.label}`}
+                        style={darkPortraitStyle}
+                        draggable={false}
+                        onError={() => {
+                          setFailedImagePaths((current) => new Set(current).add(imagePath));
+                        }}
+                      />
+                    ) : (
+                      <span style={darkPortraitFallbackStyle}>DARK</span>
+                    )}
+                  </span>
+                  <span style={missionContentStyle}>
+                    <span style={missionBadgeStyle(cleared, implemented)}>{badge}</span>
+                    <span style={missionTitleStyle}>{mission.label}</span>
+                    <span style={missionSubStyle}>{mission.subLabel}</span>
+                  </span>
                 </button>
               );
             })}
@@ -131,11 +153,16 @@ export function IsolationZoneScene({ onReturnContinent, onStartScenario }: Isola
                 ...(finalBattleCleared ? clearedMissionStyle : null),
               }}
             >
-              <span style={missionBadgeStyle(finalBattleCleared, finalBattleUnlocked)}>
-                {finalBattleCleared ? "CLEAR" : finalBattleUnlocked ? "NEXT" : "LOCK"}
+              <span style={finalVisualFrameStyle} aria-hidden="true">
+                <span style={finalVisualCoreStyle}>影</span>
               </span>
-              <span style={missionTitleStyle}>{FINAL_MISSION.label}</span>
-              <span style={missionSubStyle}>{FINAL_MISSION.subLabel}</span>
+              <span style={missionContentStyle}>
+                <span style={missionBadgeStyle(finalBattleCleared, finalBattleUnlocked)}>
+                  {finalBattleCleared ? "CLEAR" : finalBattleUnlocked ? "NEXT" : "LOCK"}
+                </span>
+                <span style={missionTitleStyle}>{FINAL_MISSION.label}</span>
+                <span style={missionSubStyle}>{FINAL_MISSION.subLabel}</span>
+              </span>
             </button>
           </div>
         </section>
@@ -173,10 +200,68 @@ const leadStyle: CSSProperties = { margin: "9px 0 0", color: "rgba(245,240,255,0
 const progressPillStyle: CSSProperties = { display: "inline-flex", marginTop: 12, padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(185,160,255,0.38)", background: "rgba(0,0,0,0.22)", color: "#dfd2ff", fontSize: 12, fontWeight: 950 };
 const missionPanelStyle: CSSProperties = { marginTop: 12, padding: 14, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(7, 8, 14, 0.76)", boxShadow: "0 18px 38px rgba(0,0,0,0.34)" };
 const sectionHeaderStyle: CSSProperties = { color: "#c9b5ff", fontSize: 13, fontWeight: 950, marginBottom: 10 };
-const missionGridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 };
-const missionButtonStyle: CSSProperties = { minHeight: 94, padding: 12, borderRadius: 12, border: "1px solid rgba(185,160,255,0.3)", background: "linear-gradient(180deg, rgba(37, 31, 62, 0.92), rgba(11, 13, 22, 0.88))", color: "#f5f0ff", textAlign: "left", cursor: "pointer", boxShadow: "0 12px 24px rgba(0,0,0,0.28)" };
+const missionGridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10 };
+const missionButtonStyle: CSSProperties = {
+  minHeight: 118,
+  padding: 10,
+  borderRadius: 12,
+  border: "1px solid rgba(185,160,255,0.3)",
+  background: "linear-gradient(180deg, rgba(37, 31, 62, 0.92), rgba(11, 13, 22, 0.88))",
+  color: "#f5f0ff",
+  textAlign: "left",
+  cursor: "pointer",
+  boxShadow: "0 12px 24px rgba(0,0,0,0.28)",
+  display: "grid",
+  gridTemplateColumns: "74px 1fr",
+  gap: 10,
+  alignItems: "center",
+};
 const disabledMissionStyle: CSSProperties = { opacity: 0.48, cursor: "not-allowed", filter: "saturate(0.5)" };
 const clearedMissionStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.68)", boxShadow: "0 12px 24px rgba(0,0,0,0.28), 0 0 18px rgba(126,240,200,0.14)" };
+const darkPortraitFrameStyle: CSSProperties = {
+  width: 74,
+  height: 92,
+  borderRadius: 10,
+  overflow: "hidden",
+  border: "1px solid rgba(197, 172, 255, 0.32)",
+  background: "radial-gradient(circle at 50% 24%, rgba(130,90,255,0.36), rgba(10,8,18,0.92) 62%)",
+  boxShadow: "inset 0 0 18px rgba(0,0,0,0.46), 0 0 18px rgba(123,82,255,0.14)",
+  display: "grid",
+  placeItems: "center",
+};
+const darkPortraitStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  objectPosition: "center top",
+  display: "block",
+};
+const darkPortraitFallbackStyle: CSSProperties = {
+  color: "#d9caff",
+  fontSize: 11,
+  fontWeight: 950,
+  letterSpacing: 0,
+};
+const finalVisualFrameStyle: CSSProperties = {
+  ...darkPortraitFrameStyle,
+  background:
+    "radial-gradient(circle at 50% 32%, rgba(255,255,255,0.7), rgba(139,91,255,0.5) 22%, rgba(20,8,40,0.95) 68%)",
+};
+const finalVisualCoreStyle: CSSProperties = {
+  display: "grid",
+  placeItems: "center",
+  width: 44,
+  height: 44,
+  borderRadius: "50%",
+  border: "1px solid rgba(238,226,255,0.4)",
+  color: "#f5f0ff",
+  fontSize: 15,
+  fontWeight: 950,
+  boxShadow: "0 0 24px rgba(165,119,255,0.54)",
+};
+const missionContentStyle: CSSProperties = {
+  minWidth: 0,
+};
 const missionTitleStyle: CSSProperties = { display: "block", fontSize: 15, fontWeight: 950 };
 const missionSubStyle: CSSProperties = { display: "block", marginTop: 5, color: "rgba(245,240,255,0.68)", fontSize: 12, fontWeight: 800, lineHeight: 1.35 };
 const noteStyle: CSSProperties = { marginTop: 12, padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.22)", color: "rgba(245,240,255,0.72)", fontSize: 12, lineHeight: 1.6, fontWeight: 800 };

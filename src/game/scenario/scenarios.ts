@@ -90,13 +90,13 @@ function makeIsolationDuelScenario(params: {
     id: params.id,
     title: params.title,
     stageName: params.stageName,
-    boardSizeMode: "advanced11",
+    boardSizeMode: "intermediate9",
     scenarioType: "isolationDuel",
     backgroundUrl: "/backgrounds/scenario-isolation-zone.png",
     returnScene: "isolationZone",
     placements: [
-      { unitId: params.allyUnitId, side: "south", r: 10, c: 5, instanceId: `${params.id}-ALLY` },
-      { unitId: params.darkUnitId, side: "north", r: 0, c: 5, instanceId: `${params.id}-DARK` },
+      { unitId: params.allyUnitId, side: "south", r: 8, c: 4, instanceId: `${params.id}-ALLY` },
+      { unitId: params.darkUnitId, side: "north", r: 0, c: 4, instanceId: `${params.id}-DARK` },
     ],
     dialogs: {
       intro: [
@@ -918,13 +918,13 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     id: "scenario22",
     title: "第22話 影のうしまる",
     stageName: "隔離区域・うしまるの影",
-    boardSizeMode: "advanced11",
+    boardSizeMode: "intermediate9",
     scenarioType: "isolationDuel",
     backgroundUrl: "/backgrounds/scenario-isolation-zone.png",
     returnScene: "isolationZone",
     placements: [
-      { unitId: "USHIMARU", side: "south", r: 10, c: 5, instanceId: "SC22-USHIMARU" },
-      { unitId: "DARK_USHIMARU", side: "north", r: 0, c: 5, instanceId: "SC22-DARK-USHIMARU", hp: 8 },
+      { unitId: "USHIMARU", side: "south", r: 8, c: 4, instanceId: "SC22-USHIMARU" },
+      { unitId: "DARK_USHIMARU", side: "north", r: 0, c: 4, instanceId: "SC22-DARK-USHIMARU", hp: 8 },
     ],
     dialogs: {
       intro: [
