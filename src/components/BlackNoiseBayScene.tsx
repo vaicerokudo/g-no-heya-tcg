@@ -374,7 +374,7 @@ const sceneStyle: CSSProperties = {
 };
 
 const shellStyle: CSSProperties = {
-  width: "min(860px, 100%)",
+  width: "min(1120px, 100%)",
   margin: "0 auto",
 };
 
@@ -448,7 +448,7 @@ const statusMetaStyle: CSSProperties = {
 
 const mapFrameStyle: CSSProperties = {
   position: "relative",
-  width: "min(100%, 820px)",
+  width: "min(100%, 1080px)",
   minHeight: "min(68dvh, 680px)",
   aspectRatio: "16 / 10",
   margin: "0 auto",
@@ -575,7 +575,7 @@ const modalOverlayStyle: CSSProperties = {
 };
 
 const modalStyle: CSSProperties = {
-  width: "min(620px, 100%)",
+  width: "min(820px, 100%)",
   maxHeight: "min(84dvh, 680px)",
   overflowY: "auto",
   padding: 18,
@@ -612,7 +612,7 @@ const modalLeadStyle: CSSProperties = {
 
 const modalMissionGridStyle: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
   gap: 10,
 };
 

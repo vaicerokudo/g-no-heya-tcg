@@ -401,7 +401,7 @@ export function TownScene({
 
   return (
     <div style={sceneStyle}>
-      <div style={{ width: "min(560px, 100%)" }}>
+      <div style={{ width: "min(820px, 100%)" }}>
         <div style={headerStyle}>
           <div>
             <div style={eyebrowStyle}>GUILD LOBBY</div>
@@ -693,10 +693,10 @@ const hintStyle: CSSProperties = {
 
 const mapStyle: CSSProperties = {
   position: "relative",
-  width: "min(100%, calc(78dvh * 941 / 1672))",
+  width: "min(100%, calc(var(--vertical-map-vh, 78dvh) * 941 / 1672), 920px)",
   minWidth: "min(100%, 320px)",
   aspectRatio: "941 / 1672",
-  maxHeight: "78dvh",
+  maxHeight: "var(--vertical-map-vh, 78dvh)",
   margin: "0 auto",
   overflow: "hidden",
   border: "1px solid rgba(255,229,172,0.25)",
@@ -790,7 +790,7 @@ const dialogOverlayStyle: CSSProperties = {
 
 const dialogPanelStyle: CSSProperties = {
   position: "relative",
-  width: "min(860px, calc(100% - 20px))",
+  width: "min(1040px, calc(100% - 20px))",
   maxHeight: "calc(100dvh - 24px)",
   overflowY: "auto",
   boxSizing: "border-box",

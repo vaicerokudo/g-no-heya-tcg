@@ -211,7 +211,7 @@ const sceneStyle: CSSProperties = {
   overflowX: "hidden",
 };
 
-const shellStyle: CSSProperties = { width: "min(760px, 100%)" };
+const shellStyle: CSSProperties = { width: "min(1120px, 100%)" };
 const headerStyle: CSSProperties = { display: "flex", alignItems: "end", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 12 };
 const eyebrowStyle: CSSProperties = { color: "#c9b5ff", fontSize: 11, fontWeight: 950 };
 const titleStyle: CSSProperties = { margin: "4px 0 0", color: "#f5f0ff", fontSize: 30, textShadow: "0 0 18px rgba(156,112,255,0.34)" };
@@ -224,7 +224,7 @@ const leadStyle: CSSProperties = { margin: "9px 0 0", color: "rgba(245,240,255,0
 const progressPillStyle: CSSProperties = { display: "inline-flex", marginTop: 12, padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(185,160,255,0.38)", background: "rgba(0,0,0,0.22)", color: "#dfd2ff", fontSize: 12, fontWeight: 950 };
 const missionPanelStyle: CSSProperties = { marginTop: 12, padding: 14, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(7, 8, 14, 0.76)", boxShadow: "0 18px 38px rgba(0,0,0,0.34)" };
 const sectionHeaderStyle: CSSProperties = { color: "#c9b5ff", fontSize: 13, fontWeight: 950, marginBottom: 10 };
-const missionGridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10 };
+const missionGridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 10 };
 const missionButtonStyle: CSSProperties = {
   minHeight: 118,
   padding: 10,

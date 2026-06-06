@@ -5,6 +5,15 @@
   text-align: center;
 }
 
+@media (min-width: 900px) {
+  #root {
+    max-width: 1480px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    --vertical-map-vh: 86dvh;
+  }
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

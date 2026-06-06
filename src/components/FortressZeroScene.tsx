@@ -68,7 +68,7 @@ const sceneStyle: CSSProperties = {
 };
 
 const panelStyle: CSSProperties = {
-  width: "min(560px, 100%)",
+  width: "min(920px, 100%)",
   padding: "24px 22px",
   boxSizing: "border-box",
   borderRadius: 14,

@@ -1274,28 +1274,35 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     commitInstancesAndVictory(next2 as any);
   }
 
-  function useWindowWidth() {
-    const [w, setW] = useState<number>(typeof window !== "undefined" ? window.innerWidth : 1024);
+  function useWindowSize() {
+    const [size, setSize] = useState(() => ({
+      w: typeof window !== "undefined" ? window.innerWidth : 1024,
+      h: typeof window !== "undefined" ? window.innerHeight : 768,
+    }));
     useEffect(() => {
-      const onResize = () => setW(window.innerWidth);
+      const onResize = () => setSize({ w: window.innerWidth, h: window.innerHeight });
       window.addEventListener("resize", onResize);
       return () => window.removeEventListener("resize", onResize);
     }, []);
-    return w;
+    return size;
   }
 
-  const winW = useWindowWidth();
+  const { w: winW, h: winH } = useWindowSize();
 
   const cell = useMemo(() => {
     const pad = 24;
     const isWideBoard = cols >= 9;
-    const max = isWideBoard ? 60 : 64;
     const isMobile = winW <= 720;
+    const isDesktop = winW >= 900;
+    const max = isDesktop ? (isWideBoard ? 68 : 76) : isWideBoard ? 60 : 64;
     const min = isMobile ? (isWideBoard ? 36 : 52) : 44;
-    const baseSize = Math.floor((winW - pad) / cols);
+    const desktopWidthBudget = isDesktop ? Math.max(360, winW - (isWideBoard ? 360 : 430)) : winW - pad;
+    const desktopHeightBudget = isDesktop ? Math.max(360, winH - 168) : winW - pad;
+    const boardBudget = isDesktop ? Math.min(desktopWidthBudget, desktopHeightBudget) : winW - pad;
+    const baseSize = Math.floor(boardBudget / cols);
     const size = isMobile && !isWideBoard ? Math.floor(baseSize * 1.1) : baseSize;
     return Math.max(min, Math.min(max, size));
-  }, [winW, cols]);
+  }, [winH, winW, cols]);
 
   const letters = useMemo(() => getLetters(cols), [cols]);
   const quicksandSet = useMemo(() => {

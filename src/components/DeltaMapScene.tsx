@@ -454,7 +454,7 @@ const sceneStyle: CSSProperties = {
 };
 
 const shellStyle: CSSProperties = {
-  width: "min(680px, 100%)",
+  width: "min(980px, 100%)",
 };
 
 const headerStyle: CSSProperties = {
@@ -527,7 +527,7 @@ const returnButtonStyle: CSSProperties = {
 
 const mapFrameStyle: CSSProperties = {
   position: "relative",
-  width: "clamp(320px, 96vw, 640px)",
+  width: "clamp(320px, 96vw, 860px)",
   maxWidth: "100%",
   aspectRatio: "9 / 16",
   minHeight: 0,
@@ -858,7 +858,7 @@ const overlayStyle: CSSProperties = {
 function dialogStyle(areaId: DeltaAreaId, machineComplete: boolean): CSSProperties {
   const locked = areaId === "quarantine" && !machineComplete;
   return {
-    width: "min(460px, calc(100% - 10px))",
+    width: "min(640px, calc(100% - 10px))",
     padding: "24px 22px 20px",
     boxSizing: "border-box",
     borderRadius: 12,

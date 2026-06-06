@@ -478,7 +478,7 @@ const sceneStyle: CSSProperties = {
 };
 
 const shellStyle: CSSProperties = {
-  width: "min(900px, 100%)",
+  width: "min(1080px, 100%)",
 };
 
 const headerStyle: CSSProperties = {
@@ -530,11 +530,11 @@ function continentButtonStyle(unlocked: boolean): CSSProperties {
 
 const mapStyle: CSSProperties = {
   position: "relative",
-  width: "min(100%, calc(78dvh * 941 / 1672))",
+  width: "min(100%, calc(var(--vertical-map-vh, 78dvh) * 941 / 1672), 920px)",
   minWidth: "min(100%, 320px)",
   aspectRatio: "941 / 1672",
   minHeight: 0,
-  maxHeight: "78dvh",
+  maxHeight: "var(--vertical-map-vh, 78dvh)",
   margin: "0 auto",
   overflow: "hidden",
   borderRadius: 18,

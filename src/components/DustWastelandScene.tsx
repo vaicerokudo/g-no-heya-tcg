@@ -281,7 +281,7 @@ const sceneStyle: CSSProperties = {
 };
 
 const shellStyle: CSSProperties = {
-  width: "min(680px, 100%)",
+  width: "min(980px, 100%)",
 };
 
 const headerStyle: CSSProperties = {
@@ -327,7 +327,7 @@ const returnButtonStyle: CSSProperties = {
 
 const mapStyle: CSSProperties = {
   position: "relative",
-  width: "clamp(320px, 96vw, 640px)",
+  width: "clamp(320px, 96vw, 920px)",
   maxWidth: "100%",
   aspectRatio: "941 / 1672",
   minHeight: 0,
@@ -515,7 +515,7 @@ const dialogPanelStyle: CSSProperties = {
   position: "absolute",
   left: "50%",
   bottom: "5%",
-  width: "min(84%, 430px)",
+  width: "min(84%, 560px)",
   transform: "translateX(-50%)",
   padding: "12px 14px",
   boxSizing: "border-box",
@@ -554,8 +554,8 @@ const explorationModalOverlayStyle: CSSProperties = {
 };
 
 const explorationModalStyle: CSSProperties = {
-  width: "min(520px, 100%)",
-  maxHeight: "min(82dvh, 620px)",
+  width: "min(680px, 100%)",
+  maxHeight: "min(86dvh, 720px)",
   overflowY: "auto",
   borderRadius: 16,
   border: "1px solid rgba(255, 223, 154, 0.38)",

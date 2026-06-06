@@ -285,7 +285,7 @@ const sceneStyle: CSSProperties = {
 };
 
 const shellStyle: CSSProperties = {
-  width: "min(680px, 100%)",
+  width: "min(980px, 100%)",
 };
 
 const headerStyle: CSSProperties = {
@@ -324,7 +324,7 @@ const returnButtonStyle: CSSProperties = {
 
 const mapFrameStyle: CSSProperties = {
   position: "relative",
-  width: "clamp(320px, 96vw, 640px)",
+  width: "clamp(320px, 96vw, 920px)",
   maxWidth: "100%",
   margin: "0 auto",
   overflow: "hidden",

@@ -778,7 +778,7 @@ const sceneStyle: CSSProperties = {
     "linear-gradient(180deg, rgba(8, 12, 18, 0.28), rgba(4, 7, 11, 0.88)), radial-gradient(circle at 28% 18%, rgba(122, 198, 255, 0.14), transparent 28%), url('/backgrounds/necro-city-map.webp') center top / cover no-repeat, linear-gradient(180deg, #151a23 0%, #12171c 48%, #080b10 100%)",
 };
 
-const shellStyle: CSSProperties = { width: "min(1180px, 100%)", margin: "0 auto" };
+const shellStyle: CSSProperties = { width: "min(1320px, 100%)", margin: "0 auto" };
 const headerStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "end", gap: 12, flexWrap: "wrap", marginBottom: 8 };
 const eyebrowStyle: CSSProperties = { color: "#a9d7ff", fontSize: 11, fontWeight: 950 };
 const titleStyle: CSSProperties = { margin: "4px 0 0", color: "#f0f6ff", fontSize: 28, textShadow: "0 2px 14px rgba(0,0,0,0.58)" };
@@ -817,7 +817,7 @@ const rokuSpriteStyle: CSSProperties = {
   pointerEvents: "none",
 };
 const rokuSpriteNarrowStyle: CSSProperties = { filter: "drop-shadow(0 6px 8px rgba(0,0,0,0.48)) drop-shadow(0 0 8px rgba(185,160,255,0.34))" };
-const detailPanelStyle: CSSProperties = { width: "min(560px, 100%)", minHeight: 430, maxHeight: "min(82dvh, 580px)", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.2)", background: "rgba(7, 10, 15, 0.9)", boxShadow: "0 18px 42px rgba(0,0,0,0.42)", backdropFilter: "blur(2px)", display: "flex", flexDirection: "column", gap: 12, overflowX: "hidden", overflowY: "auto" };
+const detailPanelStyle: CSSProperties = { width: "min(760px, 100%)", minHeight: 430, maxHeight: "min(86dvh, 720px)", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.2)", background: "rgba(7, 10, 15, 0.9)", boxShadow: "0 18px 42px rgba(0,0,0,0.42)", backdropFilter: "blur(2px)", display: "flex", flexDirection: "column", gap: 12, overflowX: "hidden", overflowY: "auto" };
 const detailPanelNarrowStyle: CSSProperties = { minHeight: 340, maxHeight: "84dvh" };
 const detailHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", gap: 10 };
 const detailEyebrowStyle: CSSProperties = { color: "#a9d7ff", fontSize: 10, fontWeight: 950 };
@@ -851,7 +851,7 @@ const messageBoxStyle: CSSProperties = { display: "grid", gap: 7, minHeight: 128
 const messageTitleStyle: CSSProperties = { color: "#ffe0a3", fontWeight: 950, fontSize: 14 };
 const areaModalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 40, display: "grid", placeItems: "center", padding: 12, boxSizing: "border-box", background: "rgba(3, 5, 9, 0.58)", backdropFilter: "blur(2px)" };
 const modalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 50, display: "grid", placeItems: "center", padding: 12, boxSizing: "border-box", background: "rgba(3, 5, 9, 0.72)", backdropFilter: "blur(3px)" };
-const kruitzModalStyle: CSSProperties = { width: "min(640px, 100%)", maxHeight: "min(82dvh, 560px)", overflowX: "hidden", overflowY: "auto", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.26)", background: "linear-gradient(180deg, rgba(13, 16, 24, 0.96), rgba(6, 8, 13, 0.96))", boxShadow: "0 24px 72px rgba(0,0,0,0.62)", display: "grid", gap: 12 };
+const kruitzModalStyle: CSSProperties = { width: "min(760px, 100%)", maxHeight: "min(86dvh, 680px)", overflowX: "hidden", overflowY: "auto", padding: 14, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(210,232,255,0.26)", background: "linear-gradient(180deg, rgba(13, 16, 24, 0.96), rgba(6, 8, 13, 0.96))", boxShadow: "0 24px 72px rgba(0,0,0,0.62)", display: "grid", gap: 12 };
 const kruitzModalNarrowStyle: CSSProperties = { maxHeight: "86dvh", padding: 12 };
 const modalHeaderStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "start", gap: 12 };
 const modalCloseButtonStyle: CSSProperties = { minHeight: 36, padding: "0 12px", borderRadius: 10, border: "1px solid rgba(210,232,255,0.24)", background: "rgba(255,255,255,0.08)", color: "#edf7ff", fontWeight: 950, cursor: "pointer" };
