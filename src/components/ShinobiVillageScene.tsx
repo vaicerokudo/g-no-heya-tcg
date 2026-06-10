@@ -65,6 +65,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
   const [progress, setProgress] = useState<ShinobiVillageProgress>(() => readShinobiVillageProgress());
   const [activeHotspot, setActiveHotspot] = useState<HotspotId | null>(null);
   const [recentPartFound, setRecentPartFound] = useState<RokuPartId | null>(null);
+  const [showRokuAssemblyEvent, setShowRokuAssemblyEvent] = useState(false);
   const activeSpot = useMemo(() => HOTSPOTS.find((spot) => spot.id === activeHotspot) ?? null, [activeHotspot]);
   const foundParts = useMemo(() => new Set(progress.rokuPartsFound), [progress.rokuPartsFound]);
   const allRokuPartsFound = ROKU_PART_IDS.every((partId) => foundParts.has(partId));
@@ -79,6 +80,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
 
   const handleHotspot = (spotId: HotspotId) => {
     setActiveHotspot(spotId);
+    setShowRokuAssemblyEvent(false);
     const spot = HOTSPOTS.find((item) => item.id === spotId);
     if (spot?.kind === "part" && spot.partId && !progress.rokuPartsFound.includes(spot.partId)) {
       setRecentPartFound(spot.partId);
@@ -128,6 +130,17 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
     updateProgress((current) => ({ ...current, rokuBuildReady: true }));
   };
 
+  const assembleRoku = () => {
+    updateProgress((current) => ({ ...current, rokuBuilt: true }));
+    setShowRokuAssemblyEvent(true);
+  };
+
+  const closeModal = () => {
+    setActiveHotspot(null);
+    setShowRokuAssemblyEvent(false);
+    setRecentPartFound(null);
+  };
+
   const renderRokuBlueprint = () => {
     if (!progress.rokuPartsQuestStarted) return null;
     return (
@@ -144,7 +157,9 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
           })}
         </div>
         <div style={blueprintStatusStyle}>
-          {progress.rokuBuildReady
+          {progress.rokuBuilt
+            ? "ロク起動済み"
+            : progress.rokuBuildReady
             ? "ロク制作準備完了"
             : allRokuPartsFound
               ? "必要なパーツが揃った。微塵に見せよう。"
@@ -396,6 +411,96 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
         );
       }
 
+      if (showRokuAssemblyEvent && progress.rokuBuilt) {
+        return (
+          <>
+            {renderRokuBlueprint()}
+            <p style={modalTextStyle}>
+              微塵：
+              <br />
+              「よし、必要なもんは揃った。あとは、こいつを組み上げるだけだ。」
+              <br />
+              <br />
+              早雲：
+              <br />
+              「本当に動くのか、それ。」
+              <br />
+              <br />
+              那茶：
+              <br />
+              「動いたら動いたで、ちょっと怖いんだけど。」
+              <br />
+              <br />
+              ROKUDO：
+              <br />
+              「……ロク。」
+              <br />
+              <br />
+              微塵：
+              <br />
+              「名前、決まってるじゃねぇか。」
+              <br />
+              <br />
+              ロク：
+              <br />
+              「……起動確認。ROKUDO、補助対象として登録します。」
+              <br />
+              <br />
+              ROKUDO：
+              <br />
+              「補助対象……ですか。」
+              <br />
+              <br />
+              ロク：
+              <br />
+              「大丈夫？ の前に、あなたが大丈夫か確認します。」
+              <br />
+              <br />
+              ROKUDO：
+              <br />
+              「……それは、少し困りますね。」
+            </p>
+          </>
+        );
+      }
+
+      if (progress.rokuBuilt) {
+        return (
+          <>
+            {renderRokuBlueprint()}
+            <p style={modalTextStyle}>
+              ロク完成
+              <br />
+              <br />
+              微塵：
+              <br />
+              「調整はまだ必要だが、起動は成功だ。こいつは、ROKUDOの後ろをちゃんと見てくれる。」
+              <br />
+              <br />
+              ロク：
+              <br />
+              「待機中。ROKUDOの状態を監視しています。」
+            </p>
+          </>
+        );
+      }
+
+      if (progress.rokuBuildReady) {
+        return (
+          <>
+            {renderRokuBlueprint()}
+            <p style={modalTextStyle}>
+              微塵：
+              <br />
+              「準備は整った。あとは組み上げるだけだな。」
+            </p>
+            <button type="button" style={primaryButtonStyle} onClick={assembleRoku}>
+              ロクを組み上げる
+            </button>
+          </>
+        );
+      }
+
       return (
         <>
           {renderRokuBlueprint()}
@@ -435,6 +540,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
           {progress.rokuPartsQuestStarted ? <strong>ロク制作準備中</strong> : null}
           {progress.rokuPartsQuestStarted ? <span>パーツ：{progress.rokuPartsFound.length} / {ROKU_PART_IDS.length}</span> : null}
           {progress.rokuBuildReady ? <strong>準備完了</strong> : null}
+          {progress.rokuBuilt ? <strong>ロク起動済み</strong> : null}
         </section>
 
         <main style={mapFrameStyle}>
@@ -459,15 +565,22 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
               <span style={hotspotSubLabelStyle}>{spot.subLabel}</span>
             </button>
           ))}
+          {progress.rokuBuilt ? (
+            <div style={rokuBuiltMarkerStyle}>
+              <span style={rokuBuiltDotStyle} />
+              <strong>ロク</strong>
+              <span>起動済み</span>
+            </div>
+          ) : null}
         </main>
 
         {activeSpot ? (
-          <div style={modalOverlayStyle} onClick={() => setActiveHotspot(null)}>
+          <div style={modalOverlayStyle} onClick={closeModal}>
             <div style={modalStyle} onClick={(event) => event.stopPropagation()}>
               <div style={modalEyebrowStyle}>忍びの里</div>
               <h2 style={modalTitleStyle}>{activeSpot.label}</h2>
               {renderModalBody()}
-              <button type="button" style={closeButtonStyle} onClick={() => setActiveHotspot(null)}>
+              <button type="button" style={closeButtonStyle} onClick={closeModal}>
                 閉じる
               </button>
             </div>
@@ -505,6 +618,8 @@ const partHotspotStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.42)",
 const hotspotPinStyle: CSSProperties = { position: "absolute", left: 10, top: 15, width: 10, height: 10, borderRadius: "50%", background: "#dff5ff", boxShadow: "0 0 0 4px rgba(174,230,255,0.12), 0 0 16px rgba(174,230,255,0.64)" };
 const hotspotLabelStyle: CSSProperties = { fontSize: 13, fontWeight: 950, lineHeight: 1.15 };
 const hotspotSubLabelStyle: CSSProperties = { color: "rgba(238,248,255,0.72)", fontSize: 11, fontWeight: 850, lineHeight: 1.2 };
+const rokuBuiltMarkerStyle: CSSProperties = { position: "absolute", left: "63%", top: "62%", transform: "translate(-50%, -50%)", minWidth: 96, minHeight: 42, padding: "7px 10px 7px 27px", borderRadius: 999, border: "1px solid rgba(126,240,200,0.46)", background: "linear-gradient(180deg, rgba(18, 62, 48, 0.92), rgba(8, 20, 17, 0.88))", color: "#e6fff4", display: "grid", gap: 0, fontSize: 11, fontWeight: 950, boxShadow: "0 12px 28px rgba(0,0,0,0.36), 0 0 18px rgba(126,240,200,0.18)", pointerEvents: "none" };
+const rokuBuiltDotStyle: CSSProperties = { position: "absolute", left: 10, top: 15, width: 9, height: 9, borderRadius: "50%", background: "#9dffd6", boxShadow: "0 0 0 4px rgba(126,240,200,0.13), 0 0 18px rgba(126,240,200,0.7)" };
 const modalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 14, boxSizing: "border-box", background: "rgba(2, 5, 10, 0.68)", backdropFilter: "blur(3px)" };
 const modalStyle: CSSProperties = { width: "min(620px, 100%)", maxHeight: "min(84dvh, 680px)", overflowY: "auto", padding: 18, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(174,230,255,0.3)", background: "linear-gradient(180deg, rgba(15, 29, 46, 0.98), rgba(6, 10, 17, 0.98))", color: "#f5fbff", boxShadow: "0 28px 70px rgba(0,0,0,0.58)" };
 const modalEyebrowStyle: CSSProperties = { color: "#aee6ff", fontSize: 11, fontWeight: 950 };

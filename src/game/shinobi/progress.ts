@@ -28,6 +28,7 @@ export type ShinobiVillageProgress = {
   rokuPartsQuestStarted: boolean;
   rokuPartsFound: RokuPartId[];
   rokuBuildReady: boolean;
+  rokuBuilt: boolean;
 };
 
 const DEFAULT_PROGRESS: ShinobiVillageProgress = {
@@ -40,6 +41,7 @@ const DEFAULT_PROGRESS: ShinobiVillageProgress = {
   rokuPartsQuestStarted: false,
   rokuPartsFound: [],
   rokuBuildReady: false,
+  rokuBuilt: false,
 };
 
 function isRokuPartId(value: unknown): value is RokuPartId {
@@ -61,6 +63,7 @@ function normalizeProgress(value: unknown): ShinobiVillageProgress {
       ? Array.from(new Set(raw.rokuPartsFound.filter(isRokuPartId)))
       : [],
     rokuBuildReady: raw.rokuBuildReady === true,
+    rokuBuilt: raw.rokuBuilt === true,
   };
 }
 
