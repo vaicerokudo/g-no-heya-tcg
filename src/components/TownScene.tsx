@@ -22,7 +22,7 @@ type TownSceneProps = {
 type Pos = { x: number; y: number };
 type InteractionArea = { x: number; y: number; w: number; h: number };
 type InteractionTarget = "table" | "story" | "reception" | "collection" | "myououRoom" | "hiddenTrial" | "exit" | null;
-type TownDialog = "reception" | "collection" | "myououRoom" | null;
+type TownDialog = "reception" | "collection" | "myououRoom" | "shadowPassage" | null;
 type ReceptionTopic = "home" | "first" | "table" | "skin" | "password" | "deltaPart5";
 type Facing = "left" | "right";
 type SpriteState = "idle" | "running-left" | "running-right";
@@ -118,6 +118,16 @@ const TOWN_HOTSPOTS: TownHotspot[] = [
     labelY: 11,
     targetX: 67,
     targetY: 27,
+  },
+  {
+    id: "hiddenTrial",
+    label: "影の通路",
+    subLabel: "まだ見ぬ任務の気配",
+    area: HIDDEN_TRIAL,
+    labelX: 12,
+    labelY: 14,
+    targetX: 13,
+    targetY: 31,
   },
   {
     id: "exit",
@@ -243,7 +253,7 @@ export function TownScene({
     } else if (target === "story") {
       onOpenScenarioSelect?.();
     } else if (target === "hiddenTrial") {
-      setActiveDialog("myououRoom");
+      setActiveDialog("shadowPassage");
     } else if (target === "table") {
       onEnterTcg();
     } else if (target === "exit") {
@@ -393,7 +403,7 @@ export function TownScene({
         : interactionTarget === "table"
           ? "対戦"
           : interactionTarget === "hiddenTrial"
-            ? "???"
+            ? "調べる"
             : interactionTarget === "exit"
               ? "戻る"
               : "移動";
@@ -522,6 +532,26 @@ export function TownScene({
 
           {activeDialog === "collection" && (
             <CollectionDialog unitsById={unitsById} onClose={() => setActiveDialog(null)} />
+          )}
+
+          {activeDialog === "shadowPassage" && (
+            <div style={dialogOverlayStyle}>
+              <div style={dialogPanelStyle}>
+                <div style={dialogBodyStyle}>
+                  <div style={dialogNameStyle}>影の通路</div>
+                  <div style={dialogTopicStyle}>ROKUDO SPIN-OFF</div>
+                  <div style={dialogTextStyle}>
+                    壁の奥から、かすかな気配がする。{"\n"}
+                    ここは、まだ開かれていない任務への入口のようだ。{"\n\n"}
+                    ROKUDO：{"\n"}
+                    「……今はまだ、入らない方がいい。」
+                  </div>
+                </div>
+                <button onClick={() => setActiveDialog(null)} style={dialogCloseButtonStyle}>
+                  閉じる
+                </button>
+              </div>
+            </div>
           )}
 
           {activeDialog === "myououRoom" && (
