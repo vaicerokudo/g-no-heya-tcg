@@ -45,16 +45,16 @@ const CHARACTER_VISUALS: Partial<Record<HotspotId, { name: string; imagePath: st
 };
 
 const HOTSPOTS: Hotspot[] = [
-  { id: "rokudoHouse", label: "ROKUDOの家", subLabel: "物語の始まり", x: 48, y: 28, kind: "home" },
-  { id: "souunHouse", label: "早雲の家", subLabel: "和弓使い", x: 20, y: 63, kind: "home" },
-  { id: "nachaHouse", label: "那茶の家", subLabel: "逃げ足注意", x: 74, y: 62, kind: "home" },
-  { id: "mijinWorkshop", label: "微塵の工房", subLabel: "技工士", x: 52, y: 75, kind: "workshop" },
-  { id: "bambooGrove", label: "竹林の奥", subLabel: "和弓探し", x: 78, y: 43, kind: "quest" },
-  { id: "oldWell", label: "古井戸", subLabel: "小さな核石", x: 49, y: 56, kind: "part", partId: "core_stone" },
-  { id: "ninjaStorehouse", label: "忍具倉庫", subLabel: "音声からくり", x: 33, y: 48, kind: "part", partId: "voice_unit" },
-  { id: "watchtower", label: "見張り台", subLabel: "視線追尾の玉", x: 19, y: 20, kind: "part", partId: "eye_tracker" },
-  { id: "brokenKarakuriBox", label: "壊れたからくり箱", subLabel: "しっぽ駆動部", x: 44, y: 64, kind: "part", partId: "tail_drive" },
-  { id: "oldShrine", label: "古い祠", subLabel: "記憶の歯車", x: 78, y: 23, kind: "part", partId: "memory_gear" },
+  { id: "rokudoHouse", label: "ROKUDOの家", subLabel: "物語", x: 47, y: 31, kind: "home" },
+  { id: "souunHouse", label: "早雲の家", subLabel: "和弓", x: 19, y: 66, kind: "home" },
+  { id: "nachaHouse", label: "那茶の家", subLabel: "逃げ足", x: 76, y: 65, kind: "home" },
+  { id: "mijinWorkshop", label: "微塵の工房", subLabel: "技工", x: 53, y: 78, kind: "workshop" },
+  { id: "bambooGrove", label: "竹林の奥", subLabel: "和弓探し", x: 80, y: 46, kind: "quest" },
+  { id: "oldWell", label: "古井戸", subLabel: "核石", x: 48, y: 58, kind: "part", partId: "core_stone" },
+  { id: "ninjaStorehouse", label: "忍具倉庫", subLabel: "音声", x: 31, y: 50, kind: "part", partId: "voice_unit" },
+  { id: "watchtower", label: "見張り台", subLabel: "視線", x: 18, y: 23, kind: "part", partId: "eye_tracker" },
+  { id: "brokenKarakuriBox", label: "からくり箱", subLabel: "しっぽ", x: 43, y: 67, kind: "part", partId: "tail_drive" },
+  { id: "oldShrine", label: "古い祠", subLabel: "記憶", x: 79, y: 25, kind: "part", partId: "memory_gear" },
 ];
 
 const PART_SPOT_TEXT: Record<Exclude<HotspotId, "rokudoHouse" | "souunHouse" | "nachaHouse" | "mijinWorkshop" | "bambooGrove">, string> = {
@@ -634,14 +634,14 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
         </header>
 
         <section style={progressPanelStyle}>
-          <span>同行者</span>
-          <span>早雲：{progress.souunJoined ? "同行中" : "未"}</span>
-          <span>那茶：{progress.nachaJoined ? "同行中" : "未"}</span>
-          <span>微塵：{progress.mijinJoined ? "参加" : "未"}</span>
-          {progress.rokuPartsQuestStarted ? <strong>ロク制作準備中</strong> : null}
-          {progress.rokuPartsQuestStarted ? <span>パーツ：{progress.rokuPartsFound.length} / {ROKU_PART_IDS.length}</span> : null}
-          {progress.rokuBuildReady ? <strong>準備完了</strong> : null}
-          {progress.rokuBuilt ? <strong>ロク起動済み</strong> : null}
+          <span style={progressLeadStyle}>同行者</span>
+          <span style={progressChipStyle}>早雲：{progress.souunJoined ? "同行中" : "未"}</span>
+          <span style={progressChipStyle}>那茶：{progress.nachaJoined ? "同行中" : "未"}</span>
+          <span style={progressChipStyle}>微塵：{progress.mijinJoined ? "参加" : "未"}</span>
+          {progress.rokuPartsQuestStarted ? <strong style={progressAccentChipStyle}>ロク制作準備中</strong> : null}
+          {progress.rokuPartsQuestStarted ? <span style={progressChipStyle}>パーツ：{progress.rokuPartsFound.length} / {ROKU_PART_IDS.length}</span> : null}
+          {progress.rokuBuildReady ? <strong style={progressAccentChipStyle}>準備完了</strong> : null}
+          {progress.rokuBuilt ? <strong style={progressAccentChipStyle}>ロク起動済み</strong> : null}
         </section>
 
         <main style={mapFrameStyle}>
@@ -661,6 +661,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
                 top: `${spot.y}%`,
               }}
             >
+              <span style={hotspotStemStyle} />
               <span style={hotspotPinStyle} />
               <span style={hotspotLabelStyle}>{spot.label}</span>
               <span style={hotspotSubLabelStyle}>{spot.subLabel}</span>
@@ -709,19 +710,23 @@ const eyebrowStyle: CSSProperties = { color: "#aee6ff", fontSize: 11, fontWeight
 const titleStyle: CSSProperties = { margin: "4px 0 0", fontSize: 30, color: "#eef8ff", textShadow: "0 0 18px rgba(94,167,255,0.26)" };
 const subtitleStyle: CSSProperties = { marginTop: 4, color: "rgba(238,248,255,0.74)", fontSize: 13, fontWeight: 850 };
 const returnButtonStyle: CSSProperties = { minHeight: 40, padding: "0 14px", borderRadius: 12, border: "1px solid rgba(174,230,255,0.28)", background: "rgba(255,255,255,0.08)", color: "#eef8ff", fontWeight: 950, cursor: "pointer" };
-const progressPanelStyle: CSSProperties = { display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 10, padding: "9px 11px", borderRadius: 14, border: "1px solid rgba(174,230,255,0.18)", background: "rgba(4, 9, 16, 0.66)", color: "#dff5ff", fontSize: 12, fontWeight: 950 };
+const progressPanelStyle: CSSProperties = { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", marginBottom: 8, padding: "7px 9px", borderRadius: 14, border: "1px solid rgba(174,230,255,0.13)", background: "rgba(4, 9, 16, 0.44)", color: "#dff5ff", fontSize: 11, fontWeight: 900, backdropFilter: "blur(3px)" };
+const progressLeadStyle: CSSProperties = { color: "rgba(238,248,255,0.72)", fontWeight: 950, marginRight: 2 };
+const progressChipStyle: CSSProperties = { padding: "3px 7px", borderRadius: 999, border: "1px solid rgba(174,230,255,0.12)", background: "rgba(255,255,255,0.045)" };
+const progressAccentChipStyle: CSSProperties = { ...progressChipStyle, color: "#c8ffe9", border: "1px solid rgba(126,240,200,0.2)", background: "rgba(17,54,43,0.22)" };
 const mapFrameStyle: CSSProperties = { position: "relative", minHeight: "clamp(430px, 74dvh, 820px)", overflow: "hidden", borderRadius: 18, border: "1px solid rgba(174,230,255,0.24)", backgroundImage: `linear-gradient(180deg, rgba(6, 10, 18, 0.08), rgba(6, 10, 18, 0.2)), url("${SHINOBI_VILLAGE_MAP_URL}")`, backgroundSize: "100% 100%", backgroundPosition: "center", backgroundRepeat: "no-repeat", boxShadow: "0 24px 66px rgba(0,0,0,0.54), inset 0 0 90px rgba(0,0,0,0.25)" };
 const moonStyle: CSSProperties = { position: "absolute", right: "10%", top: "10%", width: 76, height: 76, borderRadius: "50%", background: "radial-gradient(circle, rgba(235,247,255,0.42), rgba(148,193,230,0.12) 58%, transparent 68%)", boxShadow: "0 0 34px rgba(174,230,255,0.14)", pointerEvents: "none", opacity: 0.42 };
-const pathStyle: CSSProperties = { position: "absolute", left: "18%", right: "18%", top: "54%", height: "26%", borderRadius: "50%", borderTop: "2px dashed rgba(210,232,255,0.2)", transform: "rotate(2deg)", pointerEvents: "none" };
-const hotspotStyle: CSSProperties = { position: "absolute", transform: "translate(-50%, -50%)", minWidth: 112, minHeight: 48, padding: "7px 9px 7px 26px", borderRadius: 13, border: "1px solid rgba(174,230,255,0.34)", background: "linear-gradient(180deg, rgba(16, 35, 54, 0.78), rgba(6, 11, 18, 0.72))", color: "#f5fbff", display: "grid", gap: 1, textAlign: "left", cursor: "pointer", boxShadow: "0 12px 26px rgba(0,0,0,0.32), 0 0 16px rgba(94,167,255,0.1)", touchAction: "manipulation", backdropFilter: "blur(2px)" };
-const questHotspotStyle: CSSProperties = { borderColor: "rgba(255,220,145,0.46)", background: "linear-gradient(180deg, rgba(56, 42, 18, 0.9), rgba(16, 12, 8, 0.84))" };
-const workshopHotspotStyle: CSSProperties = { borderColor: "rgba(183,158,255,0.46)", background: "linear-gradient(180deg, rgba(35, 27, 62, 0.9), rgba(10, 9, 18, 0.84))" };
-const partHotspotStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.42)", background: "linear-gradient(180deg, rgba(17, 54, 43, 0.9), rgba(7, 18, 16, 0.84))" };
-const hotspotPinStyle: CSSProperties = { position: "absolute", left: 10, top: 14, width: 9, height: 9, borderRadius: "50%", background: "#dff5ff", boxShadow: "0 0 0 4px rgba(174,230,255,0.12), 0 0 16px rgba(174,230,255,0.64)" };
-const hotspotLabelStyle: CSSProperties = { fontSize: 13, fontWeight: 950, lineHeight: 1.15 };
-const hotspotSubLabelStyle: CSSProperties = { color: "rgba(238,248,255,0.72)", fontSize: 11, fontWeight: 850, lineHeight: 1.2 };
-const rokuBuiltMarkerStyle: CSSProperties = { position: "absolute", left: "63%", top: "62%", transform: "translate(-50%, -50%)", minWidth: 96, minHeight: 42, padding: "7px 10px 7px 27px", borderRadius: 999, border: "1px solid rgba(126,240,200,0.46)", background: "linear-gradient(180deg, rgba(18, 62, 48, 0.92), rgba(8, 20, 17, 0.88))", color: "#e6fff4", display: "grid", gap: 0, fontSize: 11, fontWeight: 950, boxShadow: "0 12px 28px rgba(0,0,0,0.36), 0 0 18px rgba(126,240,200,0.18)", pointerEvents: "none" };
-const rokuBuiltDotStyle: CSSProperties = { position: "absolute", left: 10, top: 15, width: 9, height: 9, borderRadius: "50%", background: "#9dffd6", boxShadow: "0 0 0 4px rgba(126,240,200,0.13), 0 0 18px rgba(126,240,200,0.7)" };
+const pathStyle: CSSProperties = { position: "absolute", left: "20%", right: "18%", top: "57%", height: "22%", borderRadius: "50%", borderTop: "1px dashed rgba(230,242,255,0.16)", transform: "rotate(1deg)", pointerEvents: "none", filter: "drop-shadow(0 0 5px rgba(210,232,255,0.08))" };
+const hotspotStyle: CSSProperties = { position: "absolute", transform: "translate(-50%, -50%)", minWidth: 92, minHeight: 40, padding: "5px 8px 5px 23px", borderRadius: 999, border: "1px solid rgba(224,244,255,0.24)", background: "linear-gradient(180deg, rgba(5, 14, 22, 0.46), rgba(3, 8, 14, 0.34))", color: "#f5fbff", display: "grid", gap: 0, textAlign: "left", cursor: "pointer", boxShadow: "0 8px 18px rgba(0,0,0,0.22), 0 0 10px rgba(94,167,255,0.08)", touchAction: "manipulation", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" };
+const questHotspotStyle: CSSProperties = { borderColor: "rgba(255,220,145,0.32)", background: "linear-gradient(180deg, rgba(49, 38, 17, 0.48), rgba(10, 8, 6, 0.34))" };
+const workshopHotspotStyle: CSSProperties = { borderColor: "rgba(183,158,255,0.34)", background: "linear-gradient(180deg, rgba(28, 21, 50, 0.5), rgba(8, 7, 13, 0.36))" };
+const partHotspotStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.3)", background: "linear-gradient(180deg, rgba(11, 44, 34, 0.48), rgba(4, 14, 12, 0.34))" };
+const hotspotStemStyle: CSSProperties = { position: "absolute", left: 12, top: 29, width: 1, height: 15, background: "linear-gradient(180deg, rgba(223,245,255,0.36), transparent)", boxShadow: "0 0 7px rgba(223,245,255,0.16)", pointerEvents: "none" };
+const hotspotPinStyle: CSSProperties = { position: "absolute", left: 8, top: 11, width: 10, height: 10, borderRadius: "50%", background: "#dff5ff", boxShadow: "0 0 0 3px rgba(174,230,255,0.1), 0 0 12px rgba(174,230,255,0.44), 0 7px 12px rgba(0,0,0,0.26)" };
+const hotspotLabelStyle: CSSProperties = { fontSize: "clamp(10px, 1.25vw, 12px)", fontWeight: 950, lineHeight: 1.1, letterSpacing: 0 };
+const hotspotSubLabelStyle: CSSProperties = { color: "rgba(238,248,255,0.62)", fontSize: "clamp(9px, 1vw, 10px)", fontWeight: 800, lineHeight: 1.15 };
+const rokuBuiltMarkerStyle: CSSProperties = { position: "absolute", left: "60%", top: "70%", transform: "translate(-50%, -50%)", minWidth: 76, minHeight: 34, padding: "5px 8px 5px 24px", borderRadius: 999, border: "1px solid rgba(126,240,200,0.3)", background: "linear-gradient(180deg, rgba(12, 46, 35, 0.46), rgba(6, 16, 13, 0.34))", color: "#e6fff4", display: "grid", gap: 0, fontSize: 10, fontWeight: 950, boxShadow: "0 8px 18px rgba(0,0,0,0.22), 0 0 12px rgba(126,240,200,0.14)", pointerEvents: "none", backdropFilter: "blur(4px)" };
+const rokuBuiltDotStyle: CSSProperties = { position: "absolute", left: 8, top: 11, width: 9, height: 9, borderRadius: "50%", background: "#9dffd6", boxShadow: "0 0 0 3px rgba(126,240,200,0.1), 0 0 14px rgba(126,240,200,0.5)" };
 const modalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 60, display: "grid", placeItems: "center", padding: 14, boxSizing: "border-box", background: "rgba(2, 5, 10, 0.68)", backdropFilter: "blur(3px)" };
 const modalStyle: CSSProperties = { width: "min(620px, 100%)", maxHeight: "min(84dvh, 680px)", overflowY: "auto", padding: 18, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(174,230,255,0.3)", background: "linear-gradient(180deg, rgba(15, 29, 46, 0.98), rgba(6, 10, 17, 0.98))", color: "#f5fbff", boxShadow: "0 28px 70px rgba(0,0,0,0.58)" };
 const modalEyebrowStyle: CSSProperties = { color: "#aee6ff", fontSize: 11, fontWeight: 950 };
