@@ -38,7 +38,7 @@ const ROKUDO_YOUTUBE_URL = "https://www.youtube.com/@vaicerokudo";
 const SHINOBI_VILLAGE_MAP_URL = "/backgrounds/shinobi-village-map.png";
 
 const CHARACTER_VISUALS: Partial<Record<HotspotId, { name: string; imagePath: string; tone: string }>> = {
-  rokudoHouse: { name: "ROKUDO", imagePath: "/portraits/south/default/base/rokudo.png", tone: "静かな忍具の気配" },
+  rokudoHouse: { name: "ROKUDO", imagePath: "/ui/shinobi/rokudo.png", tone: "静かな忍具の気配" },
   souunHouse: { name: "早雲", imagePath: "/ui/shinobi/souun.png", tone: "偉そうで、少し構ってほしそうな兄貴分" },
   nachaHouse: { name: "那茶", imagePath: "/ui/shinobi/nacha.png", tone: "人見知りだが、煽る時は煽る弟分" },
   mijinWorkshop: { name: "微塵", imagePath: "/ui/shinobi/mijin.png", tone: "ロクを作る、頼れるふとっちょ技工士" },
