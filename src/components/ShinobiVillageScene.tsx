@@ -59,10 +59,18 @@ const HOTSPOTS: Hotspot[] = [
 
 const PART_SPOT_TEXT: Record<Exclude<HotspotId, "rokudoHouse" | "souunHouse" | "nachaHouse" | "mijinWorkshop" | "bambooGrove">, string> = {
   oldWell: "井戸の底に、小さく光る石が沈んでいた。",
-  ninjaStorehouse: "古い忍具の棚に、小さな音声からくりが残されていた。",
-  watchtower: "見張り台の梁に、視線を追うように揺れる玉が吊られていた。",
-  brokenKarakuriBox: "壊れたからくり箱の中に、しっぽを動かす小さな駆動部が残っていた。",
-  oldShrine: "古い祠の奥で、記憶を刻む歯車が静かに回っていた。",
+  ninjaStorehouse: "古い箱の中から、小さな発声装置のような部品を見つけた。",
+  watchtower: "見張り台の片隅に、こちらを見返すような玉が置かれていた。",
+  brokenKarakuriBox: "壊れたからくり箱の奥で、小さな駆動部がまだ動いていた。",
+  oldShrine: "祠の奥に、古びた歯車が大切に納められていた。",
+};
+
+const PART_REACTION_TEXT: Record<RokuPartId, string> = {
+  core_stone: "微塵：「いいぞ。それがロクの中核になる。」",
+  voice_unit: "那茶：「これでしゃべるの？ ……うるさくならない？」",
+  eye_tracker: "早雲：「見られてるみてぇで落ち着かねぇな。」",
+  tail_drive: "那茶：「しっぽいる？ 本当にいる？」",
+  memory_gear: "ROKUDO：「……これは、簡単に扱っていいものではなさそうですね。」",
 };
 
 function openExternalUrl(url: string) {
@@ -203,10 +211,20 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
           <p style={modalTextStyle}>
             静かな家の中に、使い込まれた忍具が並んでいる。
             <br />
-            ここから、ROKUDOの物語が続いている。
+            ここから、ROKUDOの物語は今も続いている。
+            <br />
+            <br />
+            ROKUDO：
+            <br />
+            「ここは……少し、落ち着きますね。」
+            <br />
+            <br />
+            ロク：
+            <br />
+            「外の記録へ接続できます。」
           </p>
           <button type="button" style={primaryButtonStyle} onClick={() => openExternalUrl(ROKUDO_YOUTUBE_URL)}>
-            YouTubeを開く
+            ロクドの記録を見る
           </button>
         </>
       );
@@ -219,17 +237,27 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
             <p style={modalTextStyle}>
               早雲：
               <br />
-              「おう、ROKUDO。来たか。手ぇ貸してほしいなら、まず俺の和弓探してきてくれや。」
+              「おう、ROKUDO。やっと来たか。」
               <br />
               <br />
               ROKUDO：
               <br />
-              「……自分で探しなよ。にいちゃん。」
+              「呼ばれてはいませんが。」
               <br />
               <br />
               早雲：
               <br />
-              「細けぇこと言うな。兄貴分の頼みだろ。」
+              「細けぇこと言うな。兄貴分が困ってんだ。俺の和弓、どっか行っちまってよ。」
+              <br />
+              <br />
+              ROKUDO：
+              <br />
+              「……それは、探してほしいという意味ですか。」
+              <br />
+              <br />
+              早雲：
+              <br />
+              「察しがいいじゃねぇか。さすが俺の弟分だな。」
             </p>
             <div style={hintBoxStyle}>竹林の奥に手がかりがありそうだ。</div>
           </>
@@ -242,7 +270,17 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
             <p style={modalTextStyle}>
               早雲：
               <br />
-              「お、見つけてきたか。しょうがねぇな。付き合ってやるよ。」
+              「お、それだそれだ。やっぱ俺の弓は絵になるな。」
+              <br />
+              <br />
+              ROKUDO：
+              <br />
+              「探したのはこちらですが。」
+              <br />
+              <br />
+              早雲：
+              <br />
+              「しょうがねぇな。そこまで言うなら付き合ってやるよ。兄貴分だからな。」
             </p>
             <button type="button" style={primaryButtonStyle} onClick={joinSouun}>
               早雲に同行してもらう
@@ -255,7 +293,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
         <p style={modalTextStyle}>
           早雲：
           <br />
-          「しょうがねぇな。付き合ってやるよ。」
+          「で、次はどこ行くんだ？ 別に暇してたわけじゃねぇけど、付き合ってやるよ。」
         </p>
       );
     }
@@ -294,7 +332,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
               </>
             ) : null}
           </p>
-          {justFound ? <div style={hintBoxStyle}>微塵：「いいぞ、それは中核に使える。」</div> : null}
+          {justFound ? <div style={hintBoxStyle}>{PART_REACTION_TEXT[activeSpot.partId]}</div> : null}
         </>
       );
     }
@@ -306,17 +344,22 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
             <p style={modalTextStyle}>
               那茶：
               <br />
-              「……やだああああ！」
+              「……知らない人いる。やだああああ！」
               <br />
               <br />
               ROKUDO：
               <br />
-              「那茶。おちつけ！」
+              「待ってください。話を聞いてください。」
               <br />
               <br />
               那茶：
               <br />
-              「やーだね！にげろぉぉ！」
+              「聞いたら巻き込まれるやつでしょ！ そういうの、顔に出てるから！」
+              <br />
+              <br />
+              ROKUDO：
+              <br />
+              「……一人では追いきれませんね。」
             </p>
             <button type="button" style={primaryButtonStyle} onClick={visitNacha}>
               追いかける
@@ -339,9 +382,14 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
         return (
           <>
             <p style={modalTextStyle}>
+              那茶：
+              <br />
+              「やだああああ！ なんで早雲までいるの！」
+              <br />
+              <br />
               早雲：
               <br />
-              「おい那茶、逃げ足だけは一人前だな。」
+              「逃げ足だけは一人前だな、那茶。」
               <br />
               <br />
               那茶：
@@ -351,12 +399,12 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
               <br />
               ROKUDO：
               <br />
-              「ほら、いくよっ！」
+              「では、手伝ってくれるということで。」
               <br />
               <br />
               那茶：
               <br />
-              「……ちょっとだけだからね。」
+              「……ちょっとだけだからね。あと、変な道具作るなら僕のせいにしないでよ。」
             </p>
             <button type="button" style={primaryButtonStyle} onClick={visitNacha}>
               那茶に同行してもらう
@@ -369,7 +417,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
         <p style={modalTextStyle}>
           那茶：
           <br />
-          「……ちょっとだけだからね。」
+          「まだ行くの？ ……まあ、ついていけないとは言ってないけど。」
         </p>
       );
     }
@@ -380,17 +428,22 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
           <p style={modalTextStyle}>
             微塵：
             <br />
-            「おお、ROKUDOか。これよくね？」
+            「おお、ROKUDOか。ちょうど変な道具を作っていたところだ。」
             <br />
             <br />
             ROKUDO：
             <br />
-            「なに？新しい道具？」
+            「変な道具……ですか。」
             <br />
             <br />
             微塵：
             <br />
-            「人手が足りねぇな。早雲と那茶も連れてきな。」
+            「お前を後ろから支える、小さな相棒みたいなもんだ。だが、材料集めには人手がいる。」
+            <br />
+            <br />
+            微塵：
+            <br />
+            「早雲と那茶も連れてこい。あいつらも、こういう時くらい役に立つだろ。」
           </p>
         );
       }
@@ -401,17 +454,32 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
             <p style={modalTextStyle}>
               微塵：
               <br />
-              「よし、面子はそろったな。それじゃ、ロクのパーツ集めといくか。」
+              「よし、面子はそろったな。」
               <br />
               <br />
-              ROKUDO：
+              早雲：
               <br />
-              「ロク……？」
+              「俺は巻き込まれただけだぞ。」
+              <br />
+              <br />
+              那茶：
+              <br />
+              「僕も捕まっただけなんだけど。」
               <br />
               <br />
               微塵：
               <br />
-              「名前は仮だ。だが、きっとお前の助けになる。」
+              「つまり、ちょうどいい人手ってことだ。」
+              <br />
+              <br />
+              ROKUDO：
+              <br />
+              「それで、何を作るんですか。」
+              <br />
+              <br />
+              微塵：
+              <br />
+              「ロクだ。お前の後ろを見てくれる、小さな相棒を作る。」
             </p>
             <button type="button" style={primaryButtonStyle} onClick={joinMijin}>
               ロク制作の準備を始める
@@ -427,7 +495,12 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
             <p style={modalTextStyle}>
               微塵：
               <br />
-              「よし、必要なもんは揃ったな。あとは組み上げるだけだ。」
+              「よし、必要なもんは揃ったな。道具ってのは、持ち主に似るもんだ。」
+              <br />
+              <br />
+              微塵：
+              <br />
+              「ロクはただの道具じゃない。ROKUDOの後ろを見るための相棒だ。」
             </p>
             <button type="button" style={primaryButtonStyle} onClick={markRokuBuildReady}>
               ロク制作準備を完了する
@@ -505,6 +578,11 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
               ロク：
               <br />
               「待機中。ROKUDOの状態を監視しています。」
+              <br />
+              <br />
+              ROKUDO：
+              <br />
+              「……監視という言い方は、少し気になりますね。」
             </p>
           </>
         );
@@ -532,9 +610,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
           <p style={modalTextStyle}>
             微塵：
             <br />
-            {progress.rokuBuildReady
-              ? "「準備は整った。あとは組み上げるだけだな。」"
-              : "「ロク制作の準備中だ。次はパーツ探しだな。」"}
+            「足りない部品がまだあるな。道具ってのは、最後の小さい部品ほど大事なんだ。」
           </p>
         </>
       );
