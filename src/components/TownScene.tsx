@@ -9,6 +9,7 @@ import { CollectionDialog } from "./Town/CollectionDialog";
 
 type TownSceneProps = {
   onEnterTcg: () => void;
+  onEnterShinobiVillage?: () => void;
   onOpenScenarioSelect?: () => void;
   onStartHiddenScenario?: (scenarioId: ScenarioId) => void;
   onExitToMap?: () => void;
@@ -197,6 +198,7 @@ function isNearArea(pos: Pos, area: InteractionArea, threshold = INTERACTION_THR
 
 export function TownScene({
   onEnterTcg,
+  onEnterShinobiVillage,
   onOpenScenarioSelect,
   onStartHiddenScenario,
   onExitToMap,
@@ -546,6 +548,18 @@ export function TownScene({
                     ROKUDO：{"\n"}
                     「……今はまだ、入らない方がいい。」
                   </div>
+                  {onEnterShinobiVillage ? (
+                    <button
+                      type="button"
+                      style={shadowPassageButtonStyle}
+                      onClick={() => {
+                        setActiveDialog(null);
+                        onEnterShinobiVillage();
+                      }}
+                    >
+                      忍びの里へ向かう
+                    </button>
+                  ) : null}
                 </div>
                 <button onClick={() => setActiveDialog(null)} style={dialogCloseButtonStyle}>
                   閉じる
@@ -915,6 +929,19 @@ const passphraseMessageStyle: CSSProperties = {
   fontSize: 14,
   lineHeight: 1.55,
   whiteSpace: "pre-line",
+};
+
+const shadowPassageButtonStyle: CSSProperties = {
+  width: "100%",
+  minHeight: 42,
+  marginTop: 16,
+  borderRadius: 12,
+  border: "1px solid rgba(174,230,255,0.42)",
+  background: "linear-gradient(180deg, #cfefff, #5c8ec8)",
+  color: "#08111d",
+  fontSize: 14,
+  fontWeight: 950,
+  cursor: "pointer",
 };
 
 const trialSelectStyle: CSSProperties = {

@@ -119,6 +119,9 @@ const NecroCityScene = lazy(() =>
 const IsolationZoneScene = lazy(() =>
   import("./components/IsolationZoneScene").then((module) => ({ default: module.IsolationZoneScene }))
 );
+const ShinobiVillageScene = lazy(() =>
+  import("./components/ShinobiVillageScene").then((module) => ({ default: module.ShinobiVillageScene }))
+);
 const TownScene = lazy(() =>
   import("./components/TownScene").then((module) => ({ default: module.TownScene }))
 );
@@ -210,6 +213,7 @@ type Scene =
   | "blackNoiseBay"
   | "necroCity"
   | "isolationZone"
+  | "shinobiVillage"
   | "town"
   | "tcg";
 type BoardPreviewMode = "move" | "attack";
@@ -1918,11 +1922,20 @@ const reinforceSet = useMemo(() => {
     );
   }
 
+  if (scene === "shinobiVillage") {
+    return (
+      <Suspense fallback={<SceneLoading />}>
+        <ShinobiVillageScene onReturnTown={() => setScene("town")} />
+      </Suspense>
+    );
+  }
+
   if (scene === "town") {
     return (
       <Suspense fallback={<SceneLoading />}>
         <TownScene
           onExitToMap={() => setScene("astoria")}
+          onEnterShinobiVillage={() => setScene("shinobiVillage")}
           onEnterTcg={() => setScene("tcg")}
           onStartHiddenScenario={handleHiddenScenarioStart}
           onSkinUnlocked={refreshUnlockedSkins}

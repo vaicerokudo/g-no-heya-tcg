@@ -8,6 +8,7 @@ import { DELTA_MACHINE_PARTS_STORAGE_KEY } from "./delta/progress";
 import { ISOLATION_PROGRESS_STORAGE_KEY } from "./isolation/progress";
 import { HIDDEN_HINT_FLAGS_STORAGE_KEY } from "./scenario/hiddenHints";
 import { CLEARED_SCENARIOS_STORAGE_KEY } from "./scenario/progress";
+import { SHINOBI_VILLAGE_PROGRESS_STORAGE_KEY } from "./shinobi/progress";
 import { WASTELAND_PROGRESS_STORAGE_KEY } from "./wasteland/progress";
 
 export const GAME_PROGRESS_STORAGE_KEYS = [
@@ -20,6 +21,7 @@ export const GAME_PROGRESS_STORAGE_KEYS = [
   SHIP_PARTS_STORAGE_KEY,
   NECRO_CITY_PROGRESS_STORAGE_KEY,
   ISOLATION_PROGRESS_STORAGE_KEY,
+  SHINOBI_VILLAGE_PROGRESS_STORAGE_KEY,
   // Legacy one-off flags from earlier development builds.
   "delta_chapter_cleared",
   "deli_metal_machine_unlocked",
