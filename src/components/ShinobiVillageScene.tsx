@@ -35,18 +35,26 @@ type Hotspot = {
 };
 
 const ROKUDO_YOUTUBE_URL = "https://www.youtube.com/@vaicerokudo";
+const SHINOBI_VILLAGE_MAP_URL = "/backgrounds/shinobi-village-map.png";
+
+const CHARACTER_VISUALS: Partial<Record<HotspotId, { name: string; imagePath: string; tone: string }>> = {
+  rokudoHouse: { name: "ROKUDO", imagePath: "/portraits/south/default/base/rokudo.png", tone: "静かな忍具の気配" },
+  souunHouse: { name: "早雲", imagePath: "/ui/shinobi/souun.png", tone: "偉そうで、少し構ってほしそうな兄貴分" },
+  nachaHouse: { name: "那茶", imagePath: "/ui/shinobi/nacha.png", tone: "人見知りだが、煽る時は煽る弟分" },
+  mijinWorkshop: { name: "微塵", imagePath: "/ui/shinobi/mijin.png", tone: "ロクを作る、頼れるふとっちょ技工士" },
+};
 
 const HOTSPOTS: Hotspot[] = [
-  { id: "rokudoHouse", label: "ROKUDOの家", subLabel: "物語の始まり", x: 50, y: 38, kind: "home" },
-  { id: "souunHouse", label: "早雲の家", subLabel: "和弓使い", x: 26, y: 48, kind: "home" },
-  { id: "nachaHouse", label: "那茶の家", subLabel: "逃げ足注意", x: 74, y: 50, kind: "home" },
-  { id: "mijinWorkshop", label: "微塵の工房", subLabel: "技工士", x: 56, y: 68, kind: "workshop" },
-  { id: "bambooGrove", label: "竹林の奥", subLabel: "和弓探し", x: 18, y: 72, kind: "quest" },
-  { id: "oldWell", label: "古井戸", subLabel: "小さな核石", x: 38, y: 76, kind: "part", partId: "core_stone" },
-  { id: "ninjaStorehouse", label: "忍具倉庫", subLabel: "音声からくり", x: 36, y: 28, kind: "part", partId: "voice_unit" },
-  { id: "watchtower", label: "見張り台", subLabel: "視線追尾の玉", x: 82, y: 28, kind: "part", partId: "eye_tracker" },
-  { id: "brokenKarakuriBox", label: "壊れたからくり箱", subLabel: "しっぽ駆動部", x: 78, y: 76, kind: "part", partId: "tail_drive" },
-  { id: "oldShrine", label: "古い祠", subLabel: "記憶の歯車", x: 50, y: 18, kind: "part", partId: "memory_gear" },
+  { id: "rokudoHouse", label: "ROKUDOの家", subLabel: "物語の始まり", x: 48, y: 28, kind: "home" },
+  { id: "souunHouse", label: "早雲の家", subLabel: "和弓使い", x: 20, y: 63, kind: "home" },
+  { id: "nachaHouse", label: "那茶の家", subLabel: "逃げ足注意", x: 74, y: 62, kind: "home" },
+  { id: "mijinWorkshop", label: "微塵の工房", subLabel: "技工士", x: 52, y: 75, kind: "workshop" },
+  { id: "bambooGrove", label: "竹林の奥", subLabel: "和弓探し", x: 78, y: 43, kind: "quest" },
+  { id: "oldWell", label: "古井戸", subLabel: "小さな核石", x: 49, y: 56, kind: "part", partId: "core_stone" },
+  { id: "ninjaStorehouse", label: "忍具倉庫", subLabel: "音声からくり", x: 33, y: 48, kind: "part", partId: "voice_unit" },
+  { id: "watchtower", label: "見張り台", subLabel: "視線追尾の玉", x: 19, y: 20, kind: "part", partId: "eye_tracker" },
+  { id: "brokenKarakuriBox", label: "壊れたからくり箱", subLabel: "しっぽ駆動部", x: 44, y: 64, kind: "part", partId: "tail_drive" },
+  { id: "oldShrine", label: "古い祠", subLabel: "記憶の歯車", x: 78, y: 23, kind: "part", partId: "memory_gear" },
 ];
 
 const PART_SPOT_TEXT: Record<Exclude<HotspotId, "rokudoHouse" | "souunHouse" | "nachaHouse" | "mijinWorkshop" | "bambooGrove">, string> = {
@@ -139,6 +147,23 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
     setActiveHotspot(null);
     setShowRokuAssemblyEvent(false);
     setRecentPartFound(null);
+  };
+
+  const renderCharacterPanel = () => {
+    if (!activeSpot) return null;
+    const visual = CHARACTER_VISUALS[activeSpot.id];
+    if (!visual) return null;
+    return (
+      <div style={characterPanelStyle}>
+        <div style={characterImageFrameStyle}>
+          <img src={visual.imagePath} alt={visual.name} style={characterImageStyle} loading="lazy" />
+        </div>
+        <div style={characterInfoStyle}>
+          <div style={characterNameStyle}>{visual.name}</div>
+          <div style={characterToneStyle}>{visual.tone}</div>
+        </div>
+      </div>
+    );
   };
 
   const renderRokuBlueprint = () => {
@@ -579,6 +604,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
             <div style={modalStyle} onClick={(event) => event.stopPropagation()}>
               <div style={modalEyebrowStyle}>忍びの里</div>
               <h2 style={modalTitleStyle}>{activeSpot.label}</h2>
+              {renderCharacterPanel()}
               {renderModalBody()}
               <button type="button" style={closeButtonStyle} onClick={closeModal}>
                 閉じる
@@ -601,21 +627,21 @@ const sceneStyle: CSSProperties = {
   overflowX: "hidden",
 };
 
-const shellStyle: CSSProperties = { width: "min(980px, 100%)", margin: "0 auto" };
+const shellStyle: CSSProperties = { width: "min(1180px, 100%)", margin: "0 auto" };
 const headerStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "end", gap: 12, flexWrap: "wrap", marginBottom: 10 };
 const eyebrowStyle: CSSProperties = { color: "#aee6ff", fontSize: 11, fontWeight: 950 };
 const titleStyle: CSSProperties = { margin: "4px 0 0", fontSize: 30, color: "#eef8ff", textShadow: "0 0 18px rgba(94,167,255,0.26)" };
 const subtitleStyle: CSSProperties = { marginTop: 4, color: "rgba(238,248,255,0.74)", fontSize: 13, fontWeight: 850 };
 const returnButtonStyle: CSSProperties = { minHeight: 40, padding: "0 14px", borderRadius: 12, border: "1px solid rgba(174,230,255,0.28)", background: "rgba(255,255,255,0.08)", color: "#eef8ff", fontWeight: 950, cursor: "pointer" };
 const progressPanelStyle: CSSProperties = { display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 10, padding: "9px 11px", borderRadius: 14, border: "1px solid rgba(174,230,255,0.18)", background: "rgba(4, 9, 16, 0.66)", color: "#dff5ff", fontSize: 12, fontWeight: 950 };
-const mapFrameStyle: CSSProperties = { position: "relative", minHeight: "min(72dvh, 720px)", overflow: "hidden", borderRadius: 18, border: "1px solid rgba(174,230,255,0.24)", background: "radial-gradient(circle at 50% 22%, rgba(93,137,190,0.26), transparent 24%), linear-gradient(180deg, rgba(13, 28, 45, 0.92), rgba(6, 10, 18, 0.94)), repeating-linear-gradient(120deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 28px)", boxShadow: "0 24px 66px rgba(0,0,0,0.54), inset 0 0 70px rgba(0,0,0,0.26)" };
-const moonStyle: CSSProperties = { position: "absolute", right: "10%", top: "10%", width: 76, height: 76, borderRadius: "50%", background: "radial-gradient(circle, rgba(235,247,255,0.94), rgba(148,193,230,0.22) 58%, transparent 68%)", boxShadow: "0 0 34px rgba(174,230,255,0.28)", pointerEvents: "none" };
-const pathStyle: CSSProperties = { position: "absolute", left: "14%", right: "14%", top: "58%", height: "24%", borderRadius: "50%", borderTop: "2px dashed rgba(210,232,255,0.16)", transform: "rotate(-4deg)", pointerEvents: "none" };
-const hotspotStyle: CSSProperties = { position: "absolute", transform: "translate(-50%, -50%)", minWidth: 130, minHeight: 54, padding: "8px 10px 8px 28px", borderRadius: 14, border: "1px solid rgba(174,230,255,0.34)", background: "linear-gradient(180deg, rgba(16, 35, 54, 0.9), rgba(6, 11, 18, 0.84))", color: "#f5fbff", display: "grid", gap: 2, textAlign: "left", cursor: "pointer", boxShadow: "0 14px 30px rgba(0,0,0,0.34), 0 0 18px rgba(94,167,255,0.12)", touchAction: "manipulation" };
+const mapFrameStyle: CSSProperties = { position: "relative", minHeight: "clamp(430px, 74dvh, 820px)", overflow: "hidden", borderRadius: 18, border: "1px solid rgba(174,230,255,0.24)", backgroundImage: `linear-gradient(180deg, rgba(6, 10, 18, 0.08), rgba(6, 10, 18, 0.2)), url("${SHINOBI_VILLAGE_MAP_URL}")`, backgroundSize: "100% 100%", backgroundPosition: "center", backgroundRepeat: "no-repeat", boxShadow: "0 24px 66px rgba(0,0,0,0.54), inset 0 0 90px rgba(0,0,0,0.25)" };
+const moonStyle: CSSProperties = { position: "absolute", right: "10%", top: "10%", width: 76, height: 76, borderRadius: "50%", background: "radial-gradient(circle, rgba(235,247,255,0.42), rgba(148,193,230,0.12) 58%, transparent 68%)", boxShadow: "0 0 34px rgba(174,230,255,0.14)", pointerEvents: "none", opacity: 0.42 };
+const pathStyle: CSSProperties = { position: "absolute", left: "18%", right: "18%", top: "54%", height: "26%", borderRadius: "50%", borderTop: "2px dashed rgba(210,232,255,0.2)", transform: "rotate(2deg)", pointerEvents: "none" };
+const hotspotStyle: CSSProperties = { position: "absolute", transform: "translate(-50%, -50%)", minWidth: 112, minHeight: 48, padding: "7px 9px 7px 26px", borderRadius: 13, border: "1px solid rgba(174,230,255,0.34)", background: "linear-gradient(180deg, rgba(16, 35, 54, 0.78), rgba(6, 11, 18, 0.72))", color: "#f5fbff", display: "grid", gap: 1, textAlign: "left", cursor: "pointer", boxShadow: "0 12px 26px rgba(0,0,0,0.32), 0 0 16px rgba(94,167,255,0.1)", touchAction: "manipulation", backdropFilter: "blur(2px)" };
 const questHotspotStyle: CSSProperties = { borderColor: "rgba(255,220,145,0.46)", background: "linear-gradient(180deg, rgba(56, 42, 18, 0.9), rgba(16, 12, 8, 0.84))" };
 const workshopHotspotStyle: CSSProperties = { borderColor: "rgba(183,158,255,0.46)", background: "linear-gradient(180deg, rgba(35, 27, 62, 0.9), rgba(10, 9, 18, 0.84))" };
 const partHotspotStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.42)", background: "linear-gradient(180deg, rgba(17, 54, 43, 0.9), rgba(7, 18, 16, 0.84))" };
-const hotspotPinStyle: CSSProperties = { position: "absolute", left: 10, top: 15, width: 10, height: 10, borderRadius: "50%", background: "#dff5ff", boxShadow: "0 0 0 4px rgba(174,230,255,0.12), 0 0 16px rgba(174,230,255,0.64)" };
+const hotspotPinStyle: CSSProperties = { position: "absolute", left: 10, top: 14, width: 9, height: 9, borderRadius: "50%", background: "#dff5ff", boxShadow: "0 0 0 4px rgba(174,230,255,0.12), 0 0 16px rgba(174,230,255,0.64)" };
 const hotspotLabelStyle: CSSProperties = { fontSize: 13, fontWeight: 950, lineHeight: 1.15 };
 const hotspotSubLabelStyle: CSSProperties = { color: "rgba(238,248,255,0.72)", fontSize: 11, fontWeight: 850, lineHeight: 1.2 };
 const rokuBuiltMarkerStyle: CSSProperties = { position: "absolute", left: "63%", top: "62%", transform: "translate(-50%, -50%)", minWidth: 96, minHeight: 42, padding: "7px 10px 7px 27px", borderRadius: 999, border: "1px solid rgba(126,240,200,0.46)", background: "linear-gradient(180deg, rgba(18, 62, 48, 0.92), rgba(8, 20, 17, 0.88))", color: "#e6fff4", display: "grid", gap: 0, fontSize: 11, fontWeight: 950, boxShadow: "0 12px 28px rgba(0,0,0,0.36), 0 0 18px rgba(126,240,200,0.18)", pointerEvents: "none" };
@@ -624,6 +650,12 @@ const modalOverlayStyle: CSSProperties = { position: "fixed", inset: 0, zIndex: 
 const modalStyle: CSSProperties = { width: "min(620px, 100%)", maxHeight: "min(84dvh, 680px)", overflowY: "auto", padding: 18, boxSizing: "border-box", borderRadius: 16, border: "1px solid rgba(174,230,255,0.3)", background: "linear-gradient(180deg, rgba(15, 29, 46, 0.98), rgba(6, 10, 17, 0.98))", color: "#f5fbff", boxShadow: "0 28px 70px rgba(0,0,0,0.58)" };
 const modalEyebrowStyle: CSSProperties = { color: "#aee6ff", fontSize: 11, fontWeight: 950 };
 const modalTitleStyle: CSSProperties = { margin: "4px 0 10px", fontSize: 23, color: "#eef8ff" };
+const characterPanelStyle: CSSProperties = { display: "grid", gridTemplateColumns: "minmax(96px, 130px) 1fr", gap: 12, alignItems: "center", marginBottom: 14, padding: 10, borderRadius: 15, border: "1px solid rgba(174,230,255,0.2)", background: "linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))" };
+const characterImageFrameStyle: CSSProperties = { height: 132, borderRadius: 13, overflow: "hidden", border: "1px solid rgba(174,230,255,0.22)", background: "radial-gradient(circle at 50% 20%, rgba(174,230,255,0.12), rgba(0,0,0,0.28))", boxShadow: "0 14px 34px rgba(0,0,0,0.32)" };
+const characterImageStyle: CSSProperties = { width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" };
+const characterInfoStyle: CSSProperties = { display: "grid", gap: 5 };
+const characterNameStyle: CSSProperties = { color: "#eef8ff", fontSize: 18, fontWeight: 950 };
+const characterToneStyle: CSSProperties = { color: "rgba(245,251,255,0.72)", fontSize: 12, fontWeight: 850, lineHeight: 1.5 };
 const modalTextStyle: CSSProperties = { margin: "0 0 14px", color: "rgba(245,251,255,0.88)", fontSize: 14, lineHeight: 1.75, fontWeight: 800 };
 const hintBoxStyle: CSSProperties = { padding: 10, borderRadius: 12, border: "1px solid rgba(255,220,145,0.22)", background: "rgba(0,0,0,0.22)", color: "#ffe4ac", fontSize: 13, fontWeight: 900 };
 const blueprintStyle: CSSProperties = { display: "grid", gap: 8, marginBottom: 14, padding: 12, borderRadius: 14, border: "1px solid rgba(126,240,200,0.24)", background: "rgba(0,0,0,0.24)" };
