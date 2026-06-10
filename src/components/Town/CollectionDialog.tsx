@@ -150,7 +150,10 @@ function EnemyThumb({
 
 export function CollectionDialog({ unitsById, onClose }: CollectionDialogProps) {
   const units = useMemo(
-    () => Object.values(unitsById).filter((unit) => !unit.enemyOnly).sort((a, b) => a.name.localeCompare(b.name, "ja")),
+    () =>
+      Object.values(unitsById)
+        .filter((unit) => !unit.enemyOnly && !unit.guestOnly)
+        .sort((a, b) => a.name.localeCompare(b.name, "ja")),
     [unitsById]
   );
   const enemyUnits = useMemo(

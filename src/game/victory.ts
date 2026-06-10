@@ -125,6 +125,20 @@ export function checkScenarioVictory(
     return null;
   }
 
+  if (["scenario_shinobi_01", "scenario_shinobi_02", "scenario_shinobi_03"].includes(scenarioId)) {
+    const southAlive = instances.some((u) => u.side === "south");
+    const northAlive = instances.some((u) => u.side === "north");
+
+    if (!southAlive) {
+      return { winner: "north", detail: `${scenarioId} failed: all shinobi allies were defeated.` };
+    }
+    if (!northAlive) {
+      return { winner: "south", detail: `${scenarioId} clear: all enemies were defeated.` };
+    }
+
+    return null;
+  }
+
   const isolationDuel = ISOLATION_DUEL_MATCHUPS[scenarioId];
   if (isolationDuel) {
     const darkAlive = instances.some((u) => u.unitId === isolationDuel.darkUnitId && u.side === "north");

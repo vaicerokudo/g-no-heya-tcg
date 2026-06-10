@@ -1163,6 +1163,12 @@ const ROKUDO_AUTHOR_SKILL_IDS: SkillId[] = [
   "player_overclock_g",
 ];
 
+const SHINOBI_GUEST_SKILL_SOURCE_UNIT_IDS: Record<string, string> = {
+  SOUUN: "TSUTSU",
+  NACHA: "DELI",
+  MIJIN: "USHIMARU",
+};
+
 export function getAvailableSkillsForUnit(unitId: string): SkillDef[] {
   if (unitId === "ROKUDO_AUTHOR") {
     return ROKUDO_AUTHOR_SKILL_IDS.map((id) => ({
@@ -1170,6 +1176,13 @@ export function getAvailableSkillsForUnit(unitId: string): SkillDef[] {
       unitId: "ROKUDO_AUTHOR",
       requiresForm: undefined,
     })) as SkillDef[];
+  }
+
+  const sourceUnitId = SHINOBI_GUEST_SKILL_SOURCE_UNIT_IDS[unitId];
+  if (sourceUnitId) {
+    return Object.values(SKILLS)
+      .filter((s) => s.unitId === sourceUnitId)
+      .map((skill) => ({ ...skill, unitId })) as SkillDef[];
   }
 
   return Object.values(SKILLS).filter((s) => s.unitId === unitId);

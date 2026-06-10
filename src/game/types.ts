@@ -93,6 +93,7 @@ export type UnitDef = {
   id: string;
   name: string;
   enemyOnly?: boolean;
+  guestOnly?: boolean;
   hiddenFromCatalog?: boolean;
   base: { atk: number; hp: number; movePattern: MovePattern };
   evolve?: { grantsSkill2?: boolean };

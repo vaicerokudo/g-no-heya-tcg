@@ -7,9 +7,12 @@ import {
   type RokuPartId,
   type ShinobiVillageProgress,
 } from "../game/shinobi/progress";
+import { readClearedScenarios } from "../game/scenario/progress";
+import type { ScenarioId } from "../game/scenario/scenarios";
 
 type ShinobiVillageSceneProps = {
   onReturnTown: () => void;
+  onStartScenario: (scenarioId: ScenarioId) => void;
 };
 
 type HotspotId =
@@ -22,7 +25,10 @@ type HotspotId =
   | "ninjaStorehouse"
   | "watchtower"
   | "brokenKarakuriBox"
-  | "oldShrine";
+  | "oldShrine"
+  | "shinobiBattle01"
+  | "shinobiBattle02"
+  | "shinobiBattle03";
 
 type Hotspot = {
   id: HotspotId;
@@ -30,8 +36,9 @@ type Hotspot = {
   subLabel: string;
   x: number;
   y: number;
-  kind: "home" | "quest" | "workshop" | "part";
+  kind: "home" | "quest" | "workshop" | "part" | "battle";
   partId?: RokuPartId;
+  scenarioId?: ScenarioId;
 };
 
 const ROKUDO_YOUTUBE_URL = "https://www.youtube.com/@vaicerokudo";
@@ -55,9 +62,25 @@ const HOTSPOTS: Hotspot[] = [
   { id: "watchtower", label: "見張り台", subLabel: "視線", x: 18, y: 23, kind: "part", partId: "eye_tracker" },
   { id: "brokenKarakuriBox", label: "からくり箱", subLabel: "しっぽ", x: 43, y: 67, kind: "part", partId: "tail_drive" },
   { id: "oldShrine", label: "古い祠", subLabel: "記憶", x: 79, y: 25, kind: "part", partId: "memory_gear" },
+  { id: "shinobiBattle01", label: "竹林の影", subLabel: "外伝戦闘", x: 72, y: 52, kind: "battle", scenarioId: "scenario_shinobi_01" },
+  { id: "shinobiBattle02", label: "逃げ足とからくり", subLabel: "外伝戦闘", x: 36, y: 73, kind: "battle", scenarioId: "scenario_shinobi_02" },
+  { id: "shinobiBattle03", label: "ロク起動試験", subLabel: "外伝戦闘", x: 63, y: 83, kind: "battle", scenarioId: "scenario_shinobi_03" },
 ];
 
-const PART_SPOT_TEXT: Record<Exclude<HotspotId, "rokudoHouse" | "souunHouse" | "nachaHouse" | "mijinWorkshop" | "bambooGrove">, string> = {
+const PART_SPOT_TEXT: Record<
+  Exclude<
+    HotspotId,
+    | "rokudoHouse"
+    | "souunHouse"
+    | "nachaHouse"
+    | "mijinWorkshop"
+    | "bambooGrove"
+    | "shinobiBattle01"
+    | "shinobiBattle02"
+    | "shinobiBattle03"
+  >,
+  string
+> = {
   oldWell: "井戸の底に、小さく光る石が沈んでいた。",
   ninjaStorehouse: "古い箱の中から、小さな発声装置のような部品を見つけた。",
   watchtower: "見張り台の片隅に、こちらを見返すような玉が置かれていた。",
@@ -77,8 +100,9 @@ function openExternalUrl(url: string) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) {
+export function ShinobiVillageScene({ onReturnTown, onStartScenario }: ShinobiVillageSceneProps) {
   const [progress, setProgress] = useState<ShinobiVillageProgress>(() => readShinobiVillageProgress());
+  const [clearedScenarioIds] = useState<ScenarioId[]>(() => readClearedScenarios());
   const [activeHotspot, setActiveHotspot] = useState<HotspotId | null>(null);
   const [recentPartFound, setRecentPartFound] = useState<RokuPartId | null>(null);
   const [showRokuAssemblyEvent, setShowRokuAssemblyEvent] = useState(false);
@@ -86,9 +110,18 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
   const foundParts = useMemo(() => new Set(progress.rokuPartsFound), [progress.rokuPartsFound]);
   const allRokuPartsFound = ROKU_PART_IDS.every((partId) => foundParts.has(partId));
   const visibleHotspots = useMemo(
-    () => HOTSPOTS.filter((spot) => spot.kind !== "part" || progress.rokuPartsQuestStarted),
-    [progress.rokuPartsQuestStarted]
+    () =>
+      HOTSPOTS.filter((spot) => {
+        if (spot.kind === "part") return progress.rokuPartsQuestStarted;
+        if (spot.id === "shinobiBattle01") return progress.souunJoined;
+        if (spot.id === "shinobiBattle02") return progress.nachaJoined;
+        if (spot.id === "shinobiBattle03") return progress.rokuBuilt;
+        return true;
+      }),
+    [progress.nachaJoined, progress.rokuBuilt, progress.rokuPartsQuestStarted, progress.souunJoined]
   );
+
+  const isScenarioCleared = (scenarioId: ScenarioId) => clearedScenarioIds.includes(scenarioId);
 
   const updateProgress = (updater: (current: ShinobiVillageProgress) => ShinobiVillageProgress) => {
     setProgress(updateShinobiVillageProgress(updater));
@@ -204,6 +237,23 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
 
   const renderModalBody = () => {
     if (!activeSpot) return null;
+
+    if (activeSpot.kind === "battle" && activeSpot.scenarioId) {
+      const cleared = isScenarioCleared(activeSpot.scenarioId);
+      return (
+        <>
+          <div style={battleStatusStyle}>{cleared ? "CLEAR / もう一度挑む" : "NEXT / 外伝戦闘"}</div>
+          <p style={modalTextStyle}>
+            忍びの里で起きた小さな異変を確認します。
+            <br />
+            戦闘後は忍びの里へ戻ります。
+          </p>
+          <button type="button" style={primaryButtonStyle} onClick={() => onStartScenario(activeSpot.scenarioId!)}>
+            {activeSpot.label}を開始
+          </button>
+        </>
+      );
+    }
 
     if (activeSpot.id === "rokudoHouse") {
       return (
@@ -657,6 +707,7 @@ export function ShinobiVillageScene({ onReturnTown }: ShinobiVillageSceneProps) 
                 ...(spot.kind === "quest" ? questHotspotStyle : null),
                 ...(spot.kind === "workshop" ? workshopHotspotStyle : null),
                 ...(spot.kind === "part" ? partHotspotStyle : null),
+                ...(spot.kind === "battle" ? battleHotspotStyle : null),
                 left: `${spot.x}%`,
                 top: `${spot.y}%`,
               }}
@@ -721,6 +772,7 @@ const hotspotStyle: CSSProperties = { position: "absolute", transform: "translat
 const questHotspotStyle: CSSProperties = { borderColor: "rgba(255,220,145,0.32)", background: "linear-gradient(180deg, rgba(49, 38, 17, 0.48), rgba(10, 8, 6, 0.34))" };
 const workshopHotspotStyle: CSSProperties = { borderColor: "rgba(183,158,255,0.34)", background: "linear-gradient(180deg, rgba(28, 21, 50, 0.5), rgba(8, 7, 13, 0.36))" };
 const partHotspotStyle: CSSProperties = { borderColor: "rgba(126,240,200,0.3)", background: "linear-gradient(180deg, rgba(11, 44, 34, 0.48), rgba(4, 14, 12, 0.34))" };
+const battleHotspotStyle: CSSProperties = { borderColor: "rgba(255,135,135,0.34)", background: "linear-gradient(180deg, rgba(52, 18, 24, 0.5), rgba(15, 6, 8, 0.36))" };
 const hotspotStemStyle: CSSProperties = { position: "absolute", left: 12, top: 29, width: 1, height: 15, background: "linear-gradient(180deg, rgba(223,245,255,0.36), transparent)", boxShadow: "0 0 7px rgba(223,245,255,0.16)", pointerEvents: "none" };
 const hotspotPinStyle: CSSProperties = { position: "absolute", left: 8, top: 11, width: 10, height: 10, borderRadius: "50%", background: "#dff5ff", boxShadow: "0 0 0 3px rgba(174,230,255,0.1), 0 0 12px rgba(174,230,255,0.44), 0 7px 12px rgba(0,0,0,0.26)" };
 const hotspotLabelStyle: CSSProperties = { fontSize: "clamp(10px, 1.25vw, 12px)", fontWeight: 950, lineHeight: 1.1, letterSpacing: 0 };
@@ -739,6 +791,7 @@ const characterNameStyle: CSSProperties = { color: "#eef8ff", fontSize: 18, font
 const characterToneStyle: CSSProperties = { color: "rgba(245,251,255,0.72)", fontSize: 12, fontWeight: 850, lineHeight: 1.5 };
 const modalTextStyle: CSSProperties = { margin: "0 0 14px", color: "rgba(245,251,255,0.88)", fontSize: 14, lineHeight: 1.75, fontWeight: 800 };
 const hintBoxStyle: CSSProperties = { padding: 10, borderRadius: 12, border: "1px solid rgba(255,220,145,0.22)", background: "rgba(0,0,0,0.22)", color: "#ffe4ac", fontSize: 13, fontWeight: 900 };
+const battleStatusStyle: CSSProperties = { display: "inline-flex", marginBottom: 10, padding: "5px 9px", borderRadius: 999, border: "1px solid rgba(255,135,135,0.32)", background: "rgba(68, 20, 28, 0.34)", color: "#ffd5d5", fontSize: 12, fontWeight: 950 };
 const blueprintStyle: CSSProperties = { display: "grid", gap: 8, marginBottom: 14, padding: 12, borderRadius: 14, border: "1px solid rgba(126,240,200,0.24)", background: "rgba(0,0,0,0.24)" };
 const blueprintTitleStyle: CSSProperties = { color: "#c8ffe9", fontSize: 14, fontWeight: 950 };
 const blueprintGridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 7 };

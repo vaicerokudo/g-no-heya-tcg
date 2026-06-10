@@ -35,11 +35,14 @@ export type ScenarioId =
   | "scenario31"
   | "scenario32"
   | "scenario33"
+  | "scenario_shinobi_01"
+  | "scenario_shinobi_02"
+  | "scenario_shinobi_03"
   | "scenario_plaza_monten"
   | "scenario_hidden_myouou"
   | "scenario_hidden_author";
 export type ScenarioDialogKind = "intro" | "victory" | "defeat";
-export type ScenarioReturnScene = "astoria" | "delta" | "dustWasteland" | "blackNoiseBay" | "isolationZone";
+export type ScenarioReturnScene = "astoria" | "delta" | "dustWasteland" | "blackNoiseBay" | "isolationZone" | "shinobiVillage";
 export type ScenarioType = "standard" | "isolationDuel" | "isolationFinalBattle";
 
 export type ScenarioLine = {
@@ -1158,6 +1161,95 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
       defeat: [
         { speaker: "明王", text: "影は濃い。じゃが、ここで終わりではない。" },
         { speaker: "総長", text: "OKです……もう一度、全員で立て直しましょう。" },
+      ],
+    },
+  },
+  scenario_shinobi_01: {
+    id: "scenario_shinobi_01",
+    title: "竹林の影",
+    stageName: "忍びの里・竹林",
+    boardSizeMode: "intermediate9",
+    returnScene: "shinobiVillage",
+    placements: [
+      { unitId: "ROKUDO", side: "south", r: 7, c: 3, instanceId: "SH01-ROKUDO" },
+      { unitId: "SOUUN", side: "south", r: 7, c: 5, instanceId: "SH01-SOUUN" },
+      { unitId: "SCORPION", side: "north", r: 1, c: 3, instanceId: "SH01-SCORPION-A" },
+      { unitId: "SCORPION", side: "north", r: 1, c: 5, instanceId: "SH01-SCORPION-B" },
+      { unitId: "KILLER_FISH", side: "north", r: 0, c: 4, instanceId: "SH01-KILLER-FISH-A" },
+      { unitId: "KILLER_FISH", side: "north", r: 2, c: 4, instanceId: "SH01-KILLER-FISH-B" },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "早雲", text: "おい、竹林の奥に妙な気配があるぞ。" },
+        { speaker: "ROKUDO", text: "……確認しましょう。" },
+      ],
+      victory: [
+        { speaker: "早雲", text: "ふん。俺がいりゃ、このくらいは当然だな。" },
+        { speaker: "ROKUDO", text: "助かりました。次へ進みましょう。" },
+      ],
+      defeat: [
+        { speaker: "早雲", text: "ちっ、油断したか。" },
+        { speaker: "ROKUDO", text: "一度、体勢を立て直しましょう。" },
+      ],
+    },
+  },
+  scenario_shinobi_02: {
+    id: "scenario_shinobi_02",
+    title: "逃げ足とからくり",
+    stageName: "忍びの里・からくり場",
+    boardSizeMode: "intermediate9",
+    returnScene: "shinobiVillage",
+    placements: [
+      { unitId: "ROKUDO", side: "south", r: 7, c: 4, instanceId: "SH02-ROKUDO" },
+      { unitId: "SOUUN", side: "south", r: 8, c: 3, instanceId: "SH02-SOUUN" },
+      { unitId: "NACHA", side: "south", r: 8, c: 5, instanceId: "SH02-NACHA" },
+      { unitId: "ROCK_GOLEM", side: "north", r: 0, c: 4, instanceId: "SH02-ROCK-GOLEM" },
+      { unitId: "SCORPION", side: "north", r: 1, c: 3, instanceId: "SH02-SCORPION-A" },
+      { unitId: "SCORPION", side: "north", r: 1, c: 5, instanceId: "SH02-SCORPION-B" },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "那茶", text: "ちょっと待って。あれ、こっち見てない？" },
+        { speaker: "早雲", text: "逃げる前に片付けるぞ。" },
+      ],
+      victory: [
+        { speaker: "那茶", text: "べ、別に怖くなかったし。ちょっと様子見てただけ。" },
+        { speaker: "ROKUDO", text: "その調子で、もう少し付き合ってください。" },
+      ],
+      defeat: [
+        { speaker: "那茶", text: "だから逃げようって言ったじゃん！" },
+        { speaker: "早雲", text: "次は逃げる前に勝つぞ。" },
+      ],
+    },
+  },
+  scenario_shinobi_03: {
+    id: "scenario_shinobi_03",
+    title: "ロク起動試験",
+    stageName: "忍びの里・試験場",
+    boardSizeMode: "intermediate9",
+    returnScene: "shinobiVillage",
+    placements: [
+      { unitId: "ROKUDO", side: "south", r: 7, c: 4, instanceId: "SH03-ROKUDO" },
+      { unitId: "SOUUN", side: "south", r: 8, c: 2, instanceId: "SH03-SOUUN" },
+      { unitId: "NACHA", side: "south", r: 8, c: 4, instanceId: "SH03-NACHA" },
+      { unitId: "MIJIN", side: "south", r: 8, c: 6, instanceId: "SH03-MIJIN" },
+      { unitId: "ROCK_GOLEM", side: "north", r: 0, c: 3, instanceId: "SH03-ROCK-GOLEM-A" },
+      { unitId: "ROCK_GOLEM", side: "north", r: 0, c: 5, instanceId: "SH03-ROCK-GOLEM-B" },
+      { unitId: "SCORPION", side: "north", r: 1, c: 2, instanceId: "SH03-SCORPION-A" },
+      { unitId: "SCORPION", side: "north", r: 1, c: 6, instanceId: "SH03-SCORPION-B" },
+    ],
+    dialogs: {
+      intro: [
+        { speaker: "微塵", text: "ちょうどいい。ロクの起動試験も兼ねて、ひと暴れするか。" },
+        { speaker: "ロク", text: "戦闘補助、観測を開始します。" },
+      ],
+      victory: [
+        { speaker: "微塵", text: "よし、観測は上々だ。ロクもちゃんと見てるな。" },
+        { speaker: "ROKUDO", text: "……頼もしいような、少し落ち着かないような。" },
+      ],
+      defeat: [
+        { speaker: "ロク", text: "試験結果、再調整が必要です。" },
+        { speaker: "微塵", text: "失敗も試験のうちだ。もう一回いくぞ。" },
       ],
     },
   },

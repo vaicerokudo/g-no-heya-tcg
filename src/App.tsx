@@ -3,7 +3,7 @@ import unitsData from "./data/units.v1.2.json";
 import { createDemoState } from "./game/state";
 import { buildMoveInstances, getLegalMoves } from "./game/move";
 import { otherSide } from "./game/turn";
-import type { Side } from "./game/types";
+import type { Side, UnitDef } from "./game/types";
 import { getAttackableTargets, getAttackMarks } from "./game/attack";
 
 import { type SkillDef, type SkillId } from "./game/skills/registry";
@@ -244,6 +244,25 @@ type SkillImpactFxEvent = {
 const BATTLE_PREFS_STORAGE_KEY = "gnoheya_tcg_battle_prefs";
 const SKILL_CUT_IN_DURATION_MS = 820;
 
+function makeShinobiGuestUnit(source: UnitDef | undefined, id: string, name: string): UnitDef | null {
+  if (!source) return null;
+  return {
+    ...source,
+    id,
+    name,
+    guestOnly: true,
+    hiddenFromCatalog: true,
+  };
+}
+
+function buildShinobiGuestUnits(unitsById: Record<string, UnitDef>) {
+  return [
+    makeShinobiGuestUnit(unitsById.TSUTSU, "SOUUN", "早雲"),
+    makeShinobiGuestUnit(unitsById.DELI, "NACHA", "那茶"),
+    makeShinobiGuestUnit(unitsById.USHIMARU, "MIJIN", "微塵"),
+  ].filter((unit): unit is UnitDef => unit !== null);
+}
+
 function readSkillCutInEnabled() {
   if (typeof window === "undefined") return true;
 
@@ -295,6 +314,7 @@ export default function App() {
     () =>
       Object.fromEntries([
         ...Object.entries(initial.unitsById),
+        ...buildShinobiGuestUnits(initial.unitsById).map((unit) => [unit.id, unit]),
         ...scenarioEnemyUnits.map((unit) => [unit.id, unit]),
       ]),
     [initial.unitsById]
@@ -762,8 +782,9 @@ export default function App() {
     }, 300);
   }
 
-  async function playSkillCutIn({ def }: { def: SkillDef; selected: any }) {
+  async function playSkillCutIn({ def, selected }: { def: SkillDef; selected: any }) {
     if (!skillCutInEnabled) return;
+    if (["SOUUN", "NACHA", "MIJIN"].includes(selected?.unitId)) return;
 
     const cutIn = getSkillCutInDefinition(def.id);
     if (!cutIn) return;
@@ -1149,6 +1170,7 @@ const deploySouthReinforceAt = (r: number, c: number) => {
     if (returnScene === "delta") return "デルタへ戻る";
     if (returnScene === "blackNoiseBay") return "湾へ戻る";
     if (returnScene === "isolationZone") return "隔離区域へ戻る";
+    if (returnScene === "shinobiVillage") return "忍びの里へ戻る";
     return "街へ戻る";
   }
 
@@ -1925,7 +1947,7 @@ const reinforceSet = useMemo(() => {
   if (scene === "shinobiVillage") {
     return (
       <Suspense fallback={<SceneLoading />}>
-        <ShinobiVillageScene onReturnTown={() => setScene("town")} />
+        <ShinobiVillageScene onReturnTown={() => setScene("town")} onStartScenario={handleScenarioSelectStart} />
       </Suspense>
     );
   }

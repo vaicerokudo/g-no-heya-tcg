@@ -7,6 +7,12 @@ function normId(unitId: string) {
   return unitId.trim().toLowerCase();
 }
 
+function getShinobiGuestImagePath(unitId: string) {
+  const id = normId(unitId);
+  if (id === "souun" || id === "nacha" || id === "mijin") return `/ui/shinobi/${id}.png`;
+  return null;
+}
+
 function shouldPreferComicBase(form: Form, skin: Skin) {
   return skin === "comic" && form === "g";
 }
@@ -17,6 +23,8 @@ export function getCardImage(
   form: Form = "base",
   skin: Skin = "default"
 ) {
+  const shinobiGuestImagePath = getShinobiGuestImagePath(unitId);
+  if (shinobiGuestImagePath) return shinobiGuestImagePath;
   return `/cards/${side}/${skin}/${form}/${normId(unitId)}.png`;
 }
 
@@ -26,6 +34,8 @@ export function getPortrait(
   form: Form = "base",
   skin: Skin = "default"
 ) {
+  const shinobiGuestImagePath = getShinobiGuestImagePath(unitId);
+  if (shinobiGuestImagePath) return shinobiGuestImagePath;
   return `/portraits/${side}/${skin}/${form}/${normId(unitId)}.png`;
 }
 
@@ -36,7 +46,9 @@ export function cardCandidates(
   skin: Skin = "default"
 ) {
   const id = normId(unitId);
+  const shinobiGuestImagePath = getShinobiGuestImagePath(unitId);
   const list = [
+    ...(shinobiGuestImagePath ? [shinobiGuestImagePath] : []),
     `/cards/${side}/${skin}/${form}/${id}.png`,
     ...(shouldPreferComicBase(form, skin) ? [`/cards/${side}/${skin}/base/${id}.png`] : []),
     `/cards/${side}/default/${form}/${id}.png`,
@@ -52,7 +64,9 @@ export function portraitCandidates(
   skin: Skin = "default"
 ) {
   const id = normId(unitId);
+  const shinobiGuestImagePath = getShinobiGuestImagePath(unitId);
   const list = [
+    ...(shinobiGuestImagePath ? [shinobiGuestImagePath] : []),
     `/portraits/${side}/${skin}/${form}/${id}.png`,
     ...(shouldPreferComicBase(form, skin) ? [`/portraits/${side}/${skin}/base/${id}.png`] : []),
     `/portraits/${side}/default/${form}/${id}.png`,
@@ -68,7 +82,9 @@ export function portraitThumbCandidates(
   skin: Skin = "default"
 ) {
   const id = normId(unitId);
+  const shinobiGuestImagePath = getShinobiGuestImagePath(unitId);
   const list = [
+    ...(shinobiGuestImagePath ? [shinobiGuestImagePath] : []),
     `/portraits/thumb/${side}/${skin}/${form}/${id}.webp`,
     ...(shouldPreferComicBase(form, skin)
       ? [`/portraits/thumb/${side}/${skin}/base/${id}.webp`]
