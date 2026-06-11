@@ -196,6 +196,24 @@ export const KILLER_FISH_UNIT_DEF: UnitDef = {
   },
 };
 
+export const SHINOBI_SCOUT_UNIT_DEF: UnitDef = {
+  ...SCORPION_UNIT_DEF,
+  id: "SHINOBI_SCOUT",
+  name: "影走り",
+};
+
+export const SHURIKEN_SHADE_UNIT_DEF: UnitDef = {
+  ...KILLER_FISH_UNIT_DEF,
+  id: "SHURIKEN_SHADE",
+  name: "手裏剣衆",
+};
+
+export const KARAKURI_GUARD_UNIT_DEF: UnitDef = {
+  ...ROCK_GOLEM_UNIT_DEF,
+  id: "KARAKURI_GUARD",
+  name: "絡繰番兵",
+};
+
 export const OCTOPUS_UNIT_DEF: UnitDef = {
   id: "OCTOPUS",
   name: "オクトパス",
@@ -284,6 +302,9 @@ export const scenarioEnemyUnits: UnitDef[] = [
   ROCK_GOLEM_UNIT_DEF,
   GIANT_SCORPION_UNIT_DEF,
   KILLER_FISH_UNIT_DEF,
+  SHINOBI_SCOUT_UNIT_DEF,
+  SHURIKEN_SHADE_UNIT_DEF,
+  KARAKURI_GUARD_UNIT_DEF,
   OCTOPUS_UNIT_DEF,
   KRAKEN_UNIT_DEF,
   MIST_LEVIATHAN_UNIT_DEF,

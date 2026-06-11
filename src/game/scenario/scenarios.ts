@@ -1169,14 +1169,15 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "竹林の影",
     stageName: "忍びの里・竹林",
     boardSizeMode: "intermediate9",
+    backgroundUrl: "/backgrounds/scenario-shinobi-bamboo.webp",
     returnScene: "shinobiVillage",
     placements: [
       { unitId: "ROKUDO", side: "south", r: 7, c: 3, instanceId: "SH01-ROKUDO" },
       { unitId: "SOUUN", side: "south", r: 7, c: 5, instanceId: "SH01-SOUUN" },
-      { unitId: "SCORPION", side: "north", r: 1, c: 3, instanceId: "SH01-SCORPION-A" },
-      { unitId: "SCORPION", side: "north", r: 1, c: 5, instanceId: "SH01-SCORPION-B" },
-      { unitId: "KILLER_FISH", side: "north", r: 0, c: 4, instanceId: "SH01-KILLER-FISH-A" },
-      { unitId: "KILLER_FISH", side: "north", r: 2, c: 4, instanceId: "SH01-KILLER-FISH-B" },
+      { unitId: "SHINOBI_SCOUT", side: "north", r: 1, c: 3, instanceId: "SH01-SHINOBI-SCOUT-A" },
+      { unitId: "SHINOBI_SCOUT", side: "north", r: 1, c: 5, instanceId: "SH01-SHINOBI-SCOUT-B" },
+      { unitId: "SHURIKEN_SHADE", side: "north", r: 0, c: 4, instanceId: "SH01-SHURIKEN-SHADE-A" },
+      { unitId: "SHURIKEN_SHADE", side: "north", r: 2, c: 4, instanceId: "SH01-SHURIKEN-SHADE-B" },
     ],
     dialogs: {
       intro: [
@@ -1198,14 +1199,15 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "逃げ足とからくり",
     stageName: "忍びの里・からくり場",
     boardSizeMode: "intermediate9",
+    backgroundUrl: "/backgrounds/scenario-shinobi-workshop.webp",
     returnScene: "shinobiVillage",
     placements: [
       { unitId: "ROKUDO", side: "south", r: 7, c: 4, instanceId: "SH02-ROKUDO" },
       { unitId: "SOUUN", side: "south", r: 8, c: 3, instanceId: "SH02-SOUUN" },
       { unitId: "NACHA", side: "south", r: 8, c: 5, instanceId: "SH02-NACHA" },
-      { unitId: "ROCK_GOLEM", side: "north", r: 0, c: 4, instanceId: "SH02-ROCK-GOLEM" },
-      { unitId: "SCORPION", side: "north", r: 1, c: 3, instanceId: "SH02-SCORPION-A" },
-      { unitId: "SCORPION", side: "north", r: 1, c: 5, instanceId: "SH02-SCORPION-B" },
+      { unitId: "KARAKURI_GUARD", side: "north", r: 0, c: 4, instanceId: "SH02-KARAKURI-GUARD" },
+      { unitId: "SHINOBI_SCOUT", side: "north", r: 1, c: 3, instanceId: "SH02-SHINOBI-SCOUT-A" },
+      { unitId: "SHINOBI_SCOUT", side: "north", r: 1, c: 5, instanceId: "SH02-SHINOBI-SCOUT-B" },
     ],
     dialogs: {
       intro: [
@@ -1227,16 +1229,17 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
     title: "ロク起動試験",
     stageName: "忍びの里・試験場",
     boardSizeMode: "intermediate9",
+    backgroundUrl: "/backgrounds/scenario-shinobi-trial.webp",
     returnScene: "shinobiVillage",
     placements: [
       { unitId: "ROKUDO", side: "south", r: 7, c: 4, instanceId: "SH03-ROKUDO" },
       { unitId: "SOUUN", side: "south", r: 8, c: 2, instanceId: "SH03-SOUUN" },
       { unitId: "NACHA", side: "south", r: 8, c: 4, instanceId: "SH03-NACHA" },
       { unitId: "MIJIN", side: "south", r: 8, c: 6, instanceId: "SH03-MIJIN" },
-      { unitId: "ROCK_GOLEM", side: "north", r: 0, c: 3, instanceId: "SH03-ROCK-GOLEM-A" },
-      { unitId: "ROCK_GOLEM", side: "north", r: 0, c: 5, instanceId: "SH03-ROCK-GOLEM-B" },
-      { unitId: "SCORPION", side: "north", r: 1, c: 2, instanceId: "SH03-SCORPION-A" },
-      { unitId: "SCORPION", side: "north", r: 1, c: 6, instanceId: "SH03-SCORPION-B" },
+      { unitId: "KARAKURI_GUARD", side: "north", r: 0, c: 3, instanceId: "SH03-KARAKURI-GUARD-A" },
+      { unitId: "KARAKURI_GUARD", side: "north", r: 0, c: 5, instanceId: "SH03-KARAKURI-GUARD-B" },
+      { unitId: "SHURIKEN_SHADE", side: "north", r: 1, c: 2, instanceId: "SH03-SHURIKEN-SHADE-A" },
+      { unitId: "SHURIKEN_SHADE", side: "north", r: 1, c: 6, instanceId: "SH03-SHURIKEN-SHADE-B" },
     ],
     dialogs: {
       intro: [
