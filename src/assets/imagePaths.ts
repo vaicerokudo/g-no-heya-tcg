@@ -9,7 +9,7 @@ function normId(unitId: string) {
 
 function getShinobiGuestImagePath(unitId: string) {
   const id = normId(unitId);
-  if (id === "souun" || id === "nacha" || id === "mijin") return `/ui/shinobi/${id}.png`;
+  if (id === "souun" || id === "nacha" || id === "mijin") return `/ui/shinobi/${id}-unit.png`;
   return null;
 }
 
