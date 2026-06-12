@@ -109,6 +109,8 @@ export function ShinobiVillageScene({ onReturnTown, onStartScenario }: ShinobiVi
   const activeSpot = useMemo(() => HOTSPOTS.find((spot) => spot.id === activeHotspot) ?? null, [activeHotspot]);
   const foundParts = useMemo(() => new Set(progress.rokuPartsFound), [progress.rokuPartsFound]);
   const allRokuPartsFound = ROKU_PART_IDS.every((partId) => foundParts.has(partId));
+  const clearedScenarioSet = useMemo(() => new Set(clearedScenarioIds), [clearedScenarioIds]);
+  const shinobiSideStoryCleared = clearedScenarioSet.has("scenario_shinobi_03");
   const visibleHotspots = useMemo(
     () =>
       HOTSPOTS.filter((spot) => {
@@ -121,7 +123,7 @@ export function ShinobiVillageScene({ onReturnTown, onStartScenario }: ShinobiVi
     [progress.nachaJoined, progress.rokuBuilt, progress.rokuPartsQuestStarted, progress.souunJoined]
   );
 
-  const isScenarioCleared = (scenarioId: ScenarioId) => clearedScenarioIds.includes(scenarioId);
+  const isScenarioCleared = (scenarioId: ScenarioId) => clearedScenarioSet.has(scenarioId);
 
   const updateProgress = (updater: (current: ShinobiVillageProgress) => ShinobiVillageProgress) => {
     setProgress(updateShinobiVillageProgress(updater));
@@ -692,6 +694,7 @@ export function ShinobiVillageScene({ onReturnTown, onStartScenario }: ShinobiVi
           {progress.rokuPartsQuestStarted ? <span style={progressChipStyle}>パーツ：{progress.rokuPartsFound.length} / {ROKU_PART_IDS.length}</span> : null}
           {progress.rokuBuildReady ? <strong style={progressAccentChipStyle}>準備完了</strong> : null}
           {progress.rokuBuilt ? <strong style={progressAccentChipStyle}>ロク起動済み</strong> : null}
+          {shinobiSideStoryCleared ? <strong style={sideStoryClearedStyle}>SHINOBI SIDE STORY CLEARED</strong> : null}
         </section>
 
         <main style={mapFrameStyle}>
@@ -765,6 +768,7 @@ const progressPanelStyle: CSSProperties = { display: "flex", gap: 6, flexWrap: "
 const progressLeadStyle: CSSProperties = { color: "rgba(238,248,255,0.72)", fontWeight: 950, marginRight: 2 };
 const progressChipStyle: CSSProperties = { padding: "3px 7px", borderRadius: 999, border: "1px solid rgba(174,230,255,0.12)", background: "rgba(255,255,255,0.045)" };
 const progressAccentChipStyle: CSSProperties = { ...progressChipStyle, color: "#c8ffe9", border: "1px solid rgba(126,240,200,0.2)", background: "rgba(17,54,43,0.22)" };
+const sideStoryClearedStyle: CSSProperties = { ...progressChipStyle, color: "#ffe7a6", border: "1px solid rgba(255,216,102,0.36)", background: "rgba(92, 59, 16, 0.28)", letterSpacing: 0.4 };
 const mapFrameStyle: CSSProperties = { position: "relative", minHeight: "clamp(430px, 74dvh, 820px)", overflow: "hidden", borderRadius: 18, border: "1px solid rgba(174,230,255,0.24)", backgroundImage: `linear-gradient(180deg, rgba(6, 10, 18, 0.08), rgba(6, 10, 18, 0.2)), url("${SHINOBI_VILLAGE_MAP_URL}")`, backgroundSize: "100% 100%", backgroundPosition: "center", backgroundRepeat: "no-repeat", boxShadow: "0 24px 66px rgba(0,0,0,0.54), inset 0 0 90px rgba(0,0,0,0.25)" };
 const moonStyle: CSSProperties = { position: "absolute", right: "10%", top: "10%", width: 76, height: 76, borderRadius: "50%", background: "radial-gradient(circle, rgba(235,247,255,0.42), rgba(148,193,230,0.12) 58%, transparent 68%)", boxShadow: "0 0 34px rgba(174,230,255,0.14)", pointerEvents: "none", opacity: 0.42 };
 const pathStyle: CSSProperties = { position: "absolute", left: "20%", right: "18%", top: "57%", height: "22%", borderRadius: "50%", borderTop: "1px dashed rgba(230,242,255,0.16)", transform: "rotate(1deg)", pointerEvents: "none", filter: "drop-shadow(0 0 5px rgba(210,232,255,0.08))" };

@@ -1185,8 +1185,9 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "ROKUDO", text: "……確認しましょう。" },
       ],
       victory: [
-        { speaker: "早雲", text: "ふん。俺がいりゃ、このくらいは当然だな。" },
-        { speaker: "ROKUDO", text: "助かりました。次へ進みましょう。" },
+        { speaker: "早雲", text: "ほら見ろ。俺がいりゃ、この程度すぐ片付く。" },
+        { speaker: "ROKUDO", text: "……その割には、さっき少し焦ってたろ。" },
+        { speaker: "早雲", text: "うるせぇ。次行くぞ、ロクの部品も探すんだろ。" },
       ],
       defeat: [
         { speaker: "早雲", text: "ちっ、油断したか。" },
@@ -1215,8 +1216,10 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "早雲", text: "逃げる前に片付けるぞ。" },
       ],
       victory: [
-        { speaker: "那茶", text: "べ、別に怖くなかったし。ちょっと様子見てただけ。" },
-        { speaker: "ROKUDO", text: "その調子で、もう少し付き合ってください。" },
+        { speaker: "那茶", text: "や、やるじゃん……でも別に感心したわけじゃないし。" },
+        { speaker: "早雲", text: "逃げ回ってたやつの台詞か？" },
+        { speaker: "那茶", text: "うるさいっ。……ちょっとだけ、ついてってやる。" },
+        { speaker: "ROKUDO", text: "助かる。" },
       ],
       defeat: [
         { speaker: "那茶", text: "だから逃げようって言ったじゃん！" },
@@ -1247,8 +1250,10 @@ export const SCENARIOS: Partial<Record<ScenarioId, ScenarioConfig>> = {
         { speaker: "ロク", text: "戦闘補助、観測を開始します。" },
       ],
       victory: [
-        { speaker: "微塵", text: "よし、観測は上々だ。ロクもちゃんと見てるな。" },
-        { speaker: "ROKUDO", text: "……頼もしいような、少し落ち着かないような。" },
+        { speaker: "微塵", text: "よぉし、動いた！ わしの細工はやっぱり完璧じゃ！" },
+        { speaker: "那茶", text: "ほんとに起きた……。" },
+        { speaker: "早雲", text: "これで役者は揃ったってわけか。" },
+        { speaker: "ROKUDO", text: "……行こう。ここからが本番だ。" },
       ],
       defeat: [
         { speaker: "ロク", text: "試験結果、再調整が必要です。" },

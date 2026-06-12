@@ -397,6 +397,7 @@ export function TownScene({
   const safeFrameIndex = frameIndex % spriteAnim.frames;
   const myououTrialCleared = clearedScenarioIds.includes("scenario_hidden_myouou");
   const authorTrialCleared = clearedScenarioIds.includes("scenario_hidden_author");
+  const shinobiSideStoryCleared = clearedScenarioIds.includes("scenario_shinobi_03");
   const interactionButtonLabel =
     interactionTarget === "reception"
       ? "話す"
@@ -451,6 +452,9 @@ export function TownScene({
                 {spot.label}
               </span>
               <span style={townHotspotSubLabelStyle}>{spot.subLabel}</span>
+              {spot.id === "hiddenTrial" && shinobiSideStoryCleared ? (
+                <span style={shadowPassageClearBadgeStyle}>CLEAR</span>
+              ) : null}
             </button>
           ))}
 
@@ -543,10 +547,9 @@ export function TownScene({
                   <div style={dialogNameStyle}>影の通路</div>
                   <div style={dialogTopicStyle}>ROKUDO SPIN-OFF</div>
                   <div style={dialogTextStyle}>
-                    壁の奥から、かすかな気配がする。{"\n"}
-                    ここは、まだ開かれていない任務への入口のようだ。{"\n\n"}
-                    ROKUDO：{"\n"}
-                    「……今はまだ、入らない方がいい。」
+                    {shinobiSideStoryCleared
+                      ? `忍びの里での任務は一段落したようだ。\nロクはすでに起動し、里にも新しい空気が流れている。\n\nROKUDO：\n「……必要なら、また向かいましょう。」`
+                      : `壁の奥から、かすかな気配がする。\nここは、まだ開かれていない任務への入口のようだ。\n\nROKUDO：\n「……今はまだ、入らない方がいい。」`}
                   </div>
                   {onEnterShinobiVillage ? (
                     <button
@@ -817,6 +820,22 @@ const townHotspotSubLabelStyle: CSSProperties = {
   overflow: "hidden",
   clip: "rect(0 0 0 0)",
   whiteSpace: "nowrap",
+};
+
+const shadowPassageClearBadgeStyle: CSSProperties = {
+  position: "absolute",
+  left: "50%",
+  top: "calc(50% + 26px)",
+  transform: "translate(-50%, -50%)",
+  padding: "3px 7px",
+  borderRadius: 999,
+  border: "1px solid rgba(126,240,200,0.5)",
+  background: "rgba(20, 82, 58, 0.72)",
+  color: "#dfffea",
+  fontSize: 10,
+  fontWeight: 950,
+  letterSpacing: 0.5,
+  boxShadow: "0 6px 14px rgba(0,0,0,0.26), 0 0 12px rgba(126,240,200,0.16)",
 };
 
 const dialogOverlayStyle: CSSProperties = {
