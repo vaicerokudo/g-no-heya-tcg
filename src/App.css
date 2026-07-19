@@ -168,14 +168,25 @@
   color: #fff2d1;
 }
 
-.startMenuButtonReturn {
-  border: 1px solid rgba(126, 197, 255, 0.42);
-  background: linear-gradient(180deg, rgba(46, 89, 124, 0.82), rgba(22, 48, 70, 0.92));
+.global-astria-return {
+  position: fixed;
+  z-index: 2147483000;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid rgba(126, 197, 255, 0.58);
+  border-radius: 999px;
   color: #e8f6ff;
+  background: linear-gradient(180deg, rgba(46, 89, 124, 0.94), rgba(22, 48, 70, 0.97));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+  font-size: 13px;
+  font-weight: 950;
+  cursor: pointer;
 }
 
-.startMenuButtonReturn:hover {
-  background: linear-gradient(180deg, rgba(59, 112, 154, 0.9), rgba(27, 61, 88, 0.96));
+.global-astria-return:hover {
+  background: linear-gradient(180deg, rgba(59, 112, 154, 0.98), rgba(27, 61, 88, 1));
 }
 
 /* どの状態でもスクロールバー領域を確保して横ズレ防止 */
