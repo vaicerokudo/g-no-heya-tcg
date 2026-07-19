@@ -155,6 +155,17 @@ function getHandCardSrc(unitId: string, side: Side, skin: Skin) {
   return getHandThumbSrc(unitId, side, skin);
 }
 
+function getAstriaReturnUrl() {
+  const value = new URLSearchParams(window.location.search).get("returnTo");
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 function SceneLoading() {
   return (
     <div className="sceneLoading" role="status" aria-live="polite">
@@ -170,10 +181,12 @@ function StartMenu({
   hasProgress,
   onContinue,
   onNewGame,
+  returnTo,
 }: {
   hasProgress: boolean;
   onContinue: () => void;
   onNewGame: () => void;
+  returnTo: string | null;
 }) {
   return (
     <div className="startMenuScene">
@@ -191,6 +204,11 @@ function StartMenu({
           <button type="button" className="startMenuButton startMenuButtonSecondary" onClick={onNewGame}>
             はじめから
           </button>
+          {returnTo && (
+            <button type="button" className="startMenuButton startMenuButtonReturn" onClick={() => { window.location.href = returnTo; }}>
+              アストリアへ戻る
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -1839,6 +1857,7 @@ const reinforceSet = useMemo(() => {
         hasProgress={storedProgressExists}
         onContinue={handleContinueFromStartMenu}
         onNewGame={handleNewGameFromStartMenu}
+        returnTo={getAstriaReturnUrl()}
       />
     );
   }

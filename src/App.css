@@ -168,6 +168,16 @@
   color: #fff2d1;
 }
 
+.startMenuButtonReturn {
+  border: 1px solid rgba(126, 197, 255, 0.42);
+  background: linear-gradient(180deg, rgba(46, 89, 124, 0.82), rgba(22, 48, 70, 0.92));
+  color: #e8f6ff;
+}
+
+.startMenuButtonReturn:hover {
+  background: linear-gradient(180deg, rgba(59, 112, 154, 0.9), rgba(27, 61, 88, 0.96));
+}
+
 /* どの状態でもスクロールバー領域を確保して横ズレ防止 */
 html { overflow-y: scroll; }
 
